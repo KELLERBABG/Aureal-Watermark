@@ -1,0 +1,31 @@
+﻿{
+  "name": "auralwatermark",
+  "version": "0.2.0",
+  "description": "Inaudible spread-spectrum audio watermark for human-made media provenance. Core DSP engine + CLI.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "auralwatermark": "bin/auralwatermark.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node bin/auralwatermark.js"
+  },
+  "keywords": [
+    "audio",
+    "watermark",
+    "provenance",
+    "spread-spectrum",
+    "dsp",
+    "deepfake"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "src/",
+    "bin/",
+    "README.md"
+  ]
+}
