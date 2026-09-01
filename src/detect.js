@@ -1,17 +1,3 @@
-// detect.js — watermark detection & verification.
-//
-// Modes:
-//  * verify (payloadId given): matched filter against the expected codeword.
-//  * blind/open (no payloadId): correlate all 48 PN slots, hard-decide each
-//    bit, validate CRC16; a single-bit error is corrected via reliability
-//    ordered flips.
-//
-// Band specs ("high", "mid", object) run one band. "dual"/"auto" try both
-// presets and return the best-scoring result (details.bandUsed says which).
-// A coarse resync grid absorbs small sample shifts introduced by lossy
-// decode pipelines. Statistics are scale invariant: gain changes do not
-// affect the result.
-
 import {
   deriveGeometry,
   buildTemplate,
@@ -22,12 +8,8 @@ import { packCodeword, unpackCodeword, isValidPayloadId } from "./payload.js";
 import { validateFmt } from "./embed.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
-const Z_FLOOR = 3.0; // z below this => confidence 0
-const Z_FULL = 30.0; // z at/above this => confidence 1
-
-// Coarse resync offsets (fractions of the frame length). Lossy decode or
-// trimming can shift sample alignment slightly; a small offset grid restores
-// correlation without a full cross-correlation search.
+const Z_FLOOR = 3.0;
+const Z_FULL = 30.0;
 const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
 
 function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
@@ -50,7 +32,6 @@ function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
   return { folded, reps: count };
 }
 
-/** Score one (band, offset) hypothesis. Returns null if unusable. */
 function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
   const { channels } = fmt;
   const perChannel = Math.floor(pcm.length / channels);
@@ -152,19 +133,6 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
   return best;
 }
 
-/**
- * Detect / verify a watermark.
- *
- * @param {Float32Array|number[]} pcm interleaved samples
- * @param {{sampleRate:number, channels:number}} fmt
- * @param {object} opts
- * @param {string} [opts.key] secret key used at embed time
- * @param {number} [opts.payloadId] expected id (verify mode) — omit for blind
- * @param {string|object} [opts.band] "high"|"mid"|"dual"|"auto" or {lowHz,highHz}
- * @returns {{detected:boolean, confidence:number, ber:number,
- *            recoveredPayloadId:number|null, crcOk:boolean, reps:number,
- *            amplitude:number, details:object}}
- */
 export function detectWatermark(pcm, fmt, opts = {}) {
   const validated = validateFmt(fmt, pcm.length);
   const key = typeof opts.key === "string" && opts.key.length ? opts.key : DEFAULT_KEY;

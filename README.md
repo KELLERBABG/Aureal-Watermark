@@ -133,7 +133,8 @@ Aureal Watermark runs completely client-side in modern browsers using native Web
 
 ## Technical Documentation
 
-* [docs/WHITEPAPER.md](docs/WHITEPAPER.md) — Comprehensive threat model, DSSS mathematics, and measured detection statistics.
+* [docs/CODEBASE_WIKI.md](docs/CODEBASE_WIKI.md) — Comprehensive guide to all source files, functions, DSP mathematics, and pipelines.
+* [docs/WHITEPAPER.md](docs/WHITEPAPER.md) — Threat model, DSSS mathematics, and measured detection statistics.
 * [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Module hierarchy, signal processing pipelines, and data flow.
 * [docs/USAGE.md](docs/USAGE.md) — Extended CLI, API, and band selection guide.
 * [docs/PAYLOAD-FORMAT.md](docs/PAYLOAD-FORMAT.md) — Bit-level specification of codewords, CRC-16 polynomial, and modulation geometry.

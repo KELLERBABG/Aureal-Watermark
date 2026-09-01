@@ -1,12 +1,3 @@
-// signal.js — deterministic pseudo-noise / spread-spectrum primitives.
-// Zero dependencies: everything is plain Float32/Float64 math on the Node stdlib.
-
-/**
- * FNV-1a 32-bit string hash. Deterministic across platforms/runs,
- * unlike crypto hashes we only need repeatability, not secrecy.
- * @param {string} str
- * @returns {number} unsigned 32-bit
- */
 export function hashSeed(str) {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
@@ -16,20 +7,13 @@ export function hashSeed(str) {
   return h >>> 0;
 }
 
-/**
- * xorshift128 PRNG (Marsaglia). Fast, tiny period far beyond our needs,
- * fully deterministic from a seed string. Returns floats in [0,1).
- * @param {string|number} seed
- * @returns {() => number}
- */
 export function makeRng(seed) {
   const s = typeof seed === "string" ? hashSeed(seed) : seed >>> 0;
-  // Derive four independent-ish words by hashing salted variants.
   let x = mix(s ^ 0x9e3779b9);
   let y = mix(s ^ 0x85ebca6b);
   let z = mix(s ^ 0xc2b2ae35);
   let w = mix(s ^ 0x27d4eb2f);
-  if ((x | y | z | w) === 0) w = 1; // all-zero state is degenerate; never happens in practice
+  if ((x | y | z | w) === 0) w = 1;
   return function next() {
     const t = x ^ (x << 11);
     x = y;
@@ -47,15 +31,12 @@ function mix(v) {
   return (v ^ (v >>> 16)) >>> 0;
 }
 
-/** Symmetric ±1 symbols from a keyed RNG stream. */
 export function makeSymbolStream(key, label) {
   const rng = makeRng(key + "|" + label);
   return () => (rng() < 0.5 ? -1 : 1);
 }
 
 const hannCache = new Map();
-
-/** Periodic Hann window of length n (cached). */
 export function hannWindow(n) {
   let w = hannCache.get(n);
   if (!w) {
@@ -68,25 +49,15 @@ export function hannWindow(n) {
   return w;
 }
 
-// ---------------------------------------------------------------------------
-// Watermark geometry + template construction
-// ---------------------------------------------------------------------------
-
 export const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
-export const BITS_PER_CODEWORD = 48; // 32-bit payload id + 16-bit CRC16
+export const BITS_PER_CODEWORD = 48;
 export const CHIPS_PER_SLOT = 24;
 
-// Named band presets.
-//  * high: 16.5–19.5 kHz — maximally unobtrusive, but MP3/AAC encoders cut
-//    everything above ~16 kHz at ≤128 kbps, killing the watermark.
-//  * mid: 8–13 kHz — survives lossy codecs' low-pass filters; still above
-//    most speech energy and barely audible at low strength on voice content.
 export const BAND_PRESETS = Object.freeze({
   high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
   mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
 });
 
-/** Resolve a preset name ("high"|"mid") to its frequency bounds. */
 export function bandPreset(name) {
   const key = String(name || "").toLowerCase();
   if (key === "high" || key === "mid") return BAND_PRESETS[key];
@@ -99,7 +70,6 @@ function clampInt(v, lo, hi, name) {
   return Math.min(hi, Math.max(lo, Math.round(n)));
 }
 
-/** Resolve and validate frequency band against the sample rate. */
 export function resolveBand(band, sampleRate) {
   const preset = band === "high" || band === "mid" ? bandPreset(band) : null;
   const b = { ...DEFAULT_BAND, ...(preset || band || {}) };
@@ -109,11 +79,6 @@ export function resolveBand(band, sampleRate) {
   return { lowHz, highHz, centerHz: (lowHz + highHz) / 2 };
 }
 
-/**
- * Resolve a band spec into the list of concrete bands it expands to.
- *  * undefined/object/"high"/"mid" → single band
- *  * "dual" | "auto" → [high, mid] (embed uses all, detect picks best)
- */
 export function bandList(spec, sampleRate) {
   if (spec === "dual" || spec === "auto") {
     return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
@@ -121,10 +86,6 @@ export function bandList(spec, sampleRate) {
   return [resolveBand(spec ?? undefined, sampleRate)];
 }
 
-/**
- * Derive slot/chip geometry shared by embedder and detector so both build
- * bit-identical templates from just (sampleRate, perChannelSamples).
- */
 export function deriveGeometry(sampleRate, perChannelSamples, opts = {}) {
   const frameSeconds = opts.frameSeconds ?? 1.0;
   let slotLen = Math.max(1, Math.round((frameSeconds * sampleRate) / BITS_PER_CODEWORD));
@@ -144,17 +105,6 @@ export function deriveGeometry(sampleRate, perChannelSamples, opts = {}) {
   return { slotLen, chipLen, frameLen, reps, bits: BITS_PER_CODEWORD };
 }
 
-/**
- * Build one repetition of the watermark template:
- * a concatenation of BITS_PER_CODEWORD slots; slot i carries the PN sequence
- * assigned to bit i. Each chip is a Hann-windowed carrier burst at the band
- * centre multiplied by a pseudorandom +/-1 symbol => all energy stays inside
- * roughly [centerHz - 3/Tchip, centerHz + 3/Tchip] which is well inside the
- * configured band. Identical inputs produce identical templates on embed and
- * detect sides.
- *
- * @returns {{template: Float64Array, slotNorms: Float64Array}}
- */
 export function buildTemplate({ key, sampleRate, geometry, band }) {
   const { slotLen, chipLen, frameLen } = geometry;
   const { centerHz } = resolveBand(band, sampleRate);

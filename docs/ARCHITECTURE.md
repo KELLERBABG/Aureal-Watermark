@@ -26,7 +26,10 @@ src/
   browser/
     aural-watermark-verify.js   verifyWav(arrayBuffer, expectedId, key, opts)
                                 DataView RIFF parser, PCM 8/16/24/32-int + float32
-demo/verifier.html              offline browser verification page (German UI)
+demo/
+  index.html / verifier.html   offline browser studio & verifier (pure client-side)
+docs/
+  CODEBASE_WIKI.md             detailed file-by-file functions and algorithm reference
 test/
   wav.test.js watermark.test.js cli.test.js   v0.1 behavior (29 tests)
   codec.test.js   real ffmpeg MP3/AAC round-trips (11 tests, auto-skip w/o ffmpeg)

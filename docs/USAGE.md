@@ -1,109 +1,122 @@
-# Aural Watermark — Usage Guide
+# Aureal Watermark — Usage Guide
 
-**Version:** 0.2.0 · Node ≥ 18 · zero dependencies · ffmpeg optional (only for
-the codec test suite)
+**Version:** 0.2.0 &bull; Node.js &ge; 18 &bull; Zero external npm dependencies
 
-## CLI quick start
+---
+
+## 1. CLI Quick Start
 
 ```powershell
-# 1. generate synthetic speech-like material (no source audio needed)
+# 1. Generate synthetic speech-like material for quick testing (no source audio needed)
 node bin/auralwatermark.js gen podcast.wav --seconds 30 --rate 44100
 
-# 2. embed your provenance id with a secret key (default: dual band)
-node bin/auralwatermark.js embed podcast.wav podcast-marked.wav --id 1234567 --key geheim
+# 2. Embed your tracking ID with a secret key (default: dual band)
+node bin/auralwatermark.js embed podcast.wav podcast_marked.wav --id 1234567 --key secret
 
-# 3. verify — expected id, matched filter
-node bin/auralwatermark.js detect podcast-marked.wav --id 1234567 --key geheim
-#   detected: YES / confidence: 1.000 / ber: 0.0% / band hit: …
+# 3. Verify an expected ID (Verify Mode: matched filter against expected ID)
+node bin/auralwatermark.js detect podcast_marked.wav --id 1234567 --key secret
+#   detected: YES / confidence: 1.000 / ber: 0.0% / band hit: high/mid (16500-19500 Hz)
 
-# blind mode (no --id): decodes bits + CRC, recovers the id
-node bin/auralwatermark.js detect unknown.wav --key geheim --json
+# 4. Blind Detection (Auto-extracts and verifies any embedded watermark without passing an ID)
+node bin/auralwatermark.js detect unknown.wav --key secret --json
 ```
 
-Exit codes: `0` detected · `1` not detected · `2` hard error.
+**Exit Codes:** `0` detected &bull; `1` not detected &bull; `2` error.
 
-## Commands & options
+---
 
-### `gen out.wav [--seconds N] [--rate R] [--channels C] [--bits 16|24]`
-Synthesizes a speech-like tone (harmonics + AM envelope) for demos/tests.
+## 2. CLI Commands & Options
 
-### `embed in.wav out.wav --id <uint32> [--key s] [--strength 0..1] [--band …]`
+### `gen <out.wav> [--seconds N] [--rate R] [--channels C] [--bits 16|24]`
+Synthesizes speech-like audio with harmonic formants and amplitude envelope for testing and benchmarking.
 
-| Option | Default | Notes |
+### `embed <in.wav> <out.wav> --id <uint32> [--key s] [--strength 0..1] [--band dual|high|mid]`
+
+| Option | Default | Description |
 |---|---|---|
-| `--id` | required | unsigned 32-bit provenance id |
-| `--key` | built-in default | selects the PN sequences; must match at detect time |
-| `--strength` | 0.5 | perceptual strength; peak ≈ −18 dBFS at 1.0 |
-| `--band` | `dual` | `high` 16.5–19.5 kHz · `mid` 8–13 kHz (codec-safe) · `dual` both · or `lowHz:highHz` |
+| `--id` | **Required** | Unsigned 32-bit tracking ID (`0` to `4294967295`). |
+| `--key` | `aural-watermark-default-key` | Secret salt used for PRNG sequence generation. Must match at detection time. |
+| `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Peak amplitude $\approx -18\text{ dBFS}$ at `1.0`. |
+| `--band` | `dual` | `high` (16.5–19.5 kHz), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
 
-### `detect in.wav [--id <uint32>] [--key s] [--band auto|…] [--json]`
+### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json]`
 
-| Option | Default | Notes |
+| Option | Default | Description |
 |---|---|---|
-| `--id` | blind mode if omitted | verify mode uses matched filter against expected id |
-| `--band` | `auto` | tries high+mid and keeps the best result; reports which band hit |
-| `--json` | – | full machine-readable result incl. `details.bandUsed`, `z`, reps |
+| `--id` | *Omitted (Blind mode)* | When provided, runs targeted matched filter against the expected ID. |
+| `--key` | `aural-watermark-default-key` | Secret salt matching the embedder. |
+| `--band` | `auto` | Evaluates all bands and returns the highest-scoring match. |
+| `--json` | `false` | Emits structured JSON diagnostics (BER, confidence, z-score, frame count). |
 
-## Browser verifier (offline)
+---
 
-Open `demo/verifier.html` directly (`file://` works — no build step, no
-server): pick the WAV, enter the expected ID (+ key if used), press *Prüfen*.
-The audio never leaves the browser tab.
+## 3. Web Studio & Offline Browser Verifier
 
-Programmatic use:
+Open `demo/index.html` or `demo/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
 
-```js
-import { verifyWav } from "./src/browser/aural-watermark-verify.js";
+* **Verify Audio Tab:** Select or drop any audio file (MP3, WAV, AAC, M4A, OGG, FLAC) to extract or verify the provenance payload.
+* **Embed Watermark Tab:** Select a source audio file, enter a 32-bit ID, choose the frequency band, and export the watermarked audio.
 
-const buf = await file.arrayBuffer();
-const r = verifyWav(buf, 1234567, "geheim");   // {detected, confidence, ber, bandUsed}
+### Programmatic Browser API
+
+```javascript
+import { verifyAudioBuffer, verifyWav } from "./src/browser/aural-watermark-verify.js";
+
+// Decode any audio format using Web Audio API
+const ctx = new AudioContext();
+const audioBuffer = await ctx.decodeAudioData(fileArrayBuffer);
+
+// Verify AudioBuffer
+const result = verifyAudioBuffer(audioBuffer, 1234567, "secret");
+// Returns: { detected, confidence, ber, recoveredPayloadId, bandUsed, reps }
 ```
 
-Supported containers: PCM WAV (8/16/24/32-bit int, 32-bit float,
-WAVE_FORMAT_EXTENSIBLE). Compressed audio must be decoded to WAV first
-(the CLI tests do exactly this via ffmpeg).
+---
 
-## JavaScript API (Node)
+## 4. Node.js API
 
-```js
-import { embedWatermark } from "./src/embed.js";
-import { detectWatermark } from "./src/detect.js";
-import { readWavFile, writeWavFile } from "./src/wav.js";
+```javascript
+import { embedWatermark, detectWatermark } from "aureal-watermark";
+import { readWavFile, writeWavFile } from "aureal-watermark/src/wav.js";
 
-const wav = await readWavFile("in.wav");
-const marked = embedWatermark(wav.samples,
-  { sampleRate: wav.sampleRate, channels: wav.channels },
-  { payloadId: 1234567, key: "geheim", strength: 0.5, band: "dual" });
+const wav = await readWavFile("source.wav");
+const fmt = { sampleRate: wav.sampleRate, channels: wav.channels };
 
-const res = detectWatermark(marked,
-  { sampleRate: wav.sampleRate, channels: wav.channels },
-  { payloadId: 1234567, key: "geheim", band: "auto" });
-// res.detected, res.confidence, res.ber, res.recoveredPayloadId,
-// res.details.bandUsed, res.details.resyncShiftSamples …
+// Embed
+const watermarked = embedWatermark(wav.samples, fmt, {
+  payloadId: 1234567,
+  key: "secret",
+  strength: 0.5,
+  band: "dual"
+});
+await writeWavFile("tagged.wav", watermarked, { ...fmt, bitDepth: 16 });
+
+// Detect
+const res = detectWatermark(watermarked, fmt, {
+  payloadId: 1234567,
+  key: "secret",
+  band: "auto"
+});
 ```
 
-## Choosing a band mode
+---
 
-| Scenario | Recommendation |
-|---|---|
-| archival masters, lossless distribution only | `high` |
-| distribution through MP3/AAC pipelines (podcasts!) | `dual` (embed) + `auto` (detect) |
-| maximum codec margin, slight audibility budget on non-voice content | `mid` |
+## 5. Choosing a Deployment Band Profile
 
-## Tests
+| Scenario | Recommended Band | Rationale |
+| :--- | :--- | :--- |
+| **Archival Masters / Lossless Distribution** | `high` | Complete inaudibility in near-ultrasound (16.5–19.5 kHz). |
+| **Podcasts, Streaming, Social Media (MP3/AAC)** | `dual` (embed) + `auto` (detect) | Redundant encoding across mid and high bands survives encoder low-passes. |
+| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (8–13 kHz) masked under speech sibilants. |
+
+---
+
+## 6. Running Tests
 
 ```powershell
-node --test                    # full suite incl. real ffmpeg codec round-trips (~65 s)
-node --test test/codec.test.js # only the MP3/AAC survival suite (skips w/o ffmpeg)
+# Run the complete test suite (42 tests, including lossy MP3/AAC ffmpeg round-trips)
+node --test
+
+# Run only the lossy codec round-trip suite
+node --test test/codec.test.js
 ```
-
-Measured results table: [WHITEPAPER.md](WHITEPAPER.md) §5.
-Bit-level format spec: [PAYLOAD-FORMAT.md](PAYLOAD-FORMAT.md).
-
-## Troubleshooting
-
-| Symptom | Cause / fix |
-|---|---|
-| `audio too short for watermarking` | need ≥ one full ~1 s frame per channel; use longer material |
-| detected NO despite marking | wrong key/id, or audio was time-stretched/pitch-shifted; try `--band auto` |
-| confidence low after heavy processing | increase embed `--strength`; prefer `dual`; see WHITEPAPER §6 limits |
