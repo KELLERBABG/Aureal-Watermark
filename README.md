@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="Aureal Watermark Banner" width="100%" />
+<img src="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.svg" alt="Aureal Watermark Banner" width="100%" />
 
 <br><br>
 
