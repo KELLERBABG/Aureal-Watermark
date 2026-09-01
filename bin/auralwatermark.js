@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-// auralwatermark CLI — gen / embed / detect / interactive studio.
+// auralwatermark — Desktop App & CLI Suite for Aureal Watermark.
 
 import { argv, exit } from "node:process";
-import { createInterface } from "node:readline/promises";
-import { stdin, stdout } from "node:process";
-import { exec } from "node:child_process";
+import { spawn, exec } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, mkdtempSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 import { readWavFile, writeWavFile } from "../src/wav.js";
@@ -16,25 +15,25 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 
-const HELP = `auralwatermark v0.2.0 — inaudible provenance watermark for human-made audio
+const HELP = `Aureal Watermark v0.2.0 — inaudible provenance watermark for human-made audio
 
-Usage:
+Desktop App:
+  auralwatermark [gui]              Launch standalone Desktop Studio application (Default)
+
+Command Line Interface:
   auralwatermark gen out.wav --seconds 30 [--rate 44100] [--channels 1] [--bits 16]
       Generate synthetic speech-like audio for demos/tests.
 
   auralwatermark embed in.wav out.wav --id <uint32> [--key secret]
       [--strength 0..1] [--band high|mid|dual|lowHz:highHz]
-      Embed watermark carrying the payload id (default band: dual — the
-      payload goes into BOTH 16.5-19.5 kHz and 8-13 kHz for codec survival).
+      Embed watermark carrying the payload id (default band: dual).
 
   auralwatermark detect in.wav [--id <uint32>] [--key secret]
       [--band auto|high|mid|dual|lowHz:highHz] [--json]
-      Verify an expected id (matched filter) or run blind detection + CRC
-      decode when --id is omitted. Default --band auto tries high+mid and
-      keeps the best-scoring result.
+      Verify an expected id or run blind detection + CRC decode.
 
   auralwatermark studio [--port 3000]
-      Launch local web studio in your default browser.
+      Start background studio server on specific port.
 
 Exit codes: 0 success/detected · 1 not detected · 2 error`;
 
@@ -78,19 +77,7 @@ function die(msg, code = 2) {
   exit(code);
 }
 
-function openBrowser(url) {
-  const start =
-    process.platform === "darwin"
-      ? "open"
-      : process.platform === "win32"
-      ? "start"
-      : "xdg-open";
-  exec(`${start} ${url}`);
-}
-
-function startStudioServer(port = 3000) {
-  // Locate html template
-  let html = null;
+function getStudioHtml() {
   const candidates = [
     join(process.cwd(), "studio.html"),
     join(process.cwd(), "index.html"),
@@ -101,134 +88,104 @@ function startStudioServer(port = 3000) {
 
   for (const c of candidates) {
     if (existsSync(c)) {
-      html = readFileSync(c, "utf8");
-      break;
+      return readFileSync(c, "utf8");
     }
   }
 
-  if (!html) {
-    html = `<!doctype html><html><body><h1>Aureal Watermark Studio</h1><p>Please open demo/index.html or download the latest release bundle.</p></body></html>`;
+  return `<!doctype html><html><body><h1>Aureal Watermark Studio</h1></body></html>`;
+}
+
+function findAppRuntime() {
+  if (process.platform === "win32") {
+    const env = process.env;
+    const candidates = [
+      join(env["ProgramFiles(x86)"] || "C:\\Program Files (x86)", "Microsoft\\Edge\\Application\\msedge.exe"),
+      join(env["ProgramFiles"] || "C:\\Program Files", "Microsoft\\Edge\\Application\\msedge.exe"),
+      join(env["LOCALAPPDATA"] || "", "Microsoft\\Edge\\Application\\msedge.exe"),
+      join(env["ProgramFiles"] || "C:\\Program Files", "Google\\Chrome\\Application\\chrome.exe"),
+      join(env["ProgramFiles(x86)"] || "C:\\Program Files (x86)", "Google\\Chrome\\Application\\chrome.exe"),
+      join(env["LOCALAPPDATA"] || "", "Google\\Chrome\\Application\\chrome.exe"),
+    ];
+    for (const c of candidates) {
+      if (existsSync(c)) return { bin: c, type: "edge-app" };
+    }
+  } else if (process.platform === "darwin") {
+    const chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+    const edge = "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
+    if (existsSync(chrome)) return { bin: chrome, type: "chrome-app" };
+    if (existsSync(edge)) return { bin: edge, type: "chrome-app" };
+  } else if (process.platform === "linux") {
+    const linuxBins = ["/usr/bin/google-chrome", "/usr/bin/chromium-browser", "/usr/bin/chromium", "/usr/bin/microsoft-edge"];
+    for (const b of linuxBins) {
+      if (existsSync(b)) return { bin: b, type: "chrome-app" };
+    }
   }
+  return null;
+}
+
+function launchDesktopApp(requestedPort = 0) {
+  const html = getStudioHtml();
 
   const server = createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-cache",
+    });
     res.end(html);
   });
 
-  server.listen(port, () => {
-    const url = `http://localhost:${port}`;
-    console.log(`\nAureal Watermark Studio is running at: ${url}`);
-    console.log(`Opening default web browser...\n`);
-    openBrowser(url);
-    console.log(`Press Ctrl+C to stop the studio server.\n`);
-  });
-}
+  server.listen(requestedPort, "127.0.0.1", () => {
+    const address = server.address();
+    const port = address.port;
+    const url = `http://127.0.0.1:${port}`;
+    const runtime = findAppRuntime();
 
-async function interactiveMenu() {
-  const rl = createInterface({ input: stdin, output: stdout });
+    console.log(`\n========================================================`);
+    console.log(`           AUREAL WATERMARK DESKTOP STUDIO              `);
+    console.log(`========================================================`);
+    console.log(`Running local DSP engine on: ${url}\n`);
 
-  while (true) {
-    console.clear();
-    console.log(`==============================================================`);
-    console.log(`                  AUREAL WATERMARK STUDIO                     `);
-    console.log(`   Inaudible Audio Provenance & Forensic Attribution CLI      `);
-    console.log(`==============================================================`);
-    console.log(` [1] Launch Web Studio in Browser (Recommended)`);
-    console.log(` [2] Embed Watermark into Audio File (.wav)`);
-    console.log(` [3] Scan / Verify Audio File (.wav)`);
-    console.log(` [4] Generate Speech-like Test Audio (.wav)`);
-    console.log(` [5] View Command-Line Help`);
-    console.log(` [6] Exit`);
-    console.log(`==============================================================`);
+    if (runtime && runtime.bin) {
+      // Launch native app window (no URL bar, no tabs)
+      const userDir = mkdtempSync(join(tmpdir(), "aureal-studio-"));
+      const appArgs = [
+        `--app=${url}`,
+        `--window-size=1180,820`,
+        `--user-data-dir=${userDir}`,
+        `--app-id=aureal-watermark-studio`,
+        `--disable-features=Translate`,
+        `--no-first-run`,
+      ];
 
-    const choice = (await rl.question(`Select an option [1-6]: `)).trim();
+      const child = spawn(runtime.bin, appArgs, {
+        detached: false,
+        stdio: "ignore",
+      });
 
-    if (choice === "1") {
-      startStudioServer(3000);
-      await rl.question(`\nServer is active. Press Enter to return to menu...`);
-    } else if (choice === "2") {
-      console.log(`\n--- EMBED WATERMARK ---`);
-      const inPath = (await rl.question(`Input WAV path: `)).trim().replace(/^['"]|['"]$/g, "");
-      if (!inPath || !existsSync(inPath)) {
-        console.log(`File not found: ${inPath}`);
-        await rl.question(`Press Enter to continue...`);
-        continue;
-      }
-      let idStr = (await rl.question(`Tracking ID (uint32, or press Enter for random): `)).trim();
-      let payloadId = idStr === "" ? Math.floor(100000 + Math.random() * 900000) : Number(idStr);
-      const outPath = (await rl.question(`Output WAV path [default: marked.wav]: `)).trim() || "marked.wav";
-      
-      try {
-        console.log(`Embedding ID #${payloadId}...`);
-        const wav = await readWavFile(inPath);
-        const marked = embedWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
-          payloadId,
-          strength: 0.5,
-          band: "dual",
-        });
-        await writeWavFile(outPath, marked, { sampleRate: wav.sampleRate, channels: wav.channels, bitDepth: 16 });
-        console.log(`\nSUCCESS! Watermarked master saved to: ${outPath} (ID #${payloadId})`);
-      } catch (err) {
-        console.log(`\nFailed: ${err.message}`);
-      }
-      await rl.question(`\nPress Enter to continue...`);
-    } else if (choice === "3") {
-      console.log(`\n--- VERIFY AUDIO ---`);
-      const inPath = (await rl.question(`Audio WAV path: `)).trim().replace(/^['"]|['"]$/g, "");
-      if (!inPath || !existsSync(inPath)) {
-        console.log(`File not found: ${inPath}`);
-        await rl.question(`Press Enter to continue...`);
-        continue;
-      }
-      const idStr = (await rl.question(`Expected ID (or press Enter for blind auto-detection): `)).trim();
-      const expectedId = idStr !== "" ? Number(idStr) : undefined;
-      
-      try {
-        console.log(`Analyzing audio waveform...`);
-        const wav = await readWavFile(inPath);
-        const res = detectWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
-          payloadId: expectedId,
-          band: "auto",
-        });
-        console.log(`\n--- VERIFICATION RESULT ---`);
-        console.log(`Verdict:        ${res.detected ? "VERIFIED / WATERMARK FOUND" : "NOT DETECTED"}`);
-        console.log(`Confidence:     ${(res.confidence * 100).toFixed(1)}%`);
-        console.log(`Payload ID:     ${res.recoveredPayloadId ? `#${res.recoveredPayloadId}` : "None"}`);
-        console.log(`Bit Error Rate: ${(res.ber * 100).toFixed(1)}%`);
-        console.log(`Carrier Band:   ${res.details.bandUsed ? `${Math.round(res.details.bandUsed.lowHz)}-${Math.round(res.details.bandUsed.highHz)} Hz` : "None"}`);
-      } catch (err) {
-        console.log(`\nScan failed: ${err.message}`);
-      }
-      await rl.question(`\nPress Enter to continue...`);
-    } else if (choice === "4") {
-      const outPath = (await rl.question(`Output test WAV [default: test.wav]: `)).trim() || "test.wav";
-      const pcm = synthesizeSpeechLike({ seconds: 15, sampleRate: 44100, channels: 1 });
-      await writeWavFile(outPath, pcm, { sampleRate: 44100, channels: 1, bitDepth: 16 });
-      console.log(`Generated 15s test audio: ${outPath}`);
-      await rl.question(`\nPress Enter to continue...`);
-    } else if (choice === "5") {
-      console.log(`\n${HELP}\n`);
-      await rl.question(`Press Enter to continue...`);
-    } else if (choice === "6") {
-      console.log(`Goodbye!`);
-      rl.close();
-      break;
+      child.on("exit", () => {
+        server.close();
+        exit(0);
+      });
+    } else {
+      // Standard browser fallback
+      const opener =
+        process.platform === "darwin"
+          ? "open"
+          : process.platform === "win32"
+          ? "start"
+          : "xdg-open";
+      exec(`${opener} ${url}`);
     }
-  }
+  });
 }
 
 async function main() {
   const [cmd, ...rest] = argv.slice(2);
 
-  // If double-clicked without arguments or run interactively
-  if (!cmd) {
-    if (process.stdin.isTTY) {
-      await interactiveMenu();
-      return;
-    } else {
-      console.log(HELP);
-      return;
-    }
+  // If launched with no arguments (e.g. double clicked in Windows Explorer) -> launch Desktop App!
+  if (!cmd || cmd === "gui" || cmd === "app") {
+    launchDesktopApp(0);
+    return;
   }
 
   if (cmd === "help" || cmd === "--help" || cmd === "-h") {
@@ -239,7 +196,7 @@ async function main() {
   if (cmd === "studio") {
     const { flags } = parseArgs(rest);
     const port = num(flags, "port", 3000);
-    startStudioServer(port);
+    launchDesktopApp(port);
     return;
   }
 
