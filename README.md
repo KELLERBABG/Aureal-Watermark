@@ -8,7 +8,6 @@
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
 [![Platform](https://img.shields.io/badge/Platform-CLI%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
-[![Tests](https://img.shields.io/badge/Tests-42%20Passing%20(incl.%20ffmpeg%20codecs)-success?style=flat-square)](test/)
 
 <br>
 
@@ -54,7 +53,7 @@ Frequency (Hz)
 
 ## Measured Codec Robustness
 
-Tested across 42 automated tests including real `ffmpeg` encoding/decoding cycles on synthetic and real voice material:
+Tested across 42 automated tests including `ffmpeg` encoding/decoding cycles on synthetic and real voice material:
 
 | Carrier Band | MP3 128 kbps | MP3 320 kbps | AAC 128 kbps | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
