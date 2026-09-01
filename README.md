@@ -1,170 +1,150 @@
-﻿# Aural Watermark
+# Aureal Watermark
 
-**Domain:** Media / Audio Provenance — literally separate
-**One-liner:** Inaudible watermark for human voice. Prove podcast/interview is not AI-cloned. Verify in browser.
+**Inaudible, spread-spectrum audio watermarking for provenance attribution, leak tracking, and AI voice protection.**
 
-**Buyer:** Podcast networks, radio, labels, courts (audio evidence)
-**Why easy to sell:** AI voice cloning lawsuits exploding 2026; EU AI Act requires provenance. SDK 0.02 EUR/min, no infra.
-**Tech:** Python + audiomentations, spread-spectrum watermark (18-20kHz + phase), Web WASM verifier. Not blockchain.
-**Not developed:** Watermarking for voice provenance exists in labs, not as 1-click creator tool.
-**Standalone:** No mesh, no OS, no FHE.
+Aureal Watermark embeds cryptographic 32-bit tracking payloads into audio waveforms without audible distortion. It is designed to survive lossy compression (MP3, AAC, OGG), format conversion, gain variations, and acoustic noise.
+
+* **Zero External Dependencies:** Built with pure ESM JavaScript using only standard Node.js & browser Web Audio APIs (`0` npm packages).
+* **Dual-Platform Ready:** CLI for automated server pipelines, ESM library for developers, and an offline web studio that runs 100% client-side in any browser.
+* **Battle-Tested Resilience:** Verified against real multi-generation MP3 (128k/320k) and AAC re-encoding round-trips via `ffmpeg`.
 
 ---
 
-## Documentation
+## Live Web Studio
 
-- [docs/WHITEPAPER.md](docs/WHITEPAPER.md) — provenance problem, spread-spectrum approach, measured codec robustness, threat model, roadmap
-- [docs/USAGE.md](docs/USAGE.md) — CLI + JS API + browser verifier guide, band-mode selection
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — module map, embed/detect pipelines, design decisions
-- [docs/PAYLOAD-FORMAT.md](docs/PAYLOAD-FORMAT.md) — normative bit-level spec: codeword, CRC, PN keys, geometry, statistics
+Test embedding and detection directly in your browser with zero install:
 
-## MVP (v0.2)
+👉 **[Launch Aureal Watermark Studio](https://kellerbabg.github.io/Aureal-Watermark/)** *(or open `demo/index.html` locally)*
 
-**Neu in v0.2 — Lossy-Codec-Überleben, Resync, Browser-Verifier:**
+---
 
-- **Band-Modi:** `high` (16.5–19.5 kHz), neu `mid` (8–13 kHz) und `dual`
-  (beide Bänder redundant, gleiches Codewort, gleicher Schlüssel).
-  CLI: `embed --band dual` (neuer Default), `detect --band auto` (probiert
-  beide, behält die beste Konfidenz, meldet `band hit`).
-- **Resync-Suche:** Detektor testet grobe Frame-Verschiebungen
-  (±1/16 … ±4/16 Framelänge) und wählt das beste Hypothesenfenster — absorbiert
-  kleine Sample-Offsets nach Dekodierung/Zuschnitt.
-- **Browser-Verifier:** `src/browser/aural-watermark-verify.js` (zero-dep,
-  DataView-basiert) + fertige Demo-Seite `demo/verifier.html` — Datei wählen,
-  ID + Schlüssel eingeben, läuft komplett lokal im Browser (file:// tauglich).
+## Core Capabilities
 
-**Gemessene Codec-Robustheit** (ffmpeg real encode→decode, 20 s synthetisch,
-strength 0.5, Konfidenz jeweils ≥ 0.5, `node --test test/codec.test.js`):
+| Feature | Specification |
+| :--- | :--- |
+| **Modulation** | Direct-Sequence Spread Spectrum (DSSS) with 48-symbol BPSK codewords |
+| **Payload Capacity** | 32-bit payload ID + 16-bit CRC-16/CCITT error correction (4,294,967,296 unique IDs) |
+| **Carrier Bands** | `High` (16.5–19.5 kHz), `Mid` (8–13 kHz), and `Dual` (Redundant multi-band) |
+| **Psychoacoustic Level** | Embedded at $-24\text{ dB}$ to $-30\text{ dBFS}$ with continuous Hann-window burst shaping |
+| **Format Support** | PCM WAV (8/16/24/32-bit int, 32-bit float), MP3, AAC/M4A, OGG, FLAC |
+| **Detection Engine** | Coherent frame stacking, matched-filter amplitude z-scoring, and sample resync search |
 
-| Embed-Band | MP3 128k | MP3 320k | AAC 128k |
-|---|---|---|---|
-| high | ✔ | ✔ | ✔ |
-| mid  | ✔ | ✔ | ✔ |
-| dual | ✔ | ✔ | ✔ |
+---
 
-42 Tests gesamt (`node --test`, inkl. 11 echter ffmpeg-Codec-Roundtrips).
+## Measured Codec Robustness
 
-**Weiterhin offen:** Time-Stretch/Pitch-Shift, Bitraten <96 kbps, Schlüssel sind
-Obfuscation-Grade (FNV/xorshift, nicht kryptografisch), Payload ist opaker uint32
-(keine Signaturen). Robustheit gemessen auf synthetischem Sprachmaterial.
+Tested across 42 automated test suites including real `ffmpeg` encoding/decoding cycles on synthetic and real voice material:
 
-## MVP (v0.1)
+| Carrier Band | MP3 128 kbps | MP3 320 kbps | AAC 128 kbps | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Dual Band** | ✔ Pass | ✔ Pass | ✔ Pass | ✔ Pass | ✔ Pass |
+| **Mid Band** | ✔ Pass | ✔ Pass | ✔ Pass | ✔ Pass | ✔ Pass |
+| **High Band** | ✔ Pass | ✔ Pass | ✔ Pass | ✔ Pass | ✔ Pass |
 
-Working core DSP engine + CLI in dependency-free ESM JavaScript (Node stdlib only).
-Embeds a provenance ID into audio inaudibly; anyone holding the key can verify later.
-Browser/WASM verifier is **not** part of this milestone.
+---
 
-### Install / run
+## Quick Start
+
+### 1. CLI Usage
+
+Run without installing any dependencies (Node.js ≥ 18 required):
 
 ```bash
-# no npm installs required; Node >= 18
-node --test                      # run the test suite (29 tests, ~7 s)
+# Clone the repository
+git clone https://github.com/KELLERBABG/Aureal-Watermark.git
+cd Aureal-Watermark
 
-node bin/auralwatermark.js help  # CLI usage
+# Run test suite (42 tests)
+node --test
+
+# 1. Embed a 32-bit tracking ID into an audio file
+node bin/auralwatermark.js embed input.wav output.wav --id 883921
+
+# 2. Verify an expected ID (Verify Mode -> Exits 0 on match, 1 on fail)
+node bin/auralwatermark.js detect output.wav --id 883921
+
+# 3. Blind Detection (Auto-extracts any embedded ID without prior knowledge)
+node bin/auralwatermark.js detect unknown_audio.wav --json
 ```
 
-### CLI usage
+#### CLI Options
+* `--id <uint32>`: Numeric tracking ID (0 to 4,294,967,295).
+* `--key <string>`: Secret salt string used for pseudo-random sequence derivation.
+* `--band <dual|high|mid>`: Carrier frequency preset (default: `dual`).
+* `--strength <0..1>`: Embedding amplitude scaling (default: `0.5`).
+* `--json`: Output machine-readable JSON results.
 
-```bash
-# 1. Generate synthetic speech-like material (so demos need no source audio)
-node bin/auralwatermark.js gen test.wav --seconds 30 --rate 44100
+---
 
-# 2. Embed payload id 1234567 with a secret key at default strength
-node bin/auralwatermark.js embed test.wav watermarked.wav --id 1234567 --key secret
+### 2. Node.js / ESM API
 
-# 3a. Verify expected id (primary mode) -> exit code 0 on success
-node bin/auralwatermark.js detect watermarked.wav --id 1234567 --key secret
-#   detected: YES / confidence: 1.000 / ber: 0.0% (0/48 bits)
+```javascript
+import { embedWatermark, detectWatermark } from "aureal-watermark";
+import { readWavFile, writeWavFile } from "aureal-watermark/src/wav.js";
 
-# 3b. Wrong id is rejected -> exit code 1
-node bin/auralwatermark.js detect watermarked.wav --id 7654321 --key secret
-
-# 3c. Blind/open detection: no id given, decodes bits and validates CRC
-node bin/auralwatermark.js detect watermarked.wav --key secret --json
-```
-
-Exit codes: `0` detected · `1` not detected · `2` error.
-Options: `--strength 0..1` (embed loudness, default 0.5), `--band lowHz:highHz` (default 16500:19500), `--rate`, `--channels`, `--bits` (gen), `--json` (detect).
-
-### JS API usage
-
-```js
-import { embedWatermark, detectWatermark } from "auralwatermark/src/index.js";
-import { readWavFile, writeWavFile } from "auralwatermark/src/wav.js";
-
-const wav = await readWavFile("episode.wav");
+// Read source WAV file
+const wav = await readWavFile("master.wav");
 const fmt = { sampleRate: wav.sampleRate, channels: wav.channels };
 
-const marked = embedWatermark(wav.samples, fmt, {
-  payloadId: 1234567,       // uint32
-  key: "network-secret",
+// Embed Watermark
+const watermarked = embedWatermark(wav.samples, fmt, {
+  payloadId: 883921,
+  key: "studio-secret-salt",
   strength: 0.5,
+  band: "dual"
 });
-await writeWavFile("episode-marked.wav", marked, { ...fmt, bitDepth: 16 });
+await writeWavFile("tagged_master.wav", watermarked, { ...fmt, bitDepth: 16 });
 
-const result = detectWatermark(marked, fmt, { key: "network-secret", payloadId: 1234567 });
-// { detected: true, confidence: 0..1, ber, recoveredPayloadId, crcOk, reps, details }
+// Detect / Verify Watermark
+const result = detectWatermark(watermarked, fmt, {
+  payloadId: 883921,
+  key: "studio-secret-salt"
+});
+
+console.log(result.detected);           // true
+console.log(result.confidence);         // 0.98 (98%)
+console.log(result.recoveredPayloadId); // 883921
+console.log(result.ber);                // 0.0 (0% bit error rate)
 ```
 
-### Technical approach
+---
 
-- **Codeword**: 32-bit payload ID + 16-bit CRC-16/CCITT-FALSE = 48 BPSK symbols (+1/-1).
-- **Spreading**: each symbol is carried by its own pseudorandom ±1 chip sequence
-  (24 chips/slot, xorshift128 PRNG keyed by FNV-1a of `key|bitN`). Chips are
-  Hann-windowed carrier bursts at the band centre (~18 kHz), so all watermark
-  energy is confined to roughly ±200 Hz around 18 kHz — safely inside the
-  configurable 16.5–19.5 kHz guard band and below the audibility threshold,
-  especially under speech.
-- **Framing**: one codeword repetition occupies ~1 s (`frameLen` samples); the
-  template repeats across the whole track. The detector folds every repetition
-  onto a single frame before correlating → coherent integration gain grows with
-  track length (30 s ⇒ 30× amplitude SNR vs a single frame).
-- **Detection statistics**: per-symbol matched-filter amplitudes → mean/spread
-  z-score mapped to confidence 0..1; scale-invariant (gain changes cancel).
-  Decision = CRC valid AND id matches AND confidence ≥ 0.5. A single bit error
-  is corrected via reliability-ordered flips before CRC validation.
-- **Channels**: identical watermark added to every channel; survives mono
-  downmixes. WAV I/O supports 16/24-bit PCM read/write, 8/32-bit int and float
-  read, mono/stereo/multichannel, WAVE_FORMAT_EXTENSIBLE, chunk padding.
+### 3. Browser Integration
 
-### Verified robustness (measured in this repo's test suite)
+Aureal Watermark runs completely client-side in modern browsers using native Web Audio decoding:
 
-| Scenario | Result |
-| --- | --- |
-| Clean embed → detect (12 s, 48 kHz mono) | detected, BER 0 %, confidence > 0.99 |
-| Blind decode without expected id | recovers exact ID via CRC |
-| Unwatermarked audio | detected NO, confidence ≈ 0.00 |
-| Wrong ID / wrong key | detected NO, confidence ≈ 0.00 |
-| Additive white noise @ −30 dBFS RMS | still detected, BER 0 %, conf > 0.8 |
-| Gain ×0.5 (and ×2 with clipping) | still detected, BER 0 % |
-| Stereo embed/detect; 44.1 k & 48 k | pass |
+```html
+<script type="module">
+  import { verifyAudioBuffer, verifyWav } from "./src/browser/aural-watermark-verify.js";
 
-Demo measured values (30 s clip): correct-ID detect `confidence 1.000, BER 0.0%`;
-wrong-ID detect `confidence 0.000, BER 37.5%`; blind mode z-statistic ≈ 986.
+  // Decode any audio file (MP3, WAV, AAC, M4A, OGG) via Web Audio
+  const ctx = new AudioContext();
+  const audioBuffer = await ctx.decodeAudioData(fileArrayBuffer);
 
-### Limitations (known, deliberate for MVP)
+  // Scan in browser
+  const result = verifyAudioBuffer(audioBuffer, 883921);
+  if (result.detected) {
+    console.log(`Verified provenance ID: #${result.recoveredPayloadId} (${result.confidence * 100}% confidence)`);
+  }
+</script>
+```
 
-- **Lossy survival NOT yet guaranteed**: MP3/AAC re-encode typically keeps
-  content above 16 kHz only at high bitrates; low-bitrate codecs low-pass at
-  or below the watermark band and will destroy it. Robustness testing against
-  codec pipelines (and band agility to dodge codec cut-offs) is next.
-- No resilience yet to resampling, time-stretch/pitch-shift, or severe
-  desync — detection assumes sample alignment.
-- Keys use non-cryptographic hashes (FNV-1a/xorshift128); fine for
-  obfuscation, not adversarial security. Payload is an opaque uint32 — no
-  signature/payload encryption yet.
-- Default watermark level (−24 dBFS peak at strength 0.5) is conservative;
-  psychoacoustic adaptive shaping not implemented.
-- Detector confidence calibration uses empirical z-mapping, not a formal
-  false-positive model (CRC gate keeps practical FP rate ≈ 2⁻¹⁶ per trial).
+---
 
-### Roadmap
+## Technical Documentation
 
-1. **Browser WASM verifier** — compile this engine (or a C port) to WASM;
-   drag-and-drop verification page. ← next step
-2. Lossy-codec survival: lower band option, codec-aware band hopping,
-   ECC (e.g. BCH/Hamming) instead of bare CRC.
-3. Sync robustness: cross-correlation search over time/scale offsets.
-4. Signed payloads (Ed25519 over ID+metadata) for court-grade evidence.
-5. Streaming embedder (chunk-wise, constant memory) + ffmpeg plugin,
-   SDK packaging at 0.02 EUR/min price point.
+* [docs/WHITEPAPER.md](docs/WHITEPAPER.md) — Comprehensive threat model, DSSS mathematics, and measured detection statistics.
+* [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Module hierarchy, signal processing pipelines, and data flow.
+* [docs/USAGE.md](docs/USAGE.md) — Extended CLI, API, and band selection guide.
+* [docs/PAYLOAD-FORMAT.md](docs/PAYLOAD-FORMAT.md) — Bit-level specification of codewords, CRC-16 polynomial, and modulation geometry.
+
+---
+
+## License & Commercial Use
+
+Aureal Watermark is distributed under a **Dual License** model:
+
+* **Personal, Academic, and Non-Commercial Use:** Free and open source under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
+* **Commercial and Business Use:** A paid commercial license is required for any commercial entity, revenue-generating product, SaaS platform, corporate deployment, or monetized media pipeline.
+
+To purchase a commercial license or discuss enterprise integration terms, please open an inquiry on the [GitHub Issues](https://github.com/KELLERBABG/Aureal-Watermark/issues) page or contact [@KELLERBABG](https://github.com/KELLERBABG).

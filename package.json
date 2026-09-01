@@ -1,10 +1,11 @@
-﻿{
-  "name": "auralwatermark",
+{
+  "name": "aureal-watermark",
   "version": "0.2.0",
-  "description": "Inaudible spread-spectrum audio watermark for human-made media provenance. Core DSP engine + CLI.",
+  "description": "Inaudible spread-spectrum audio watermarking & provenance detection engine. Zero external dependencies.",
   "type": "module",
   "main": "src/index.js",
   "bin": {
+    "aureal-watermark": "bin/auralwatermark.js",
     "auralwatermark": "bin/auralwatermark.js"
   },
   "scripts": {
@@ -17,15 +18,29 @@
     "provenance",
     "spread-spectrum",
     "dsp",
-    "deepfake"
+    "deepfake-detection",
+    "leak-tracking",
+    "copyright-protection",
+    "audiowatermark"
   ],
-  "license": "MIT",
+  "author": "KELLERBABG",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KELLERBABG/Aureal-Watermark.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KELLERBABG/Aureal-Watermark/issues"
+  },
+  "homepage": "https://github.com/KELLERBABG/Aureal-Watermark#readme",
   "engines": {
     "node": ">=18"
   },
   "files": [
     "src/",
     "bin/",
+    "demo/",
+    "LICENSE.md",
     "README.md"
   ]
 }
