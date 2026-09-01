@@ -1,7 +1,7 @@
 {
   "name": "aureal-watermark",
   "version": "0.2.0",
-  "description": "Inaudible spread-spectrum audio watermarking & provenance detection engine. Zero external dependencies.",
+  "description": "Audio watermarking for anti-theft and AI detection",
   "type": "module",
   "main": "src/index.js",
   "bin": {
