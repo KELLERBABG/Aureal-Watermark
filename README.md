@@ -1,20 +1,41 @@
-# Aureal Watermark
+<div align="center">
 
-**Inaudible, spread-spectrum audio watermarking for provenance attribution, leak tracking, and AI voice protection.**
+# AUREAL WATERMARK
 
-Aureal Watermark embeds cryptographic 32-bit tracking payloads into audio waveforms without audible distortion. It is designed to survive lossy compression (MP3, AAC, OGG), format conversion, gain variations, and acoustic noise.
+**Inaudible Spread-Spectrum Acoustic Watermarking for Audio Provenance, Leak Tracking & AI Voice Protection**
 
-* **Zero External Dependencies:** Built with pure ESM JavaScript using only standard Node.js & browser Web Audio APIs (`0` npm packages).
-* **Dual-Platform Ready:** CLI for automated server pipelines, ESM library for developers, and an offline web studio that runs 100% client-side in any browser.
-* **Battle-Tested Resilience:** Verified against real multi-generation MP3 (128k/320k) and AAC re-encoding round-trips via `ffmpeg`.
+[![Release](https://img.shields.io/github/v/release/KELLERBABG/Aureal-Watermark?color=2563eb&label=Release&style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
+[![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
+[![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
+[![Platform](https://img.shields.io/badge/Platform-CLI%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
+[![Tests](https://img.shields.io/badge/Tests-42%20Passing%20(incl.%20ffmpeg%20codecs)-success?style=flat-square)](test/)
+
+<br>
+
+[**Interactive Web Studio**](https://kellerbabg.github.io/Aureal-Watermark/) &bull; [**Download Standalone (.exe)**](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest) &bull; [**Codebase Wiki**](docs/CODEBASE_WIKI.md) &bull; [**Whitepaper**](docs/WHITEPAPER.md)
+
+</div>
+
+<br>
+
+```
+Frequency (Hz)
+20 kHz ─────────────────────────────────────────────────────────────
+        ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- Dual-Band DSSS Carrier
+16 kHz ─────────────────────────────────────────────────────────────      (48-symbol BPSK, Hann burst shaped)
+        [ Musical Harmonics, Vocals, Percussion, Speech Formants ]        (Inaudible / Diffuse noise profile)
+ 8 kHz ─────────────────────────────────────────────────────────────
+```
 
 ---
 
-## Live Web Studio
+## Overview
 
-Test embedding and detection directly in your browser with zero install:
+**Aureal Watermark** embeds cryptographic 32-bit tracking payloads directly into audio waveforms with zero perceptible degradation. It acts as an active digital serial number designed to survive lossy compression (MP3, AAC, OGG), multi-generation transcoding, gain variations, and background acoustic noise.
 
-👉 **[Launch Aureal Watermark Studio](https://kellerbabg.github.io/Aureal-Watermark/)** *(or open `demo/index.html` locally)*
+* **Zero External Dependencies:** Built with pure ESM JavaScript using only standard Node.js & browser Web Audio APIs (`0` npm packages).
+* **Multi-Platform Architecture:** Fast CLI for server automation, clean ESM library for Node.js developers, and a standalone single-page Studio that runs 100% client-side in the browser.
+* **Battle-Tested Resilience:** Verified against real multi-generation MP3 (128k/320k) and AAC (128k) re-encoding round-trips via `ffmpeg`.
 
 ---
 
@@ -23,17 +44,17 @@ Test embedding and detection directly in your browser with zero install:
 | Feature | Specification |
 | :--- | :--- |
 | **Modulation** | Direct-Sequence Spread Spectrum (DSSS) with 48-symbol BPSK codewords |
-| **Payload Capacity** | 32-bit payload ID + 16-bit CRC-16/CCITT error correction (4,294,967,296 unique IDs) |
+| **Payload Capacity** | 32-bit payload ID + 16-bit CRC-16/CCITT error correction ($4,294,967,296$ unique IDs) |
 | **Carrier Bands** | `High` (16.5–19.5 kHz), `Mid` (8–13 kHz), and `Dual` (Redundant multi-band) |
 | **Psychoacoustic Level** | Embedded at $-24\text{ dB}$ to $-30\text{ dBFS}$ with continuous Hann-window burst shaping |
 | **Format Support** | PCM WAV (8/16/24/32-bit int, 32-bit float), MP3, AAC/M4A, OGG, FLAC |
-| **Detection Engine** | Coherent frame stacking, matched-filter amplitude z-scoring, and sample resync search |
+| **Detection Engine** | Coherent frame stacking, matched-filter amplitude $z$-scoring, and sample resync search |
 
 ---
 
 ## Measured Codec Robustness
 
-Tested across 42 automated test suites including real `ffmpeg` encoding/decoding cycles on synthetic and real voice material:
+Tested across 42 automated tests including real `ffmpeg` encoding/decoding cycles on synthetic and real voice material:
 
 | Carrier Band | MP3 128 kbps | MP3 320 kbps | AAC 128 kbps | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -45,16 +66,28 @@ Tested across 42 automated test suites including real `ffmpeg` encoding/decoding
 
 ## Quick Start
 
-### 1. CLI Usage
+### 1. Standalone Executable (No Node.js Required)
 
-Run without installing any dependencies (Node.js ≥ 18 required):
+Download the pre-compiled binary from the [Releases Page](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest):
+
+```powershell
+# 1. Embed tracking ID into an audio file
+.\aureal-watermark.exe embed master.wav tagged.wav --id 883921
+
+# 2. Detect and verify the watermark
+.\aureal-watermark.exe detect tagged.wav --id 883921
+```
+
+---
+
+### 2. CLI Usage (via Node.js)
 
 ```bash
 # Clone the repository
 git clone https://github.com/KELLERBABG/Aureal-Watermark.git
 cd Aureal-Watermark
 
-# Run test suite (42 tests)
+# Run full test suite (42 tests)
 node --test
 
 # 1. Embed a 32-bit tracking ID into an audio file
@@ -67,16 +100,9 @@ node bin/auralwatermark.js detect output.wav --id 883921
 node bin/auralwatermark.js detect unknown_audio.wav --json
 ```
 
-#### CLI Options
-* `--id <uint32>`: Numeric tracking ID (0 to 4,294,967,295).
-* `--key <string>`: Secret salt string used for pseudo-random sequence derivation.
-* `--band <dual|high|mid>`: Carrier frequency preset (default: `dual`).
-* `--strength <0..1>`: Embedding amplitude scaling (default: `0.5`).
-* `--json`: Output machine-readable JSON results.
-
 ---
 
-### 2. Node.js / ESM API
+### 3. Node.js / ESM API
 
 ```javascript
 import { embedWatermark, detectWatermark } from "aureal-watermark";
@@ -109,7 +135,7 @@ console.log(result.ber);                // 0.0 (0% bit error rate)
 
 ---
 
-### 3. Browser Integration
+### 4. Browser Web Studio
 
 Aureal Watermark runs completely client-side in modern browsers using native Web Audio decoding:
 
