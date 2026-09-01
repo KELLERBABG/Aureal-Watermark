@@ -1,0 +1,1 @@
+﻿# Aural Watermark — whitepaper stub
