@@ -1,16 +1,15 @@
 #!/usr/bin/env node
-// auralwatermark CLI — gen / embed / detect.
-//
-//   auralwatermark gen    out.wav --seconds 30 [--rate 44100] [--channels 1] [--bits 16]
-//   auralwatermark embed  in.wav out.wav --id 1234567 [--key secret] [--strength 0.5]
-//                         [--band low:high]
-//   auralwatermark detect in.wav [--id 1234567] [--key secret] [--band low:high]
-//                         [--json]
-//
-// Exit codes: 0 ok (and detected, for `detect`), 1 not detected / usage of
-// detect without match, 2 hard error (bad file, bad args).
+// auralwatermark CLI — gen / embed / detect / interactive studio.
 
 import { argv, exit } from "node:process";
+import { createInterface } from "node:readline/promises";
+import { stdin, stdout } from "node:process";
+import { exec } from "node:child_process";
+import { createServer } from "node:http";
+import { existsSync, readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { readWavFile, writeWavFile } from "../src/wav.js";
 import { synthesizeSpeechLike } from "../src/synth.js";
 import { embedWatermark } from "../src/embed.js";
@@ -33,6 +32,9 @@ Usage:
       Verify an expected id (matched filter) or run blind detection + CRC
       decode when --id is omitted. Default --band auto tries high+mid and
       keeps the best-scoring result.
+
+  auralwatermark studio [--port 3000]
+      Launch local web studio in your default browser.
 
 Exit codes: 0 success/detected · 1 not detected · 2 error`;
 
@@ -61,89 +63,246 @@ function num(flags, name, dflt) {
 }
 
 function bandOf(flags, dflt) {
-  const v = flags.band;
-  if (v === undefined || v === true) return dflt;
-  const s = String(v);
-  if (["high", "mid", "dual", "auto"].includes(s.toLowerCase())) return s.toLowerCase();
-  const m = s.match(/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/);
-  if (!m) throw new Error("--band expects high|mid|dual|auto or lowHz:highHz");
-  return { lowHz: Number(m[1]), highHz: Number(m[2]) };
+  const b = flags.band;
+  if (!b) return dflt;
+  if (b === "high" || b === "mid" || b === "dual" || b === "auto") return b;
+  const parts = String(b).split(":").map(Number);
+  if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
+    return { lowHz: parts[0], highHz: parts[1] };
+  }
+  throw new Error(`--band must be high|mid|dual|auto or lowHz:highHz, got '${b}'`);
 }
 
 function die(msg, code = 2) {
-  console.error("error:", msg);
-  console.error(HELP);
+  console.error(`error: ${msg}`);
   exit(code);
+}
+
+function openBrowser(url) {
+  const start =
+    process.platform === "darwin"
+      ? "open"
+      : process.platform === "win32"
+      ? "start"
+      : "xdg-open";
+  exec(`${start} ${url}`);
+}
+
+function startStudioServer(port = 3000) {
+  // Locate html template
+  let html = null;
+  const candidates = [
+    join(process.cwd(), "studio.html"),
+    join(process.cwd(), "index.html"),
+    join(process.cwd(), "demo", "index.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "index.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "index.html"),
+  ];
+
+  for (const c of candidates) {
+    if (existsSync(c)) {
+      html = readFileSync(c, "utf8");
+      break;
+    }
+  }
+
+  if (!html) {
+    html = `<!doctype html><html><body><h1>Aureal Watermark Studio</h1><p>Please open demo/index.html or download the latest release bundle.</p></body></html>`;
+  }
+
+  const server = createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.end(html);
+  });
+
+  server.listen(port, () => {
+    const url = `http://localhost:${port}`;
+    console.log(`\nAureal Watermark Studio is running at: ${url}`);
+    console.log(`Opening default web browser...\n`);
+    openBrowser(url);
+    console.log(`Press Ctrl+C to stop the studio server.\n`);
+  });
+}
+
+async function interactiveMenu() {
+  const rl = createInterface({ input: stdin, output: stdout });
+
+  while (true) {
+    console.clear();
+    console.log(`==============================================================`);
+    console.log(`                  AUREAL WATERMARK STUDIO                     `);
+    console.log(`   Inaudible Audio Provenance & Forensic Attribution CLI      `);
+    console.log(`==============================================================`);
+    console.log(` [1] Launch Web Studio in Browser (Recommended)`);
+    console.log(` [2] Embed Watermark into Audio File (.wav)`);
+    console.log(` [3] Scan / Verify Audio File (.wav)`);
+    console.log(` [4] Generate Speech-like Test Audio (.wav)`);
+    console.log(` [5] View Command-Line Help`);
+    console.log(` [6] Exit`);
+    console.log(`==============================================================`);
+
+    const choice = (await rl.question(`Select an option [1-6]: `)).trim();
+
+    if (choice === "1") {
+      startStudioServer(3000);
+      await rl.question(`\nServer is active. Press Enter to return to menu...`);
+    } else if (choice === "2") {
+      console.log(`\n--- EMBED WATERMARK ---`);
+      const inPath = (await rl.question(`Input WAV path: `)).trim().replace(/^['"]|['"]$/g, "");
+      if (!inPath || !existsSync(inPath)) {
+        console.log(`File not found: ${inPath}`);
+        await rl.question(`Press Enter to continue...`);
+        continue;
+      }
+      let idStr = (await rl.question(`Tracking ID (uint32, or press Enter for random): `)).trim();
+      let payloadId = idStr === "" ? Math.floor(100000 + Math.random() * 900000) : Number(idStr);
+      const outPath = (await rl.question(`Output WAV path [default: marked.wav]: `)).trim() || "marked.wav";
+      
+      try {
+        console.log(`Embedding ID #${payloadId}...`);
+        const wav = await readWavFile(inPath);
+        const marked = embedWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
+          payloadId,
+          strength: 0.5,
+          band: "dual",
+        });
+        await writeWavFile(outPath, marked, { sampleRate: wav.sampleRate, channels: wav.channels, bitDepth: 16 });
+        console.log(`\nSUCCESS! Watermarked master saved to: ${outPath} (ID #${payloadId})`);
+      } catch (err) {
+        console.log(`\nFailed: ${err.message}`);
+      }
+      await rl.question(`\nPress Enter to continue...`);
+    } else if (choice === "3") {
+      console.log(`\n--- VERIFY AUDIO ---`);
+      const inPath = (await rl.question(`Audio WAV path: `)).trim().replace(/^['"]|['"]$/g, "");
+      if (!inPath || !existsSync(inPath)) {
+        console.log(`File not found: ${inPath}`);
+        await rl.question(`Press Enter to continue...`);
+        continue;
+      }
+      const idStr = (await rl.question(`Expected ID (or press Enter for blind auto-detection): `)).trim();
+      const expectedId = idStr !== "" ? Number(idStr) : undefined;
+      
+      try {
+        console.log(`Analyzing audio waveform...`);
+        const wav = await readWavFile(inPath);
+        const res = detectWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
+          payloadId: expectedId,
+          band: "auto",
+        });
+        console.log(`\n--- VERIFICATION RESULT ---`);
+        console.log(`Verdict:        ${res.detected ? "VERIFIED / WATERMARK FOUND" : "NOT DETECTED"}`);
+        console.log(`Confidence:     ${(res.confidence * 100).toFixed(1)}%`);
+        console.log(`Payload ID:     ${res.recoveredPayloadId ? `#${res.recoveredPayloadId}` : "None"}`);
+        console.log(`Bit Error Rate: ${(res.ber * 100).toFixed(1)}%`);
+        console.log(`Carrier Band:   ${res.details.bandUsed ? `${Math.round(res.details.bandUsed.lowHz)}-${Math.round(res.details.bandUsed.highHz)} Hz` : "None"}`);
+      } catch (err) {
+        console.log(`\nScan failed: ${err.message}`);
+      }
+      await rl.question(`\nPress Enter to continue...`);
+    } else if (choice === "4") {
+      const outPath = (await rl.question(`Output test WAV [default: test.wav]: `)).trim() || "test.wav";
+      const pcm = synthesizeSpeechLike({ seconds: 15, sampleRate: 44100, channels: 1 });
+      await writeWavFile(outPath, pcm, { sampleRate: 44100, channels: 1, bitDepth: 16 });
+      console.log(`Generated 15s test audio: ${outPath}`);
+      await rl.question(`\nPress Enter to continue...`);
+    } else if (choice === "5") {
+      console.log(`\n${HELP}\n`);
+      await rl.question(`Press Enter to continue...`);
+    } else if (choice === "6") {
+      console.log(`Goodbye!`);
+      rl.close();
+      break;
+    }
+  }
 }
 
 async function main() {
   const [cmd, ...rest] = argv.slice(2);
-  const { pos, flags } = parseArgs(rest);
 
-  if (!cmd || cmd === "help" || flags.help) {
-    console.log(HELP);
-    exit(cmd ? 0 : 2);
+  // If double-clicked without arguments or run interactively
+  if (!cmd) {
+    if (process.stdin.isTTY) {
+      await interactiveMenu();
+      return;
+    } else {
+      console.log(HELP);
+      return;
+    }
   }
+
+  if (cmd === "help" || cmd === "--help" || cmd === "-h") {
+    console.log(HELP);
+    return;
+  }
+
+  if (cmd === "studio") {
+    const { flags } = parseArgs(rest);
+    const port = num(flags, "port", 3000);
+    startStudioServer(port);
+    return;
+  }
+
+  const { pos, flags } = parseArgs(rest);
+  const key = flags.key;
 
   if (cmd === "gen") {
     const out = pos[0];
-    if (!out) die("gen requires an output .wav path");
+    if (!out) die("gen requires an output path: auralwatermark gen out.wav");
     const seconds = num(flags, "seconds", 10);
-    const rate = Math.round(num(flags, "rate", 44100));
-    const channels = Math.round(num(flags, "channels", 1));
-    const bits = [16, 24].includes(num(flags, "bits", 16)) ? num(flags, "bits", 16) : 16;
+    const sampleRate = num(flags, "rate", 44100);
+    const channels = num(flags, "channels", 1);
+    const bits = num(flags, "bits", 16);
+    if (![16, 24].includes(bits)) die("--bits must be 16 or 24");
     const t0 = Date.now();
-    const pcm = synthesizeSpeechLike({ seconds, sampleRate: rate, channels });
-    await writeWavFile(out, pcm, { sampleRate: rate, channels, bitDepth: bits });
+    const pcm = synthesizeSpeechLike({ seconds, sampleRate, channels });
+    await writeWavFile(out, pcm, { sampleRate, channels, bitDepth: bits });
+    const ms = Date.now() - t0;
     console.log(
-      `gen: wrote ${out} — ${seconds}s speech-like tone, ${rate} Hz, ${channels}ch, ${bits}-bit PCM (${(
-        (Date.now() - t0) / 1000
+      `gen: wrote ${out} — ${seconds}s speech-like tone, ${sampleRate} Hz, ${channels}ch, ${bits}-bit PCM (${(
+        ms / 1000
       ).toFixed(2)}s)`
     );
-    exit(0);
+    return;
   }
 
   if (cmd === "embed") {
-    const [inp, outp] = pos;
-    if (!inp || !outp) die("embed requires input.wav output.wav");
+    const [inp, out] = pos;
+    if (!inp || !out) die("embed requires <in.wav> <out.wav>: auralwatermark embed in.wav out.wav --id 1234567");
     if (flags.id === undefined) die("embed requires --id <uint32>");
-    const id = Number(flags.id);
-    if (!Number.isInteger(id) || id < 0 || id > 0xffffffff) die(`--id must be a uint32, got '${flags.id}'`);
+    const payloadId = Number(flags.id);
+    if (!Number.isInteger(payloadId) || payloadId < 0 || payloadId > 0xffffffff) {
+      die(`--id must be a uint32 in [0, 2^32-1], got '${flags.id}'`);
+    }
     const strength = num(flags, "strength", 0.5);
-    const key = typeof flags.key === "string" ? flags.key : "aural-watermark-default-key";
+    const band = bandOf(flags, "dual");
 
     const t0 = Date.now();
     const wav = await readWavFile(inp);
-    const watermarked = embedWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
-      payloadId: id,
+    const marked = embedWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
+      payloadId,
       key,
       strength,
-      band: bandOf(flags, "dual"),
+      band,
     });
-    await writeWavFile(outp, watermarked, {
-      sampleRate: wav.sampleRate,
-      channels: wav.channels,
-      bitDepth: wav.bitsPerSample === 24 ? 24 : 16,
-    });
-    const meta = watermarked.watermarkMeta;
-    const bandLabel =
-      meta.band === "dual"
-        ? "dual (high 16.5-19.5 kHz + mid 8-13 kHz)"
-        : `${Math.round(meta.band.lowHz)}-${Math.round(meta.band.highHz)} Hz`;
-    console.log(
-      `embed: id=${meta.payloadId} key='${key}' strength=${meta.strength} -> ${outp}\n` +
-        `  band ${bandLabel}, peak watermark ${(20 * Math.log10(meta.peakWatermark)).toFixed(1)} dBFS, ${meta.geometry.reps} repetition(s), ${(
-          (Date.now() - t0) / 1000
-        ).toFixed(2)}s`
-    );
-    exit(0);
+    const meta = marked.watermarkMeta;
+    const bits = wav.bitsPerSample === 24 ? 24 : 16;
+    await writeWavFile(out, marked, { sampleRate: wav.sampleRate, channels: wav.channels, bitDepth: bits });
+    const ms = Date.now() - t0;
+
+    const peakDb = (20 * Math.log10(meta.peakWatermark + 1e-12)).toFixed(1);
+    const bandStr = Array.isArray(meta.bands)
+      ? `dual (${meta.bands.map((b) => `${b.lowHz >= 14000 ? "high" : "mid"} ${b.lowHz / 1000}-${b.highHz / 1000} kHz`).join(" + ")})`
+      : `${meta.band.lowHz / 1000}-${meta.band.highHz / 1000} kHz`;
+    console.log(`embed: id=${payloadId} key='${meta.key}' strength=${strength} -> ${out}`);
+    console.log(`  band ${bandStr}, peak watermark ${peakDb} dBFS, ${meta.geometry.reps} repetition(s), ${(ms / 1000).toFixed(2)}s`);
+    return;
   }
 
   if (cmd === "detect") {
     const inp = pos[0];
-    if (!inp) die("detect requires input.wav");
-    const key = typeof flags.key === "string" ? flags.key : "aural-watermark-default-key";
-    let expectedId;
+    if (!inp) die("detect requires <in.wav>: auralwatermark detect in.wav [--id <uint32>]");
+    let expectedId = undefined;
     if (flags.id !== undefined) {
       expectedId = Number(flags.id);
       if (!Number.isInteger(expectedId) || expectedId < 0 || expectedId > 0xffffffff) {

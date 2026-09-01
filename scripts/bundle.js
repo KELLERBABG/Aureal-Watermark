@@ -32,13 +32,26 @@ detectCode = detectCode.replace(/const DEFAULT_KEY = [^;]+;/g, "");
 wavCode = wavCode.replace(/const\s+{\s*readFile\s*}\s*=\s*await import\("node:fs\/promises"\);/g, "const { readFile } = fsp;");
 wavCode = wavCode.replace(/const\s+{\s*writeFile\s*}\s*=\s*await import\("node:fs\/promises"\);/g, "const { writeFile } = fsp;");
 
+// Embed raw HTML directly so the studio server always has the complete web UI embedded inside the binary!
+const rawStudioHtml = JSON.stringify(readFileSync("index.html", "utf8"));
+
+cliCode = cliCode.replace(
+  /let html = null;[\s\S]*?if \(!html\) {[\s\S]*?}/,
+  `const html = ${rawStudioHtml};`
+);
+
 const cjsBundle = `#!/usr/bin/env node
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const process = require("node:process");
+const { createInterface } = require("node:readline/promises");
+const { exec } = require("node:child_process");
+const { createServer } = require("node:http");
+const { join, dirname } = require("node:path");
 
-const { argv, exit } = process;
+const { argv, exit, stdin, stdout } = process;
 const { readFile, writeFile } = fsp;
+const { existsSync, readFileSync } = fs;
 
 ${signalCode}
 
@@ -56,4 +69,4 @@ ${cliCode}
 `;
 
 writeFileSync("dist/cli.cjs", cjsBundle, "utf8");
-console.log("Successfully generated dist/cli.cjs");
+console.log("Successfully generated dist/cli.cjs with embedded Web Studio!");
