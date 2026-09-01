@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.svg" alt="Aureal Watermark Banner" width="100%" />
+![Aureal Watermark Banner](assets/banner.png)
 
-<br><br>
+<br>
 
 [![Release](https://img.shields.io/badge/Release-v0.2.0-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
