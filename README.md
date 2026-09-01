@@ -1,8 +1,8 @@
 <div align="center">
 
-# AUREAL WATERMARK
+<img src="assets/banner.svg" alt="Aureal Watermark Banner" width="100%" />
 
-**Inaudible Spread-Spectrum Acoustic Watermarking for Audio Provenance, Leak Tracking & AI Voice Protection**
+<br><br>
 
 [![Release](https://img.shields.io/github/v/release/KELLERBABG/Aureal-Watermark?color=2563eb&label=Release&style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)

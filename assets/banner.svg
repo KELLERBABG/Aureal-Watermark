@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0c11"/>
+      <stop offset="100%" stop-color="#040507"/>
+    </linearGradient>
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Banner Background -->
+  <rect width="1200" height="360" rx="16" fill="url(#bgGrad)"/>
+  <rect width="1198" height="358" x="1" y="1" rx="15" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+
+  <!-- Subtle Precision Grid -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="90" x2="1200" y2="90"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="300" y1="0" x2="300" y2="360"/>
+    <line x1="600" y1="0" x2="600" y2="360"/>
+    <line x1="900" y1="0" x2="900" y2="360"/>
+  </g>
+
+  <!-- Logo Mark (Left Side) -->
+  <g transform="translate(110, 80)">
+    <!-- Stealth Carrier Rings -->
+    <g opacity="0.18" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="3 6">
+      <circle cx="100" cy="100" r="95"/>
+      <circle cx="100" cy="100" r="75"/>
+      <circle cx="100" cy="100" r="55"/>
+    </g>
+
+    <!-- Left & Right Acoustic Waves -->
+    <g stroke="url(#waveGrad)" fill="none" stroke-linecap="round" filter="url(#glow)">
+      <path d="M 30 55 A 75 75 0 0 0 30 145" stroke-width="3" opacity="0.4"/>
+      <path d="M 50 70 A 50 50 0 0 0 50 130" stroke-width="4.5" opacity="0.75"/>
+      <path d="M 70 85 A 25 25 0 0 0 70 115" stroke-width="6" opacity="0.95"/>
+
+      <path d="M 130 85 A 25 25 0 0 1 130 115" stroke-width="6" opacity="0.95"/>
+      <path d="M 150 70 A 50 50 0 0 1 150 130" stroke-width="4.5" opacity="0.75"/>
+      <path d="M 170 55 A 75 75 0 0 1 170 145" stroke-width="3" opacity="0.4"/>
+    </g>
+
+    <!-- Center Codeword Bars -->
+    <g fill="#ffffff" filter="url(#glow)">
+      <rect x="97" y="35" width="6" height="130" rx="3"/>
+      <rect x="85" y="55" width="5" height="90" rx="2.5" opacity="0.85"/>
+      <rect x="109" y="55" width="5" height="90" rx="2.5" opacity="0.85"/>
+      <rect x="74" y="75" width="4" height="50" rx="2" opacity="0.55"/>
+      <rect x="122" y="75" width="4" height="50" rx="2" opacity="0.55"/>
+    </g>
+
+    <!-- Origin Node -->
+    <circle cx="100" cy="100" r="8" fill="#ffffff" filter="url(#glow)"/>
+    <circle cx="100" cy="100" r="3.5" fill="#0a0c11"/>
+  </g>
+
+  <!-- Typography & System Hierarchy (Right Side) -->
+  <g transform="translate(370, 0)">
+    <!-- Sub-Brand / System Classification -->
+    <text x="0" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="0.28em" fill="#38bdf8" text-transform="uppercase">
+      SYSTEMS &amp; CREATIONS &bull; PROVENANCE ARCHITECTURE
+    </text>
+
+    <!-- Primary Title -->
+    <text x="0" y="180" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif" font-size="44" font-weight="700" letter-spacing="-0.03em" fill="url(#textGrad)">
+      AUREAL WATERMARK
+    </text>
+
+    <!-- Description -->
+    <text x="0" y="222" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="400" fill="#94a3b8">
+      Inaudible Spread-Spectrum Steganography &amp; Digital Provenance Engine
+    </text>
+
+    <!-- Spec Badges -->
+    <g transform="translate(0, 245)">
+      <!-- Badge 1 -->
+      <rect width="90" height="24" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="45" y="16" font-family="ui-monospace, monospace" font-size="11" font-weight="600" fill="#cbd5e1" text-anchor="middle">v0.2.0 DSP</text>
+
+      <!-- Badge 2 -->
+      <rect x="100" width="130" height="24" rx="4" fill="rgba(56,189,248,0.08)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+      <text x="165" y="16" font-family="ui-monospace, monospace" font-size="11" font-weight="600" fill="#38bdf8" text-anchor="middle">ZERO DEPENDENCY</text>
+
+      <!-- Badge 3 -->
+      <rect x="240" width="125" height="24" rx="4" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+      <text x="302" y="16" font-family="ui-monospace, monospace" font-size="11" font-weight="600" fill="#34d399" text-anchor="middle">CODEC VERIFIED</text>
+    </g>
+  </g>
+</svg>
