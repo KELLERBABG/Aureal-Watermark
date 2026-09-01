@@ -32,7 +32,7 @@ docs/
   CODEBASE_WIKI.md             detailed file-by-file functions and algorithm reference
 test/
   wav.test.js watermark.test.js cli.test.js   v0.1 behavior (29 tests)
-  codec.test.js   real ffmpeg MP3/AAC round-trips (11 tests, auto-skip w/o ffmpeg)
+  codec.test.js   ffmpeg MP3/AAC round-trips (11 tests, auto-skip w/o ffmpeg)
   browser.test.js verifier module against generated WAVs (2 tests)
 ```
 

@@ -4,10 +4,10 @@
 
 <br><br>
 
-[![Release](https://img.shields.io/github/v/release/KELLERBABG/Aureal-Watermark?color=2563eb&label=Release&style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
+[![Release](https://img.shields.io/badge/Release-v0.2.0-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
-[![Platform](https://img.shields.io/badge/Platform-CLI%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
+[![Platform](https://img.shields.io/badge/Platform-Desktop%20App%20%7C%20CLI%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
 
 <br>
 
@@ -33,8 +33,8 @@ Frequency (Hz)
 **Aureal Watermark** embeds cryptographic 32-bit tracking payloads directly into audio waveforms with zero perceptible degradation. It acts as an active digital serial number designed to survive lossy compression (MP3, AAC, OGG), multi-generation transcoding, gain variations, and background acoustic noise.
 
 * **Zero External Dependencies:** Built with pure ESM JavaScript using only standard Node.js & browser Web Audio APIs (`0` npm packages).
-* **Multi-Platform Architecture:** Fast CLI for server automation, clean ESM library for Node.js developers, and a standalone single-page Studio that runs 100% client-side in the browser.
-* **Battle-Tested Resilience:** Verified against real multi-generation MP3 (128k/320k) and AAC (128k) re-encoding round-trips via `ffmpeg`.
+* **Multi-Platform Architecture:** Standalone Desktop App window, fast CLI for server automation, clean ESM library for Node.js developers, and an offline single-page Studio for browsers.
+* **Lossy Transcoding Resilience:** Verified against multi-generation MP3 (128k/320k) and AAC (128k) round-trips via `ffmpeg`.
 
 ---
 
@@ -53,7 +53,7 @@ Frequency (Hz)
 
 ## Measured Codec Robustness
 
-Tested across 42 automated tests including `ffmpeg` encoding/decoding cycles on synthetic and real voice material:
+Tested across 42 automated tests including `ffmpeg` encoding/decoding cycles across speech and instrumental audio:
 
 | Carrier Band | MP3 128 kbps | MP3 320 kbps | AAC 128 kbps | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) |
 | :--- | :---: | :---: | :---: | :---: | :---: |

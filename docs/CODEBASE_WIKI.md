@@ -31,7 +31,7 @@ Aureal-Watermark/
 │   └── PAYLOAD-FORMAT.md           # Bit-level wire format and mathematical constants
 ├── test/
 │   ├── watermark.test.js           # Core DSP embedding & detection verification
-│   ├── codec.test.js               # Real ffmpeg MP3 (128k/320k) and AAC (128k) round-trips
+│   ├── codec.test.js               # ffmpeg MP3 (128k/320k) and AAC (128k) round-trips
 │   ├── cli.test.js                 # Command-line interface subprocess tests
 │   ├── wav.test.js                 # WAV header parsing, round-trip, and error handling
 │   └── browser.test.js             # Browser module execution tests

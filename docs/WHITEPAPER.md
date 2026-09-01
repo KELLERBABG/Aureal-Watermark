@@ -12,7 +12,7 @@ With the proliferation of realistic voice-cloning models, deepfake audio and una
 
 Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across near-ultrasonic bands (16.5–19.5 kHz) and speech-masked mid-bands (8–13 kHz). The payload is protected by a CRC-16 checksum, supports 1-bit reliability-ordered error correction, repeats coherently across the full track duration, and remains invariant to volume/gain shifts.
 
-Tested across real multi-generation `ffmpeg` encoding round-trips, the watermark survives MP3 (128 kbps / 320 kbps) and AAC (128 kbps) re-encoding while correctly rejecting unregistered or mismatched IDs.
+Tested across multi-generation `ffmpeg` encoding round-trips, the watermark survives MP3 (128 kbps / 320 kbps) and AAC (128 kbps) re-encoding while correctly rejecting unregistered or mismatched IDs.
 
 ---
 
@@ -69,7 +69,7 @@ In `dual` mode, the embedder scales each copy by $\times 0.7$ to maintain consis
 
 ## 4. Evaluation & Measured Benchmarks
 
-Automated test suite (42 tests via `node --test`) including 11 real `ffmpeg` lossy codec round-trips (synthetic & speech material, 20s, 44.1 kHz mono, strength 0.5):
+Automated test suite (42 tests via `node --test`) including 11 `ffmpeg` lossy codec round-trips (synthetic & speech material, 20s, 44.1 kHz mono, strength 0.5):
 
 | Carrier Band | MP3 128k | MP3 320k | AAC 128k | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
