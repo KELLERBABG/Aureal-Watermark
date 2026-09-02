@@ -1,0 +1,65 @@
+# Aureal Watermark — Pre-Release Technical & Architecture Checklist
+Target Release: Production Drop / Public Release
+
+---
+
+## 1. Digital Signal Processing & Acoustic Hardening
+
+- [ ] Dynamic Psychoacoustic Masking (Silence & Pause Handling)
+  - Issue: Constant carrier injection causes perceptible noise during quiet intros, vocal pauses, and acoustic breakdowns[cite: 2, 4, 5].
+  - Task: Compute slot-level RMS energy in the host audio prior to carrier synthesis.
+  - Fix: Attenuate the watermark amplitude proportionally when host RMS drops below -30 dBFS; mute the carrier during near-silence to preserve clean quiet sections.
+
+- [ ] Headroom Protection & Soft-Peak Limiting
+  - Issue: Direct float32 superposition (`pcm + wm`) can cause values to exceed 1.0 on masters near 0 dBFS, resulting in digital clipping when writing to 16/24-bit PCM[cite: 2, 3].
+  - Task: Scan peak amplitude post-superposition.
+  - Fix: Automatically scale host audio down slightly (-0.5 dB) if peak > 0.999, or pass through a cubic tanh limiter prior to integer conversion in `writeWav()`.
+
+- [ ] Resampling Invariance (Sample Rate Normalization)
+  - Issue: `deriveGeometry()` computes slot and chip lengths strictly from input sample rates; watermarking at 48 kHz and downsampling to 44.1 kHz breaks template matching[cite: 2, 4].
+  - Task: Implement an internal resampling check in `detect.js` and `aural-watermark-verify.js`[cite: 2, 3].
+  - Fix: Resample incoming audio to a canonical rate (e.g., 44.1 kHz) before slicing and matched filtering.
+
+---
+
+## 2. Payload, Modulation & Synchronization
+
+- [ ] Enhanced Error Correction (Multi-Bit Recovery)
+  - Issue: The 1-bit soft-decision flipping mechanism fails whenever lossy codecs or noise flip 2 or more bits across the 48-bit codeword[cite: 2, 3, 4].
+  - Task: Expand recovery beyond single-bit brute force.
+  - Fix: Implement a 2-bit permutation sweep on the lowest-confidence bits, or upgrade to a lightweight (63, 36) or (63, 39) BCH code that deterministically handles 2-to-3-bit flips.
+
+- [ ] Stream Synchronization Preamble
+  - Issue: Slicing cropped audio or mid-track snippets forces the detector to sweep a fractional offset grid across the entire frame length[cite: 2, 3, 5].
+  - Task: Add a deterministic synchronization marker (e.g., a short 7-bit Barker sequence or chirp).
+  - Fix: Run a fast 1D cross-correlation against the boundary marker to identify the exact frame start offset in a single pass.
+
+---
+
+## 3. UI, Runtimes & Workflow Tooling
+
+- [ ] Web Worker Offloading in Studio Demo
+  - Issue: Running synchronous decoding and correlation on the main UI thread locks the browser tab when analyzing long or high-sample-rate audio files[cite: 2, 3, 6].
+  - Task: Move `verifyAudioBuffer()` and `detectWatermark()` into a background `Worker`[cite: 2, 3].
+  - Fix: Implement non-blocking analysis with progress reporting (`progress: 0..100%`) in `demo/index.html` and `demo/verifier.html`[cite: 2, 3].
+
+- [ ] Promo Leak Batch Script (`scripts/batch_distribute.js`)
+  - Issue: The CLI currently processes single files, leaving the common "leak tracking" workflow unautomated[cite: 1, 3, 6].
+  - Task: Build an automated distribution script[cite: 1].
+  - Fix: Accept an input master file and a list of recipient names/IDs, generating uniquely tagged copies alongside a mapping file (`recipients.json`)[cite: 1].
+
+---
+
+## 4. Packaging, CI & Release Automation
+
+- [ ] Multi-Platform GitHub Actions CI (`.github/workflows/test.yml`)
+  - Task: Automate test execution on commit and pull request[cite: 3].
+  - Fix: Run `node --test` across `ubuntu-latest`, `macos-latest`, and `windows-latest` to verify cross-platform endianness and float parsing in `wav.js`[cite: 2, 3].
+
+- [ ] Visual Spectrogram Proof in Documentation
+  - Task: Provide visual evidence of frequency containment[cite: 2, 5].
+  - Fix: Add an FFT/spectrogram graphic to `README.md` and `docs/TECHNICAL_SPECIFICATIONS.md` demonstrating the clean, band-limited carrier profile (-24 dBFS) in both High and Mid presets[cite: 1, 5].
+
+- [ ] Explicit Capability & Boundary Section in README
+  - Task: Set clear operational parameters up front.
+  - Fix: State explicitly in the main README that the engine is resilient to MP3/AAC compression down to 128 kbps, level shifts, and mono downmixing, but not non-linear DAW time-stretching or pitch-shifting[cite: 1, 2, 7].
