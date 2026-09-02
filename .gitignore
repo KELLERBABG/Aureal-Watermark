@@ -6,3 +6,7 @@ sea-config.json
 *.log
 .env
 aureal-watermark.cjs
+internal/
+private/
+goal.txt
+GOAL
