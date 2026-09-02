@@ -14,7 +14,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 
-const HELP = `Aureal Watermark v0.2.1 — Audio watermarking for anti-theft and AI detection
+const HELP = `Aureal Watermark v0.2.2 — Audio watermarking for anti-theft and AI detection
 
 Desktop App:
   auralwatermark [gui]              Launch standalone Desktop Studio application (Default)
