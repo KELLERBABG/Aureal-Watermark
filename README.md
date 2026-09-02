@@ -7,11 +7,11 @@
 [![Release](https://img.shields.io/badge/Release-v0.2.2-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
-[![Platform](https://img.shields.io/badge/Platform-Universal%20(.cjs)%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://aural.kellersystems.dev/studio.html/)
+[![Platform](https://img.shields.io/badge/Platform-Universal%20(.cjs)%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://aureal.kellersystems.dev/studio.html)
 
 <br>
 
-[**Open Web Studio**](https://aural.kellersystems.dev/studio.html/) &bull; [**Download Universal (.cjs)**](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest) &bull; [**Technical Deep Dive**](docs/TECHNICAL_SPECIFICATIONS.md) &bull; [**Code Wiki**](docs/CODEBASE_WIKI.md)
+[**Open Web Studio**](https://aureal.kellersystems.dev/studio.html) &bull; [**Download Universal (.cjs)**](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest) &bull; [**Technical Deep Dive**](docs/TECHNICAL_SPECIFICATIONS.md) &bull; [**Code Wiki**](docs/CODEBASE_WIKI.md)
 
 </div>
 
@@ -65,7 +65,7 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
 
 No installation or technical setup needed:
 
-👉 **[Launch Interactive Web Studio](https://aural.kellersystems.dev/studio.html/)**
+👉 **[Launch Interactive Web Studio](https://aureal.kellersystems.dev/studio.html)**
 
 *(Runs 100% client-side in browser memory. Nothing ever leaves your device).*
 
@@ -217,4 +217,4 @@ Aureal Watermark is distributed under a **Dual License**:
 | **Voice AI & Speech Platforms** | **$0.01 / min** or **$12,500 / yr** | EU AI Act Article 50 compliance, low-latency SDK integration, C2PA persistence. |
 | **Audio Forensics & Legal Labs** | **$1,499** *(perpetual)* | Client-side offline forensic suite, raw $E_b/N_0$ reports, custom branding. |
 
-For commercial licensing, interactive pricing tiers, and enterprise SLAs, visit the [**Interactive Pricing Page**](https://aural.kellersystems.dev/studio.html/pricing.html), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[lukas@negenborn.de](mailto:lukas@negenborn.de)**.
+For commercial licensing, interactive pricing tiers, and enterprise SLAs, visit the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/studio.htmlpricing.html), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[lukas@negenborn.de](mailto:lukas@negenborn.de)**.
