@@ -1,4 +1,4 @@
-﻿# Impressum
+# Impressum
 
 Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)
 
@@ -11,7 +11,7 @@ Deutschland
 
 ## Kontakt
 * **E-Mail:** [lukas@negenborn.de](mailto:lukas@negenborn.de)
-* **Website:** [https://kellerbabg.github.io/Aureal-Watermark/](https://kellerbabg.github.io/Aureal-Watermark/)
+* **Website:** [https://aureal.kellersystems.dev/](https://aureal.kellersystems.dev/)
 
 ## Umsatzsteuer
 Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).  
