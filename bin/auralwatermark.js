@@ -91,6 +91,23 @@ function getStudioHtml() {
   return `<!doctype html><html><body><h1>Aureal Watermark Studio</h1></body></html>`;
 }
 
+function getPricingHtml() {
+  const candidates = [
+    join(process.cwd(), "pricing.html"),
+    join(process.cwd(), "demo", "pricing.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "pricing.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "pricing.html"),
+  ];
+
+  for (const c of candidates) {
+    if (existsSync(c)) {
+      return readFileSync(c, "utf8");
+    }
+  }
+
+  return "";
+}
+
 function findAppRuntime() {
   if (process.platform === "win32") {
     const env = process.env;
@@ -121,8 +138,11 @@ function findAppRuntime() {
 
 function launchDesktopApp() {
   const html = getStudioHtml();
+  const pricingHtml = getPricingHtml();
   const localFile = join(tmpdir(), "aureal-watermark-studio.html");
+  const localPricingFile = join(tmpdir(), "pricing.html");
   writeFileSync(localFile, html, "utf8");
+  if (pricingHtml) writeFileSync(localPricingFile, pricingHtml, "utf8");
 
   // Format file:/// URL properly with forward slashes
   const fileUrl = "file:///" + localFile.split("\\").join("/");

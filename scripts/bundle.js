@@ -32,11 +32,16 @@ detectCode = detectCode.replace(/const DEFAULT_KEY = [^;]+;/g, "");
 wavCode = wavCode.replace(/const\s+{\s*readFile\s*}\s*=\s*await import\("node:fs\/promises"\);/g, "const { readFile } = fsp;");
 wavCode = wavCode.replace(/const\s+{\s*writeFile\s*}\s*=\s*await import\("node:fs\/promises"\);/g, "const { writeFile } = fsp;");
 
-// Embed complete HTML inside getStudioHtml()
+// Embed complete HTML inside getStudioHtml() and getPricingHtml()
 const rawStudioHtml = JSON.stringify(readFileSync("index.html", "utf8"));
+const rawPricingHtml = JSON.stringify(readFileSync("pricing.html", "utf8"));
 cliCode = cliCode.replace(
   /function getStudioHtml\(\)\s*{[\s\S]*?return `[\s\S]*?`;\s*}/,
   `function getStudioHtml() { return ${rawStudioHtml}; }`
+);
+cliCode = cliCode.replace(
+  /function getPricingHtml\(\)\s*{[\s\S]*?return "";\s*}/,
+  `function getPricingHtml() { return ${rawPricingHtml}; }`
 );
 
 const cjsBundle = `#!/usr/bin/env node
