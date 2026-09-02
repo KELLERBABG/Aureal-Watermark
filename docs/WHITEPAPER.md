@@ -1,6 +1,6 @@
 # Aureal Watermark Whitepaper
 
-**Version:** 0.2.0 &bull; **Status:** Working Implementation & Production-Ready DSP Core
+**Version:** 0.2.1 &bull; **Status:** Working Implementation & Production-Ready DSP Core
 
 > An inaudible spread-spectrum steganographic audio watermark proving that an audio recording originates from a verified human creator or official source. Verifiable in seconds, client-side in the browser, with zero server infrastructure.
 

@@ -1,6 +1,6 @@
 {
   "name": "aureal-watermark",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Audio watermarking for anti-theft and AI detection",
   "type": "module",
   "main": "src/index.js",

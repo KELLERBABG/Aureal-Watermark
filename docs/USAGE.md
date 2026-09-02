@@ -1,6 +1,6 @@
 # Aureal Watermark — Usage Guide
 
-**Version:** 0.2.0 &bull; Node.js &ge; 18 &bull; Zero external npm dependencies
+**Version:** 0.2.1 &bull; Node.js &ge; 18 &bull; Zero external npm dependencies
 
 ---
 

@@ -1,6 +1,6 @@
 # Aural Watermark — Architecture
 
-**Version:** 0.2.0 · ESM · Node ≥ 18 · zero npm dependencies (browser-safe core)
+**Version:** 0.2.1 · ESM · Node ≥ 18 · zero npm dependencies (browser-safe core)
 
 ## Module map
 

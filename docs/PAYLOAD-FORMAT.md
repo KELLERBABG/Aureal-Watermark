@@ -1,7 +1,7 @@
 # Aural Watermark — Payload & Signal Format
 
 Normative reference for everything a second implementation (e.g. the WASM
-verifier) must reproduce bit-exactly. Version 0.2.0.
+verifier) must reproduce bit-exactly. Version 0.2.1.
 
 ## 1. Payload codeword
 
