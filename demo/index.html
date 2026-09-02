@@ -490,14 +490,12 @@
       <h1 style="margin-bottom: 0.15rem; font-size: 1.35rem;">Aureal Watermark</h1>
       <p style="font-size: 0.8rem;">Audio watermarking for anti-theft and AI detection.</p>
     </div>
-    <button type="button" id="header-pricing-btn" style="margin-left: auto; font-size: 0.75rem; font-weight: 600; color: var(--cyan); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-family: inherit;">Pricing & Licenses</button>
   </div>
 
   <div class="workspace-card">
     <div class="tab-bar">
       <button type="button" class="tab-item active" id="tab-detect">Verify Audio</button>
       <button type="button" class="tab-item" id="tab-embed">Embed Watermark</button>
-      <button type="button" class="tab-item" id="tab-pricing">Pricing & Licenses</button>
     </div>
 
     <!-- VERIFY TAB -->
@@ -568,7 +566,7 @@
         <div class="callout-tag">Commercial Production</div>
         <div class="callout-title">Commercial release, label distribution, or AI platform?</div>
         <div class="callout-desc">Aureal is free for personal & research use. Commercial releases, SaaS platforms, and leak distribution require a commercial license.</div>
-        <button type="button" id="btn-callout-pricing" class="callout-link" style="background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: inherit;">View Commercial Tiers & SLA &rarr;</button>
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/docs/COMMERCIAL_LICENSING.md" target="_blank" class="callout-link">View Commercial Tiers & Pricing &rarr;</a>
       </div>
 
       <button type="button" class="btn" id="embed-btn" disabled>Embed Watermark & Export</button>
@@ -583,85 +581,17 @@
         <button type="button" class="btn btn-subtle" id="btn-verify-now">Scan in Verifier &rarr;</button>
       </div>
     </div>
-
-    <!-- PRICING TAB -->
-    <div class="tab-pane" id="pane-pricing">
-      <div style="margin-bottom: 1.25rem;">
-        <h2 style="font-size: 1.15rem; margin-bottom: 0.35rem; color: #f8fafc;">Commercial Production Licenses</h2>
-        <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
-          Aureal is free for personal & research use. Commercial music releases, label promo distributions, audio platforms, and AI speech providers require a production license.
-        </p>
-      </div>
-
-      <div class="pricing-grid">
-        <!-- Solo / Indie Studio -->
-        <div class="pricing-card">
-          <div class="pricing-badge">SOLO CREATOR</div>
-          <div class="pricing-price">$249 <span>/ one-time</span></div>
-          <div class="pricing-title">Indie Studio License</div>
-          <div class="pricing-desc">For individual producers, mixing engineers, and beatmakers.</div>
-          <ul class="pricing-features">
-            <li>✓ Unrestricted commercial rights on personal releases</li>
-            <li>✓ Universal Standalone CLI (Windows, macOS, Linux)</li>
-            <li>✓ Offline Web Studio with background Web Worker</li>
-            <li>✓ Lifetime updates on all major v0.x versions</li>
-          </ul>
-          <a href="mailto:lukas@negenborn.de?subject=Aureal%20Indie%20License%20Inquiry" class="btn btn-pricing">Inquire / Purchase</a>
-        </div>
-
-        <!-- Boutique Label / A&R -->
-        <div class="pricing-card featured">
-          <div class="pricing-badge featured-badge">MOST POPULAR</div>
-          <div class="pricing-price">$499 <span>/ one-time</span></div>
-          <div class="pricing-title">Boutique Label & A&R Desk</div>
-          <div class="pricing-desc">Complete pre-release promo leak prevention and forensic audit tool.</div>
-          <ul class="pricing-features">
-            <li>✓ Everything in Indie Studio</li>
-            <li>✓ Automated Promo Leak Batch Generator (batch_distribute.js)</li>
-            <li>✓ One-Click Forensic Leak Audit Inspector (audit_leak.js)</li>
-            <li>✓ Tamper-proof recipients.json cryptographic manifest</li>
-            <li>✓ Priority support for leak disputes</li>
-          </ul>
-          <a href="mailto:lukas@negenborn.de?subject=Aureal%20Label%20License%20Inquiry" class="btn btn-pricing">Inquire / Purchase</a>
-        </div>
-
-        <!-- B2B Marketplace -->
-        <div class="pricing-card">
-          <div class="pricing-badge">PLATFORM</div>
-          <div class="pricing-price">$2,900+ <span>/ year</span></div>
-          <div class="pricing-title">B2B Audio Marketplace</div>
-          <div class="pricing-desc">For beat marketplaces, sample libraries, and distribution platforms.</div>
-          <ul class="pricing-features">
-            <li>✓ Headless Node.js backend integration rights</li>
-            <li>✓ Commercial export hook SLA</li>
-            <li>✓ Unlimited automated watermarking loops</li>
-            <li>✓ Dual-band heavy lossy compression resilience</li>
-          </ul>
-          <a href="mailto:lukas@negenborn.de?subject=Aureal%20B2B%20Platform%20License" class="btn btn-pricing">Contact Enterprise</a>
-        </div>
-
-        <!-- Voice AI -->
-        <div class="pricing-card">
-          <div class="pricing-badge">EU COMPLIANCE</div>
-          <div class="pricing-price">$0.01 <span>/ min or $12.5k/yr</span></div>
-          <div class="pricing-title">Voice AI & Speech Compliance</div>
-          <div class="pricing-desc">For TTS, AI voice cloning, and synthetic speech platforms.</div>
-          <ul class="pricing-features">
-            <li>✓ EU AI Act Article 50 machine-readable compliance</li>
-            <li>✓ Low-latency audio-layer watermarking (&lt;1s per asset)</li>
-            <li>✓ C2PA provenance persistence across social media</li>
-            <li>✓ Dedicated integration engineer support</li>
-          </ul>
-          <a href="mailto:lukas@negenborn.de?subject=Aureal%20EU%20AI%20Act%20Compliance%20Inquiry" class="btn btn-pricing">Contact Enterprise</a>
-        </div>
-      </div>
-
-      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.78rem; color: var(--text-muted);">
-        Detailed license terms, SLAs, and technical specifications available in 
-        <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/docs/COMMERCIAL_LICENSING.md" target="_blank" style="color: var(--cyan); text-decoration: none; font-weight: 600;">docs/COMMERCIAL_LICENSING.md</a>.
-      </div>
-    </div>
   </div>
+
+  <footer class="app-footer" style="margin-top: 1.75rem; padding: 1.25rem 0; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center; font-size: 0.76rem; color: var(--text-muted); line-height: 1.6;">
+    <div>Free & open-source for personal use under PolyForm Noncommercial 1.0.0.</div>
+    <div style="margin-top: 0.25rem;">
+      Commercial music release, label leak distribution, or AI platform?
+      <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/docs/COMMERCIAL_LICENSING.md" target="_blank" style="color: var(--cyan); text-decoration: none; font-weight: 600; margin-left: 0.25rem;">
+        Commercial Licenses & Pricing &rarr;
+      </a>
+    </div>
+  </footer>
 </div>
 
 <script>
@@ -1327,33 +1257,22 @@
   // --- Tab Interactivity ---
   const tabDetect = document.getElementById("tab-detect");
   const tabEmbed = document.getElementById("tab-embed");
-  const tabPricing = document.getElementById("tab-pricing");
   const paneDetect = document.getElementById("pane-detect");
   const paneEmbed = document.getElementById("pane-embed");
-  const panePricing = document.getElementById("pane-pricing");
-  const headerPricingBtn = document.getElementById("header-pricing-btn");
-  const btnCalloutPricing = document.getElementById("btn-callout-pricing");
 
-  function switchTab(tabName) {
-    [tabDetect, tabEmbed, tabPricing].forEach((t) => t && t.classList.remove("active"));
-    [paneDetect, paneEmbed, panePricing].forEach((p) => p && p.classList.remove("active"));
-    if (tabName === "detect") {
-      tabDetect.classList.add("active");
-      paneDetect.classList.add("active");
-    } else if (tabName === "embed") {
-      tabEmbed.classList.add("active");
-      paneEmbed.classList.add("active");
-    } else if (tabName === "pricing") {
-      tabPricing.classList.add("active");
-      panePricing.classList.add("active");
-    }
-  }
+  tabDetect.addEventListener("click", () => {
+    tabDetect.classList.add("active");
+    tabEmbed.classList.remove("active");
+    paneDetect.classList.add("active");
+    paneEmbed.classList.remove("active");
+  });
 
-  tabDetect.addEventListener("click", () => switchTab("detect"));
-  tabEmbed.addEventListener("click", () => switchTab("embed"));
-  if (tabPricing) tabPricing.addEventListener("click", () => switchTab("pricing"));
-  if (headerPricingBtn) headerPricingBtn.addEventListener("click", () => switchTab("pricing"));
-  if (btnCalloutPricing) btnCalloutPricing.addEventListener("click", () => switchTab("pricing"));
+  tabEmbed.addEventListener("click", () => {
+    tabEmbed.classList.add("active");
+    tabDetect.classList.remove("active");
+    paneEmbed.classList.add("active");
+    paneDetect.classList.remove("active");
+  });
 
   function setupDragDrop(zone, input, onFile) {
     zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("dragover"); });
