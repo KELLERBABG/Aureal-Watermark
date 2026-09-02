@@ -3,329 +3,387 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Commercial Licenses & Pricing — Aureal Watermark</title>
-<meta name="description" content="Commercial production licenses, enterprise SLAs, and pricing for Aureal Watermark.">
+<title>Commercial Licensing & Pricing — Aureal Watermark</title>
+<meta name="description" content="Commercial production licenses, feature comparison, and enterprise terms for Aureal Watermark.">
 <link rel="icon" type="image/svg+xml" href="./assets/logo.svg">
 <style>
   :root {
-    --bg: #0a0c10;
-    --card: #12151c;
-    --card-border: #1e2430;
-    --card-hover: #262e3d;
+    --bg: #0d0e11;
+    --card: #14161b;
+    --card-subtle: #111317;
+    --border: #222630;
+    --border-bright: #323846;
     --text: #e6edf3;
-    --text-muted: #8b949e;
+    --text-muted: #7d8590;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
     --cyan: #38bdf8;
-    --blue: #2563eb;
-    --blue-glow: rgba(56, 189, 248, 0.15);
-    --featured-border: rgba(56, 189, 248, 0.45);
-    --featured-bg: rgba(14, 25, 45, 0.7);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding: 3rem 1.25rem;
+    padding: 2.5rem 1.25rem 4rem 1.25rem;
     line-height: 1.5;
   }
 
   .container {
-    max-width: 1040px;
+    max-width: 980px;
     margin: 0 auto;
   }
 
   /* Header */
-  .nav-bar {
+  .nav-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
     padding-bottom: 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
   }
 
-  .brand {
+  .nav-brand {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.75rem;
     text-decoration: none;
     color: var(--text);
   }
 
-  .brand-title {
-    font-size: 1.15rem;
-    font-weight: 700;
+  .nav-brand-text {
+    font-size: 1.05rem;
+    font-weight: 600;
     letter-spacing: -0.01em;
   }
 
-  .brand-sub {
+  .nav-brand-version {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .nav-btn {
+    font-family: var(--mono);
     font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .nav-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--cyan);
+    color: var(--text);
     text-decoration: none;
-    padding: 0.45rem 0.9rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 6px;
-    background: rgba(56, 189, 248, 0.08);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    transition: background 0.15s, border-color 0.15s;
+    border: 1px solid var(--border);
+    background: var(--card);
+    transition: border-color 0.15s, color 0.15s;
   }
 
-  .nav-link:hover {
-    background: rgba(56, 189, 248, 0.15);
-    border-color: rgba(56, 189, 248, 0.35);
-  }
-
-  /* Hero */
-  .hero {
-    text-align: center;
-    max-width: 720px;
-    margin: 0 auto 3rem auto;
-  }
-
-  .hero-tag {
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  .nav-btn:hover {
+    border-color: var(--border-bright);
     color: var(--cyan);
-    background: var(--blue-glow);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    padding: 0.3rem 0.75rem;
-    border-radius: 9999px;
-    margin-bottom: 1rem;
   }
 
-  .hero h1 {
-    font-size: 2.25rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: #f8fafc;
-    margin-bottom: 0.85rem;
-    line-height: 1.2;
+  /* Page Title */
+  .page-intro {
+    margin-bottom: 2.5rem;
   }
 
-  .hero p {
-    font-size: 0.95rem;
+  .page-intro h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #f0f6fc;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-intro p {
+    font-size: 0.88rem;
     color: var(--text-muted);
-    line-height: 1.6;
+    max-width: 680px;
+    line-height: 1.55;
   }
 
-  /* Pricing Cards Grid */
-  .pricing-grid {
+  .dual-license-note {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin-top: 0.75rem;
+    color: var(--cyan);
+  }
+
+  /* Tiers Grid */
+  .tiers-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 4rem;
+    gap: 1.25rem;
+    margin-bottom: 3.5rem;
   }
 
-  @media (min-width: 768px) {
-    .pricing-grid {
-      grid-template-columns: repeat(2, 1fr);
+  @media (min-width: 640px) {
+    .tiers-grid {
+      grid-template-columns: 1fr 1fr;
     }
   }
 
-  @media (min-width: 1024px) {
-    .pricing-grid {
+  @media (min-width: 960px) {
+    .tiers-grid {
       grid-template-columns: repeat(4, 1fr);
     }
   }
 
-  .pricing-card {
+  .tier-card {
     background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 1.65rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.35rem 1.15rem;
     display: flex;
     flex-direction: column;
-    position: relative;
-    transition: transform 0.15s, border-color 0.15s;
   }
 
-  .pricing-card:hover {
-    border-color: var(--card-hover);
-    transform: translateY(-2px);
+  .tier-card.featured {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: #101520;
   }
 
-  .pricing-card.featured {
-    background: var(--featured-bg);
-    border-color: var(--featured-border);
-    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.08);
-  }
-
-  .tier-badge {
+  .tier-tag {
+    font-family: var(--mono);
     font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     color: var(--text-muted);
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.75rem;
   }
 
-  .featured .tier-badge {
+  .tier-card.featured .tier-tag {
     color: var(--cyan);
   }
 
+  .tier-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 0.25rem;
+  }
+
   .tier-price {
-    font-size: 1.85rem;
-    font-weight: 800;
+    font-family: var(--mono);
+    font-size: 1.45rem;
+    font-weight: 700;
     color: #f8fafc;
-    margin-bottom: 0.35rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
   }
 
   .tier-price span {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     font-weight: 400;
     color: var(--text-muted);
-    margin-left: 0.15rem;
-  }
-
-  .tier-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #f1f5f9;
-    margin-bottom: 0.45rem;
   }
 
   .tier-desc {
     font-size: 0.78rem;
     color: var(--text-muted);
-    margin-bottom: 1.25rem;
     line-height: 1.4;
+    margin-bottom: 1.15rem;
     min-height: 2.8rem;
   }
 
-  .tier-features {
+  .tier-specs {
     list-style: none;
-    padding: 0;
-    margin: 0 0 1.75rem 0;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: #cbd5e1;
-    line-height: 1.55;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
     flex-grow: 1;
   }
 
-  .tier-features li {
+  .tier-specs li {
+    padding-left: 0.85rem;
     position: relative;
-    padding-left: 1.25rem;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.4rem;
   }
 
-  .tier-features li::before {
-    content: "✓";
+  .tier-specs li::before {
+    content: "–";
     position: absolute;
     left: 0;
-    color: var(--cyan);
-    font-weight: bold;
+    color: var(--text-muted);
   }
 
-  .btn {
-    display: inline-block;
+  .tier-specs code {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+  }
+
+  .btn-tier {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 600;
     text-align: center;
     text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.65rem 1rem;
+    padding: 0.55rem 0.75rem;
     border-radius: 6px;
-    background: #1f2937;
-    color: #f8fafc;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    background: #1b1f27;
+    color: var(--text);
     transition: background 0.15s, border-color 0.15s;
     margin-top: auto;
   }
 
-  .btn:hover {
-    background: #374151;
-    border-color: rgba(255, 255, 255, 0.2);
+  .btn-tier:hover {
+    background: #252b36;
+    border-color: var(--border-bright);
+    color: #ffffff;
   }
 
-  .btn-featured {
-    background: var(--blue);
+  .tier-card.featured .btn-tier {
+    background: var(--accent);
     border-color: #3b82f6;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    color: #ffffff;
   }
 
-  .btn-featured:hover {
-    background: #1d4ed8;
-    border-color: #2563eb;
+  .tier-card.featured .btn-tier:hover {
+    background: var(--accent-hover);
   }
 
-  /* FAQ */
-  .faq-section {
-    max-width: 800px;
-    margin: 0 auto 4rem auto;
+  /* Matrix Table */
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 0.5rem;
   }
 
-  .faq-section h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: center;
-    color: #f8fafc;
-    margin-bottom: 2rem;
+  .section-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
   }
 
-  .faq-grid {
+  .matrix-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    margin-bottom: 3.5rem;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    text-align: left;
+  }
+
+  .matrix-table th {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: #101216;
+    color: var(--text-muted);
+  }
+
+  .matrix-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+  }
+
+  .matrix-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .matrix-table code {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--cyan);
+  }
+
+  .val-yes {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: #34d399;
+  }
+
+  .val-no {
+    font-family: var(--mono);
+    color: var(--text-muted);
+  }
+
+  /* Procurement & Operations */
+  .procurement-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    margin-bottom: 3.5rem;
   }
 
-  @media (min-width: 768px) {
-    .faq-grid {
+  @media (min-width: 640px) {
+    .procurement-grid {
       grid-template-columns: 1fr 1fr;
     }
   }
 
-  .faq-item {
-    background: var(--card);
-    border: 1px solid var(--card-border);
+  .info-box {
+    background: var(--card-subtle);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 1.25rem;
   }
 
-  .faq-item h3 {
-    font-size: 0.92rem;
+  .info-box h3 {
+    font-family: var(--mono);
+    font-size: 0.82rem;
     font-weight: 600;
-    color: #f1f5f9;
-    margin-bottom: 0.45rem;
+    color: #f0f6fc;
+    margin-bottom: 0.5rem;
   }
 
-  .faq-item p {
-    font-size: 0.8rem;
+  .info-box p {
+    font-size: 0.78rem;
     color: var(--text-muted);
     line-height: 1.5;
   }
 
   /* Footer */
   .footer {
-    text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 0.78rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
     color: var(--text-muted);
-    line-height: 1.8;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .footer {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
   }
 
   .footer a {
-    color: var(--cyan);
+    color: var(--text);
     text-decoration: none;
-    font-weight: 600;
   }
 
   .footer a:hover {
-    text-decoration: underline;
+    color: var(--cyan);
   }
 </style>
 </head>
@@ -333,158 +391,241 @@
 
 <div class="container">
   <!-- Nav Bar -->
-  <div class="nav-bar">
-    <a href="index.html" class="brand">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="34" height="34">
+  <header class="nav-header">
+    <a href="index.html" class="nav-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26">
         <defs>
-          <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="bgG" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#0d0f15"/>
             <stop offset="100%" stop-color="#050608"/>
           </linearGradient>
-          <linearGradient id="sonicWaveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="sonicG" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#38bdf8"/>
-            <stop offset="50%" stop-color="#2563eb"/>
-            <stop offset="100%" stop-color="#1d4ed8"/>
-          </linearGradient>
-          <linearGradient id="corePulse" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#93c5fd"/>
+            <stop offset="100%" stop-color="#2563eb"/>
           </linearGradient>
         </defs>
-        <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
-        <g stroke="url(#sonicWaveGrad)" fill="none" stroke-linecap="round">
-          <path d="M 120 160 A 170 170 0 0 0 120 352" stroke-width="5" opacity="0.4"/>
-          <path d="M 155 190 A 120 120 0 0 0 155 322" stroke-width="7" opacity="0.7"/>
-          <path d="M 190 220 A 70 70 0 0 0 190 292" stroke-width="8" opacity="0.95"/>
-          <path d="M 322 220 A 70 70 0 0 1 322 292" stroke-width="8" opacity="0.95"/>
-          <path d="M 357 190 A 120 120 0 0 1 357 322" stroke-width="7" opacity="0.7"/>
-          <path d="M 392 160 A 170 170 0 0 1 392 352" stroke-width="5" opacity="0.4"/>
-        </g>
-        <g fill="url(#corePulse)">
-          <rect x="251" y="112" width="10" height="288" rx="5"/>
-          <rect x="233" y="152" width="8" height="208" rx="4" opacity="0.85"/>
-          <rect x="271" y="152" width="8" height="208" rx="4" opacity="0.85"/>
+        <rect width="512" height="512" rx="112" fill="url(#bgG)"/>
+        <g stroke="url(#sonicG)" fill="none" stroke-linecap="round" stroke-width="8">
+          <path d="M 155 190 A 120 120 0 0 0 155 322" opacity="0.6"/>
+          <path d="M 190 220 A 70 70 0 0 0 190 292"/>
+          <path d="M 322 220 A 70 70 0 0 1 322 292"/>
+          <path d="M 357 190 A 120 120 0 0 1 357 322" opacity="0.6"/>
         </g>
         <circle cx="256" cy="256" r="14" fill="#ffffff"/>
-        <circle cx="256" cy="256" r="6" fill="#0d0f15"/>
       </svg>
-      <div>
-        <div class="brand-title">Aureal Watermark</div>
-        <div class="brand-sub">Commercial Licensing & Enterprise SLA</div>
-      </div>
+      <span class="nav-brand-text">Aureal Watermark</span>
+      <span class="nav-brand-version">v0.2.2</span>
     </a>
-    <a href="index.html" class="nav-link">&larr; Back to Web Studio</a>
-  </div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-btn">&larr; Studio</a>
+      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="nav-btn">GitHub</a>
+    </div>
+  </header>
 
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-tag">PRODUCTION LICENSING</div>
-    <h1>Simple, Transparent Commercial Licensing</h1>
+  <!-- Page Intro -->
+  <section class="page-intro">
+    <h1>Commercial Licensing & SLAs</h1>
     <p>
-      Aureal is 100% free and open-source for personal, academic, and non-commercial research use. Commercial music releases, promo leak tracking pools, audio SaaS platforms, and voice AI systems require a production license.
+      Aureal Watermark is available under a dual-license model. Personal evaluation, academic research, and non-monetized music production are 100% free under the PolyForm Noncommercial 1.0.0 license.
     </p>
-  </div>
+    <div class="dual-license-note">
+      Any commercial music release, record label promo distribution pool, audio marketplace, or synthetic speech platform requires a commercial production license.
+    </div>
+  </section>
 
-  <!-- Pricing Cards -->
-  <div class="pricing-grid">
-    <!-- Solo Creator -->
-    <div class="pricing-card">
-      <div class="tier-badge">SOLO CREATOR</div>
-      <div class="tier-price">$249 <span>/ one-time</span></div>
-      <div class="tier-title">Indie Studio License</div>
-      <div class="tier-desc">For independent producers, mixing engineers, beatmakers, and solo artists.</div>
-      <ul class="tier-features">
-        <li>Unrestricted commercial rights on personal releases & beats</li>
-        <li>Standalone Universal CLI (<code>aureal-watermark.cjs</code>)</li>
-        <li>Offline Web Studio with 60 FPS Web Worker</li>
-        <li>16-bit and 24-bit lossless WAV master export</li>
-        <li>Perpetual license + lifetime v0.x updates</li>
+  <!-- Tiers Grid -->
+  <div class="tiers-grid">
+    <!-- Solo / Indie Studio -->
+    <div class="tier-card">
+      <div class="tier-tag">[ SOLO CREATOR ]</div>
+      <div class="tier-title">Indie Studio</div>
+      <div class="tier-price">$249 <span>/ perpetual</span></div>
+      <div class="tier-desc">For individual producers, beatmakers, and mixing engineers releasing commercial music.</div>
+      <ul class="tier-specs">
+        <li>Commercial release rights on personal catalogue</li>
+        <li>Universal CLI (<code>aureal-watermark.cjs</code>)</li>
+        <li>Offline Web Studio with Web Worker</li>
+        <li>16 &amp; 24-bit WAV master export</li>
+        <li>Perpetual seat + v0.x updates</li>
       </ul>
-      <a href="mailto:lukas@negenborn.de?subject=Aureal%20Solo%20License%20Inquiry" class="btn">Inquire / Purchase</a>
+      <a href="mailto:lukas@negenborn.de?subject=Aureal%20Solo%20License%20Inquiry" class="btn-tier">Inquire (Email)</a>
     </div>
 
-    <!-- Boutique Label & A&R Desk -->
-    <div class="pricing-card featured">
-      <div class="tier-badge">MOST POPULAR • LABEL PROTECTION</div>
-      <div class="tier-price">$499 <span>/ one-time</span></div>
-      <div class="tier-title">Boutique Label & A&R</div>
-      <div class="tier-desc">Complete pre-release promo leak tracking and forensic audit suite for labels and management.</div>
-      <ul class="tier-features">
-        <li><strong>Everything in Solo Creator</strong></li>
-        <li><strong>Automated Promo Leak Batch Tool</strong> (<code>batch_distribute.js</code>)</li>
-        <li><strong>One-Click Forensic Leak Auditor</strong> (<code>audit_leak.js</code>)</li>
-        <li>Cryptographic <code>recipients.json</code> mapping manifest</li>
+    <!-- Boutique Label & A&R -->
+    <div class="tier-card featured">
+      <div class="tier-tag">[ LABEL &amp; A&amp;R DESK ]</div>
+      <div class="tier-title">Promo Leak Suite</div>
+      <div class="tier-price">$499 <span>/ seat</span></div>
+      <div class="tier-desc">Complete pre-release leak tracking and forensic attribution suite for record labels and artist management.</div>
+      <ul class="tier-specs">
+        <li>Everything in Indie Studio</li>
+        <li>Batch promo distributor (<code>batch_distribute.js</code>)</li>
+        <li>Forensic leak auditor (<code>audit_leak.js</code>)</li>
+        <li>Cryptographic <code>recipients.json</code> manifest</li>
         <li>2-bit soft-decision error recovery</li>
-        <li>Priority support for leak disputes</li>
+        <li>Direct founder email support</li>
       </ul>
-      <a href="mailto:lukas@negenborn.de?subject=Aureal%20Label%20License%20Inquiry" class="btn btn-featured">Inquire / Purchase</a>
+      <a href="mailto:lukas@negenborn.de?subject=Aureal%20Label%20License%20Inquiry" class="btn-tier">Inquire (Email)</a>
     </div>
 
     <!-- B2B Audio Marketplace -->
-    <div class="pricing-card">
-      <div class="tier-badge">PLATFORM INTEGRATION</div>
+    <div class="tier-card">
+      <div class="tier-tag">[ MARKETPLACE API ]</div>
+      <div class="tier-title">Audio Platform</div>
       <div class="tier-price">$2,900+ <span>/ year</span></div>
-      <div class="tier-title">B2B Audio Marketplace</div>
       <div class="tier-desc">For beat marketplaces, stem distribution platforms, and stock audio libraries.</div>
-      <ul class="tier-features">
+      <ul class="tier-specs">
         <li>Headless Node.js backend integration rights</li>
-        <li>Commercial export hook & automated render SLA</li>
-        <li>Dual-band heavy lossy compression resilience</li>
+        <li>Commercial automated export hook SLA</li>
+        <li>Dual-band heavy compression resilience</li>
         <li>Tier 1: Up to 50k tracks/mo ($2,900/yr)</li>
-        <li>Tier 2: Unlimited volume ($5,900/yr)</li>
+        <li>Tier 2: Unlimited catalogue volume ($5,900/yr)</li>
       </ul>
-      <a href="mailto:lukas@negenborn.de?subject=Aureal%20B2B%20Marketplace%20License" class="btn">Contact Sales</a>
+      <a href="mailto:lukas@negenborn.de?subject=Aureal%20B2B%20Marketplace%20License" class="btn-tier">Contact Sales</a>
     </div>
 
     <!-- Voice AI & Speech Platforms -->
-    <div class="pricing-card">
-      <div class="tier-badge">EU AI ACT ARTICLE 50</div>
+    <div class="tier-card">
+      <div class="tier-tag">[ AI REGULATION ]</div>
+      <div class="tier-title">Voice AI &amp; Speech</div>
       <div class="tier-price">$0.01 <span>/ min or $12.5k/yr</span></div>
-      <div class="tier-title">Voice AI & Speech</div>
-      <div class="tier-desc">For TTS, AI voice cloning, podcasting, and synthetic speech compliance.</div>
-      <ul class="tier-features">
-        <li><strong>EU AI Act Article 50</strong> machine-readable compliance</li>
-        <li><strong>C2PA Content Credentials Persistence Bridge</strong></li>
-        <li>Low-latency audio-layer watermarking (&lt;1s per asset)</li>
-        <li>Undetectable to human ears (-24 dBFS psychoacoustic masking)</li>
-        <li>Dedicated integration engineer & SLA</li>
+      <div class="tier-desc">For TTS, AI voice cloning, and synthetic media platforms needing regulatory compliance.</div>
+      <ul class="tier-specs">
+        <li><strong>EU AI Act Article 50</strong> compliance grant</li>
+        <li><strong>C2PA Content Credentials</strong> persistence</li>
+        <li>Low-latency audio-layer watermarking (&lt;1s)</li>
+        <li>Psychoacoustic masking (&le; -60 dBFS muting)</li>
+        <li>Dedicated engineering support &amp; custom keys</li>
       </ul>
-      <a href="mailto:lukas@negenborn.de?subject=Aureal%20EU%20AI%20Act%20Compliance%20Inquiry" class="btn">Contact Enterprise</a>
+      <a href="mailto:lukas@negenborn.de?subject=Aureal%20EU%20AI%20Act%20Compliance%20Inquiry" class="btn-tier">Contact Enterprise</a>
     </div>
   </div>
 
-  <!-- FAQ Section -->
-  <div class="faq-section">
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-grid">
-      <div class="faq-item">
-        <h3>What counts as free non-commercial use?</h3>
-        <p>Personal evaluation, student academic research, non-monetized tracks, and bedroom listening tests are 100% free under the PolyForm Noncommercial 1.0.0 license. No payment required.</p>
-      </div>
+  <!-- Technical Feature Comparison Matrix -->
+  <section>
+    <div class="section-title">Technical Capability Matrix</div>
+    <div class="section-desc">Comparison of technical rights, DSP components, and operational tooling across licenses.</div>
 
-      <div class="faq-item">
-        <h3>Does Aureal require internet or phone-home DRM?</h3>
-        <p>No. Aureal is designed for high-security, air-gapped studio facilities. It runs completely offline on your own machine without telemetry, accounts, or DRM phone-home servers.</p>
-      </div>
+    <div class="matrix-wrapper">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Feature / Capability</th>
+            <th>Non-Commercial (Free)</th>
+            <th>Solo Creator ($249)</th>
+            <th>Label &amp; A&amp;R ($499)</th>
+            <th>B2B Platform ($2.9k+)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Usage Scope</td>
+            <td>Personal / Academic</td>
+            <td>Solo Commercial</td>
+            <td>Label &amp; Artist Pool</td>
+            <td>SaaS &amp; Headless Backend</td>
+          </tr>
+          <tr>
+            <td>Universal CLI (<code>aureal-watermark.cjs</code>)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Offline Web Studio (<code>studio.html</code>)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Commercial Streaming / Paid Sale Rights</td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Batch Promo Distributor (<code>batch_distribute.js</code>)</td>
+            <td><span class="val-no">NO (Evaluation only)</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Forensic Leak Auditor (<code>audit_leak.js</code>)</td>
+            <td><span class="val-no">NO (Evaluation only)</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>2-Bit Soft-Decision Error Recovery</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Headroom Limiter (&le; 0.995 True-Peak)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Dynamic Silence Muting (&le; -60 dBFS)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Automated Backend Integration SLA</td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Legal Indemnification &amp; Compliance Warranty</td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-      <div class="faq-item">
-        <h3>How does the Promo Leak Audit tool work?</h3>
-        <p>You run <code>batch_distribute.js</code> to generate tagged copies for reviewers and DJs. If a leaked copy surfaces on Discord, YouTube, or SoundCloud, you run <code>audit_leak.js</code> to extract the ID and identify the recipient in seconds.</p>
-      </div>
+  <!-- Procurement & Operational Guarantees -->
+  <div class="procurement-grid">
+    <div class="info-box">
+      <h3>AIR-GAPPED &amp; ZERO-TELEMETRY</h3>
+      <p>
+        Aureal Watermark executes 100% locally on your machine or private servers. It makes zero outbound network requests, collects no analytics, and does not require account logins or DRM license servers. It is fully compliant with high-security mastering facilities and air-gapped studio workflows.
+      </p>
+    </div>
 
-      <div class="faq-item">
-        <h3>Can I pay via corporate invoice or wire transfer?</h3>
-        <p>Yes. We support corporate purchase orders (PO), SEPA / ACH bank wire transfers, and credit card payments. Digital license certificates and tax invoices are issued same-day.</p>
-      </div>
+    <div class="info-box">
+      <h3>PROCUREMENT &amp; PAYMENT METHODS</h3>
+      <p>
+        Commercial licenses are fulfilled directly with a signed digital certificate and tax invoice. We support corporate purchase orders (PO), SEPA / ACH wire transfers, and credit card payments. Multi-seat discounts and enterprise custom SLAs are available upon inquiry.
+      </p>
     </div>
   </div>
 
   <!-- Footer -->
-  <div class="footer">
-    <div>Free & open-source for personal use under <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/LICENSE.md" target="_blank">PolyForm Noncommercial 1.0.0</a>.</div>
-    <div>For full legal definitions and patent grants, consult <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/docs/COMMERCIAL_LICENSING.md" target="_blank">docs/COMMERCIAL_LICENSING.md</a>.</div>
-    <div style="margin-top: 0.5rem;">Direct founder contact: <a href="mailto:lukas@negenborn.de">lukas@negenborn.de</a></div>
-  </div>
+  <footer class="footer">
+    <div>
+      Licensed under <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/LICENSE.md" target="_blank">PolyForm Noncommercial 1.0.0</a> &bull; Full terms in <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/docs/COMMERCIAL_LICENSING.md" target="_blank">docs/COMMERCIAL_LICENSING.md</a>
+    </div>
+    <div>
+      Direct inquiries: <a href="mailto:lukas@negenborn.de">lukas@negenborn.de</a>
+    </div>
+  </footer>
 </div>
 
 </body>
