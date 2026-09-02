@@ -78,8 +78,9 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
 
     const absSorted = [...soft].map((v, i) => [Math.abs(v), i]).sort((a, b) => a[0] - b[0]);
     let decoded = unpackCodeword(hard);
-    let correctedAt = -1;
+    let correctedBits = [];
     if (!decoded.crcOk) {
+      // Step 1: 1-bit flip sweep over sorted soft candidates
       for (const [, i] of absSorted) {
         const trial = Int8Array.from(hard);
         trial[i] = -trial[i];
@@ -87,8 +88,29 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
         if (t.crcOk) {
           hard = trial;
           decoded = t;
-          correctedAt = i;
+          correctedBits = [i];
           break;
+        }
+      }
+
+      // Step 2: 2-bit permutation sweep on the 8 lowest-confidence symbols (28 trials)
+      if (!decoded.crcOk) {
+        const topCandidates = absSorted.slice(0, 8);
+        outer2Bit: for (let p = 0; p < topCandidates.length; p++) {
+          for (let q = p + 1; q < topCandidates.length; q++) {
+            const i1 = topCandidates[p][1];
+            const i2 = topCandidates[q][1];
+            const trial = Int8Array.from(hard);
+            trial[i1] = -trial[i1];
+            trial[i2] = -trial[i2];
+            const t = unpackCodeword(trial);
+            if (t.crcOk) {
+              hard = trial;
+              decoded = t;
+              correctedBits = [i1, i2];
+              break outer2Bit;
+            }
+          }
         }
       }
     }
@@ -122,7 +144,7 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
         soft,
         hard,
         decoded,
-        correctedAt,
+        correctedBits,
         mu,
         sd,
         z,
@@ -187,7 +209,8 @@ export function detectWatermark(pcm, fmt, opts = {}) {
       sqnrDb: winner.sqnrDb,
       meanAlignedAmplitude: winner.mu,
       amplitudeSpread: winner.sd,
-      singleBitCorrected: winner.correctedAt >= 0 ? winner.correctedAt : null,
+      bitsCorrected: winner.correctedBits && winner.correctedBits.length > 0 ? winner.correctedBits : null,
+      singleBitCorrected: winner.correctedBits && winner.correctedBits.length === 1 ? winner.correctedBits[0] : null,
       band: bands.length > 1 ? opts.band : winnerBand,
       bandUsed: winnerBand,
       bandsTried: bands.length,

@@ -150,3 +150,35 @@ test("headroom protection prevents digital clipping on 0 dBFS hot masters", () =
   }
   assert.ok(maxPeak <= 0.999, `maxPeak ${maxPeak} exceeded 0.999 limit`);
 });
+
+test("2-bit soft-decision permutation sweep recovers corrupted codeword", () => {
+  const codeword = packCodeword(883921);
+  const corrupted = Int8Array.from(codeword);
+  // Flip 2 bits
+  corrupted[10] = -corrupted[10];
+  corrupted[20] = -corrupted[20];
+  const decodedDirect = unpackCodeword(corrupted);
+  assert.equal(decodedDirect.crcOk, false, "CRC should fail before correction");
+
+  // Run through 2-bit sweep
+  const absSorted = Array.from({ length: 48 }, (_, i) => [i === 10 || i === 20 ? 0.01 : 0.5, i])
+    .sort((a, b) => a[0] - b[0]);
+  const topCandidates = absSorted.slice(0, 8);
+  let repaired = null;
+  outer: for (let p = 0; p < topCandidates.length; p++) {
+    for (let q = p + 1; q < topCandidates.length; q++) {
+      const i1 = topCandidates[p][1];
+      const i2 = topCandidates[q][1];
+      const trial = Int8Array.from(corrupted);
+      trial[i1] = -trial[i1];
+      trial[i2] = -trial[i2];
+      const t = unpackCodeword(trial);
+      if (t.crcOk) {
+        repaired = t;
+        break outer;
+      }
+    }
+  }
+  assert.ok(repaired !== null, "2-bit sweep should find valid CRC");
+  assert.equal(repaired.id, 883921);
+});

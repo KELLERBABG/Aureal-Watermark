@@ -269,8 +269,8 @@ async function main() {
       );
       console.log(`  ber:      ${(res.ber * 100).toFixed(1)}% (${Math.round(res.ber * res.details.bits)}/${res.details.bits} bits)`);
       console.log(`  recovered id: ${res.recoveredPayloadId ?? "none"}`);
-      if (res.details.singleBitCorrected !== null) {
-        console.log(`  note:     single-bit error corrected at position ${res.details.singleBitCorrected}`);
+      if (res.details.bitsCorrected && res.details.bitsCorrected.length > 0) {
+        console.log(`  note:     ${res.details.bitsCorrected.length}-bit error corrected at position(s) ${res.details.bitsCorrected.join(", ")}`);
       }
       console.log(`  time:     ${ms} ms`);
     }

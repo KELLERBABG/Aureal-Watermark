@@ -94,18 +94,36 @@ node aureal-watermark.cjs studio
 
 ---
 
-### Option 3: Promo Leak Batch Distribution (For Labels & Artists)
+### Option 3: Promo Leak Batch Distribution & Forensic Audit (For Labels & Artists)
 
-Automatically generate uniquely tagged copies for reviewers, radio stations, or DJs alongside a `recipients.json` leak-tracking manifest in a single command:
+#### 1. Generate Tagged Copies for Reviewers & DJs
+Generate uniquely watermarked master copies for multiple recipients alongside a cryptographic `recipients.json` mapping manifest in a single command:
 
 ```bash
-node scripts/batch_distribute.js album_track.wav --recipients "DJ Snake, Annie Mac, Zane Lowe" --out-dir ./promos
+node scripts/batch_distribute.js album_master.wav --recipients "DJ Snake, Annie Mac, Zane Lowe" --out-dir ./promos
 ```
 
-If a copy leaks online later, scan it to pinpoint the exact recipient:
+#### 2. One-Click Forensic Audit If a Leak Occurs
+If a rip or leak appears on Discord, SoundCloud, or YouTube, pinpoint the responsible recipient in seconds:
 
 ```bash
-node aureal-watermark.cjs detect leaked_audio.wav --json
+node scripts/audit_leak.js leaked_audio.mp3 --manifest ./promos/recipients.json
+```
+
+```text
+======================================================
+AUREAL FORENSIC AUDIT REPORT
+======================================================
+Target File:      leaked_audio.mp3 (MP3 128 kbps)
+Recovered ID:     #100002 (CRC-16 Valid)
+Confidence:       100.0% (Eb/N0: +17.7 dB)
+------------------------------------------------------
+MATCH CONFIRMED IN DISTRIBUTION MANIFEST:
+  Recipient Name:   Zane Lowe
+  Assigned ID:      #100002
+  Original File:    album_master_[Zane_Lowe].wav
+======================================================
+VERDICT: Leak traced directly to "Zane Lowe".
 ```
 
 ---
@@ -137,15 +155,29 @@ console.log(result.recoveredPayloadId); // 883921
 
 ---
 
+## Regulatory Compliance: The EU AI Act & C2PA Bridge
+
+### 1. EU AI Act Article 50 Machine-Readable Synthetic Audio
+Under **Article 50 of the European Union AI Act**, platforms generating synthetic voices, deepfakes, or AI music must ensure outputs are marked with machine-detectable provenance.
+* **The Problem:** Social media platforms (TikTok, Instagram, YouTube Shorts, WhatsApp) automatically strip ID3 tags and RIFF metadata chunks during re-encoding.
+* **The Aureal Solution:** Aureal embeds the machine-readable provenance ID directly inside the acoustic wave using DSSS modulation. The watermark survives lossy re-encoding and format conversion without audible degradation.
+
+### 2. The C2PA Content Credentials Persistence Bridge
+Traditional C2PA manifests are stored in audio headers that get discarded by lossy encoders. Aureal's 32-bit payload ID serves as an indestructible **Acoustic Pointer**:
+$$\text{Social Media Re-encode} \longrightarrow \text{Header Metadata Stripped} \longrightarrow \text{Aureal Acoustic Scan} \longrightarrow \text{Original C2PA Manifest Recovered}$$
+
+---
+
 ## Operational Capabilities & Boundaries
 
 | Transformation / Attack | Survives? | Engineering Notes |
 | :--- | :---: | :--- |
-| **MP3 Compression (128k / 320k)** | **YES** | Robust across 42 automated tests via `Dual` and `High` band presets. |
+| **MP3 Compression (128k / 320k)** | **YES** | Robust across 44 automated tests via `Dual` and `High` band presets. |
 | **AAC / M4A Compression (128k)** | **YES** | Survives MDCT lossy psychoacoustic quantization with strong SNR margin. |
 | **Volume Scaling & Normalization** | **YES** | Tolerates level shifts from $0.1\times$ to $5.0\times$ without phase disruption. |
 | **Hot Master Headroom Limiting** | **YES** | Built-in true-peak limiter ($\le 0.995$) prevents clipping on $0\text{ dBFS}$ loud masters. |
 | **Dynamic Silence Muting** | **YES** | Psychoacoustic masking automatically mutes carrier during quiet intros and pauses. |
+| **Multi-Bit Error Correction** | **YES** | Reliability-ordered 2-bit soft-decision permutation sweep repairs flipped bits. |
 | **Stereo to Mono Downmixing** | **YES** | Interleaved downmixing preserves carrier phase alignment. |
 | **Linear Time Offsets / Cropping** | **YES** | Fractional resync grid ($\pm 1/16, \pm 2/16, \pm 4/16$) absorbs start-offset shifts. |
 | **Additive Noise (−30 dBFS)** | **YES** | Spread-spectrum processing gain extracts signals below host noise floor. |
@@ -158,6 +190,7 @@ console.log(result.recoveredPayloadId); // 883921
 
 For audio engineers, DSP researchers, and developers who want to inspect the mathematics, frequency bands, and algorithms:
 
+* [**Commercial Licensing & Enterprise SLA**](docs/COMMERCIAL_LICENSING.md) — Production licensing terms, pricing tiers, and compliance specifications.
 * [**Technical Specifications & Benchmarks**](docs/TECHNICAL_SPECIFICATIONS.md) — DSSS carrier frequencies, BPSK modulation parameters, and measured compression tests.
 * [**Codebase Wiki**](docs/CODEBASE_WIKI.md) — Complete file-by-file reference for every function and DSP module.
 * [**Whitepaper**](docs/WHITEPAPER.md) — Formal threat model, detection statistics, and academic background.
@@ -166,11 +199,21 @@ For audio engineers, DSP researchers, and developers who want to inspect the mat
 
 ---
 
-## License & Commercial Use
+## Commercial Licensing & Enterprise SLA
 
-Aureal Watermark is available under a **Dual License**:
+Aureal Watermark is distributed under a **Dual License**:
 
 * **Personal, Academic & Hobby Use:** Completely free and open-source under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
-* **Commercial & Business Use:** A commercial license is required for businesses, commercial software integrations, record labels, and revenue-generating platforms.
+* **Commercial & Enterprise Use:** A commercial production license is required for commercial releases, label promo pools, SaaS audio pipelines, and AI speech platforms.
 
-To purchase a commercial license or discuss custom integration, please open an inquiry on the [GitHub Issues](https://github.com/KELLERBABG/Aureal-Watermark/issues) page or contact [@KELLERBABG](https://github.com/KELLERBABG).
+### Commercial Pricing Matrix
+
+| Tier | Price | Includes |
+| :--- | :--- | :--- |
+| **Solo Creator / Indie Studio** | **$249** *(one-time)* | Unrestricted commercial rights on personal releases, Universal CLI, Web Studio. |
+| **Boutique Label / A&R Desk** | **$499** *(one-time / seat)* | Batch leak distributor, one-click forensic audit script, priority leak support. |
+| **B2B Audio Marketplace** | **$2,900 – $5,900 / yr** | Headless backend integration rights, commercial export hook SLA, unlimited embeds. |
+| **Voice AI & Speech Platforms** | **$0.01 / min** or **$12,500 / yr** | EU AI Act Article 50 compliance, low-latency SDK integration, C2PA persistence. |
+| **Audio Forensics & Legal Labs** | **$1,499** *(perpetual)* | Client-side offline forensic suite, raw $E_b/N_0$ reports, custom branding. |
+
+For commercial licensing and enterprise SLAs, see [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md) or contact **[lukas@negenborn.de](mailto:lukas@negenborn.de)**.

@@ -293,6 +293,49 @@
     text-align: right;
     color: var(--text);
   }
+
+  .commercial-callout {
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .callout-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .callout-title {
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.2rem;
+  }
+
+  .callout-desc {
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .callout-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .callout-link:hover {
+    text-decoration: underline;
+  }
 </style>
 <link rel="icon" type="image/svg+xml" href="./assets/logo.svg">
 </head>
@@ -427,6 +470,13 @@
           <option value="high">High Band (16.5–19.5 kHz) — Archival / Lossless</option>
           <option value="mid">Mid Band (8–13 kHz) — Heavy compression survival</option>
         </select>
+      </div>
+
+      <div class="commercial-callout">
+        <div class="callout-tag">Commercial Production</div>
+        <div class="callout-title">Commercial release, label distribution, or AI platform?</div>
+        <div class="callout-desc">Aureal is free for personal & research use. Commercial releases, SaaS platforms, and leak distribution require a commercial license.</div>
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/docs/COMMERCIAL_LICENSING.md" target="_blank" class="callout-link">View Commercial Tiers & SLA &rarr;</a>
       </div>
 
       <button type="button" class="btn" id="embed-btn" disabled>Embed Watermark & Export</button>
@@ -669,7 +719,7 @@
 
       const absSorted = [...soft].map((v, i) => [Math.abs(v), i]).sort((a, b) => a[0] - b[0]);
       let decoded = unpackCodeword(hard);
-      let correctedAt = -1;
+      let correctedBits = [];
       if (!decoded.crcOk) {
         for (const [, i] of absSorted) {
           const trial = Int8Array.from(hard);
@@ -678,8 +728,27 @@
           if (t.crcOk) {
             hard = trial;
             decoded = t;
-            correctedAt = i;
+            correctedBits = [i];
             break;
+          }
+        }
+        if (!decoded.crcOk) {
+          const topCandidates = absSorted.slice(0, 8);
+          outer2Bit: for (let p = 0; p < topCandidates.length; p++) {
+            for (let q = p + 1; q < topCandidates.length; q++) {
+              const i1 = topCandidates[p][1];
+              const i2 = topCandidates[q][1];
+              const trial = Int8Array.from(hard);
+              trial[i1] = -trial[i1];
+              trial[i2] = -trial[i2];
+              const t = unpackCodeword(trial);
+              if (t.crcOk) {
+                hard = trial;
+                decoded = t;
+                correctedBits = [i1, i2];
+                break outer2Bit;
+              }
+            }
           }
         }
       }
