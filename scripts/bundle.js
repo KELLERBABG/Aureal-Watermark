@@ -50,7 +50,7 @@ const { join, dirname } = require("node:path");
 
 const { argv, exit, stdin, stdout } = process;
 const { readFile, writeFile } = fsp;
-const { existsSync, readFileSync, mkdtempSync } = fs;
+const { existsSync, readFileSync, writeFileSync, mkdtempSync } = fs;
 const { tmpdir } = os;
 
 ${signalCode}

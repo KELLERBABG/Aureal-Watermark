@@ -3,8 +3,7 @@
 
 import { argv, exit } from "node:process";
 import { spawn, exec } from "node:child_process";
-import { createServer } from "node:http";
-import { existsSync, readFileSync, mkdtempSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -15,7 +14,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 
-const HELP = `Aureal Watermark v0.2.0 — inaudible provenance watermark for human-made audio
+const HELP = `Aureal Watermark v0.2.0 — Audio watermarking for anti-theft and AI detection
 
 Desktop App:
   auralwatermark [gui]              Launch standalone Desktop Studio application (Default)
@@ -31,9 +30,6 @@ Command Line Interface:
   auralwatermark detect in.wav [--id <uint32>] [--key secret]
       [--band auto|high|mid|dual|lowHz:highHz] [--json]
       Verify an expected id or run blind detection + CRC decode.
-
-  auralwatermark studio [--port 3000]
-      Start background studio server on specific port.
 
 Exit codes: 0 success/detected · 1 not detected · 2 error`;
 
@@ -107,96 +103,77 @@ function findAppRuntime() {
       join(env["LOCALAPPDATA"] || "", "Google\\Chrome\\Application\\chrome.exe"),
     ];
     for (const c of candidates) {
-      if (existsSync(c)) return { bin: c, type: "edge-app" };
+      if (existsSync(c)) return { bin: c, type: "app" };
     }
   } else if (process.platform === "darwin") {
     const chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
     const edge = "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
-    if (existsSync(chrome)) return { bin: chrome, type: "chrome-app" };
-    if (existsSync(edge)) return { bin: edge, type: "chrome-app" };
+    if (existsSync(chrome)) return { bin: chrome, type: "app" };
+    if (existsSync(edge)) return { bin: edge, type: "app" };
   } else if (process.platform === "linux") {
     const linuxBins = ["/usr/bin/google-chrome", "/usr/bin/chromium-browser", "/usr/bin/chromium", "/usr/bin/microsoft-edge"];
     for (const b of linuxBins) {
-      if (existsSync(b)) return { bin: b, type: "chrome-app" };
+      if (existsSync(b)) return { bin: b, type: "app" };
     }
   }
   return null;
 }
 
-function launchDesktopApp(requestedPort = 0) {
+function launchDesktopApp() {
   const html = getStudioHtml();
+  const localFile = join(tmpdir(), "aureal-watermark-studio.html");
+  writeFileSync(localFile, html, "utf8");
 
-  const server = createServer((req, res) => {
-    res.writeHead(200, {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-cache",
-    });
-    res.end(html);
-  });
+  // Format file:/// URL properly with forward slashes
+  const fileUrl = "file:///" + localFile.split("\\").join("/");
+  const runtime = findAppRuntime();
 
-  server.listen(requestedPort, "127.0.0.1", () => {
-    const address = server.address();
-    const port = address.port;
-    const url = `http://127.0.0.1:${port}`;
-    const runtime = findAppRuntime();
+  console.log(`\n========================================================`);
+  console.log(`           AUREAL WATERMARK DESKTOP STUDIO              `);
+  console.log(`========================================================`);
+  console.log(`Launching standalone Desktop Studio...\n`);
 
-    console.log(`\n========================================================`);
-    console.log(`           AUREAL WATERMARK DESKTOP STUDIO              `);
-    console.log(`========================================================`);
-    console.log(`Running local DSP engine on: ${url}\n`);
+  if (runtime && runtime.bin) {
+    const appArgs = [
+      `--app=${fileUrl}`,
+      `--window-size=1180,820`,
+      `--app-id=aureal-watermark-studio`,
+      `--no-first-run`,
+    ];
 
-    if (runtime && runtime.bin) {
-      // Launch native app window (no URL bar, no tabs)
-      const userDir = mkdtempSync(join(tmpdir(), "aureal-studio-"));
-      const appArgs = [
-        `--app=${url}`,
-        `--window-size=1180,820`,
-        `--user-data-dir=${userDir}`,
-        `--app-id=aureal-watermark-studio`,
-        `--disable-features=Translate`,
-        `--no-first-run`,
-      ];
-
+    try {
       const child = spawn(runtime.bin, appArgs, {
-        detached: false,
+        detached: true,
         stdio: "ignore",
       });
-
-      child.on("exit", () => {
-        server.close();
-        exit(0);
-      });
-    } else {
-      // Standard browser fallback
-      const opener =
-        process.platform === "darwin"
-          ? "open"
-          : process.platform === "win32"
-          ? "start"
-          : "xdg-open";
-      exec(`${opener} ${url}`);
+      child.unref();
+      return;
+    } catch {
+      // Fallback if spawn fails
     }
-  });
+  }
+
+  // Universal browser fallback
+  const opener =
+    process.platform === "darwin"
+      ? "open"
+      : process.platform === "win32"
+      ? "start"
+      : "xdg-open";
+  exec(`${opener} "${fileUrl}"`);
 }
 
 async function main() {
   const [cmd, ...rest] = argv.slice(2);
 
   // If launched with no arguments (e.g. double clicked in Windows Explorer) -> launch Desktop App!
-  if (!cmd || cmd === "gui" || cmd === "app") {
-    launchDesktopApp(0);
+  if (!cmd || cmd === "gui" || cmd === "app" || cmd === "studio") {
+    launchDesktopApp();
     return;
   }
 
   if (cmd === "help" || cmd === "--help" || cmd === "-h") {
     console.log(HELP);
-    return;
-  }
-
-  if (cmd === "studio") {
-    const { flags } = parseArgs(rest);
-    const port = num(flags, "port", 3000);
-    launchDesktopApp(port);
     return;
   }
 
