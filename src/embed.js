@@ -49,11 +49,39 @@ export function embedWatermark(pcm, fmt, opts) {
   for (let r = 0; r < reps; r++) {
     const base = r * frameLen * channels;
     for (let ch = 0; ch < channels; ch++) {
-      let o = base + ch;
-      for (let n = 0; n < frameLen; n++) {
-        out[o] = out[o] + wm[n];
-        o += channels;
+      for (let b = 0; b < bits; b++) {
+        const slotOffset = base + ch + b * slotLen * channels;
+        // Compute slot RMS for psychoacoustic masking
+        let sumSq = 0;
+        for (let n = 0; n < slotLen; n++) {
+          const s = pcm[slotOffset + n * channels];
+          sumSq += s * s;
+        }
+        const rms = Math.sqrt(sumSq / slotLen);
+        // Attenuate carrier in quiet sections; mute in near-silence (<= -60 dBFS)
+        const mask = rms <= 0.001 ? 0.0 : (rms >= 0.0316 ? 1.0 : (rms - 0.001) / 0.0306);
+        if (mask > 0) {
+          const wmSlotBase = b * slotLen;
+          let o = slotOffset;
+          for (let n = 0; n < slotLen; n++) {
+            out[o] += wm[wmSlotBase + n] * mask;
+            o += channels;
+          }
+        }
       }
+    }
+  }
+
+  // Headroom protection & soft-peak limiting (prevent digital clipping when peak > 0.999)
+  let maxPeak = 0;
+  for (let i = 0; i < out.length; i++) {
+    const abs = Math.abs(out[i]);
+    if (abs > maxPeak) maxPeak = abs;
+  }
+  if (maxPeak > 0.999) {
+    const headroomScale = 0.995 / maxPeak;
+    for (let i = 0; i < out.length; i++) {
+      out[i] *= headroomScale;
     }
   }
 

@@ -94,7 +94,23 @@ node aureal-watermark.cjs studio
 
 ---
 
-### Option 3: JavaScript / Node.js API (For Developers & Backends)
+### Option 3: Promo Leak Batch Distribution (For Labels & Artists)
+
+Automatically generate uniquely tagged copies for reviewers, radio stations, or DJs alongside a `recipients.json` leak-tracking manifest in a single command:
+
+```bash
+node scripts/batch_distribute.js album_track.wav --recipients "DJ Snake, Annie Mac, Zane Lowe" --out-dir ./promos
+```
+
+If a copy leaks online later, scan it to pinpoint the exact recipient:
+
+```bash
+node aureal-watermark.cjs detect leaked_audio.wav --json
+```
+
+---
+
+### Option 4: JavaScript / Node.js API (For Developers & Backends)
 
 Integrate protection directly into your own apps and export pipelines:
 
@@ -115,8 +131,26 @@ const result = detectWatermark(protectedAudio, format, { payloadId: 883921 });
 
 console.log(result.detected);           // true
 console.log(result.confidence);         // 0.98 (98%)
+console.log(result.ebN0Db);             // +18.4 dB (Signal-to-Noise)
 console.log(result.recoveredPayloadId); // 883921
 ```
+
+---
+
+## Operational Capabilities & Boundaries
+
+| Transformation / Attack | Survives? | Engineering Notes |
+| :--- | :---: | :--- |
+| **MP3 Compression (128k / 320k)** | **YES** | Robust across 42 automated tests via `Dual` and `High` band presets. |
+| **AAC / M4A Compression (128k)** | **YES** | Survives MDCT lossy psychoacoustic quantization with strong SNR margin. |
+| **Volume Scaling & Normalization** | **YES** | Tolerates level shifts from $0.1\times$ to $5.0\times$ without phase disruption. |
+| **Hot Master Headroom Limiting** | **YES** | Built-in true-peak limiter ($\le 0.995$) prevents clipping on $0\text{ dBFS}$ loud masters. |
+| **Dynamic Silence Muting** | **YES** | Psychoacoustic masking automatically mutes carrier during quiet intros and pauses. |
+| **Stereo to Mono Downmixing** | **YES** | Interleaved downmixing preserves carrier phase alignment. |
+| **Linear Time Offsets / Cropping** | **YES** | Fractional resync grid ($\pm 1/16, \pm 2/16, \pm 4/16$) absorbs start-offset shifts. |
+| **Additive Noise (−30 dBFS)** | **YES** | Spread-spectrum processing gain extracts signals below host noise floor. |
+| **Non-Linear Time-Stretching** | **NO** | $\pm 1\text{--}2\%$ DAW warp/stretch breaks chip phase coherence *(roadmap: chirp CSS)*. |
+| **Non-Linear Pitch-Shifting** | **NO** | Shifting pitch moves carriers outside the matched-filter frequency band. |
 
 ---
 

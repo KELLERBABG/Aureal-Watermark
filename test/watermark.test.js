@@ -128,3 +128,25 @@ test("too-short audio throws a helpful range error", () => {
     /too short/
   );
 });
+
+test("dynamic psychoacoustic masking mutes carrier on digital silence", () => {
+  const silence = new Float32Array(RATE * 2);
+  const result = embedWatermark(silence, fmt, { payloadId: ID, key: KEY });
+  // Silence should remain 100% pure silence (zero carrier injected)
+  let maxAbs = 0;
+  for (let i = 0; i < result.length; i++) {
+    if (Math.abs(result[i]) > maxAbs) maxAbs = Math.abs(result[i]);
+  }
+  assert.equal(maxAbs, 0.0);
+});
+
+test("headroom protection prevents digital clipping on 0 dBFS hot masters", () => {
+  const hotAudio = new Float32Array(RATE * 2);
+  hotAudio.fill(0.98); // near digital peak
+  const markedHot = embedWatermark(hotAudio, fmt, { payloadId: ID, key: KEY, strength: 1.0 });
+  let maxPeak = 0;
+  for (let i = 0; i < markedHot.length; i++) {
+    if (Math.abs(markedHot[i]) > maxPeak) maxPeak = Math.abs(markedHot[i]);
+  }
+  assert.ok(maxPeak <= 0.999, `maxPeak ${maxPeak} exceeded 0.999 limit`);
+});
