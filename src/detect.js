@@ -113,6 +113,9 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
     const denom = sd / Math.sqrt(BITS_PER_CODEWORD) + 1e-3 * maxAbs + 1e-12;
     const z = mu / denom;
     const confidence = Math.min(1, Math.max(0, (z - Z_FLOOR) / (Z_FULL - Z_FLOOR)));
+    const ebN0 = mu > 0 && sd > 0 ? (mu / sd) ** 2 : 1e-4;
+    const ebN0Db = Number((10 * Math.log10(Math.max(1e-4, ebN0))).toFixed(2));
+    const sqnrDb = Number((10 * Math.log10(Math.max(1e-4, ebN0 * reps))).toFixed(2));
 
     if (!best || confidence > best.confidence) {
       best = {
@@ -124,6 +127,8 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
         sd,
         z,
         confidence,
+        ebN0Db,
+        sqnrDb,
         ber: berCount / BITS_PER_CODEWORD,
         reps,
         shiftUsed: shift,
@@ -169,6 +174,8 @@ export function detectWatermark(pcm, fmt, opts = {}) {
     detected,
     confidence: winner.confidence,
     ber: winner.ber,
+    ebN0Db: winner.ebN0Db,
+    sqnrDb: winner.sqnrDb,
     recoveredPayloadId: winner.decoded.crcOk ? winner.decoded.id : null,
     crcOk: winner.decoded.crcOk,
     reps: winner.reps,
@@ -176,6 +183,8 @@ export function detectWatermark(pcm, fmt, opts = {}) {
     details: {
       mode: opts.payloadId !== undefined ? "verify" : "blind",
       z: winner.z,
+      ebN0Db: winner.ebN0Db,
+      sqnrDb: winner.sqnrDb,
       meanAlignedAmplitude: winner.mu,
       amplitudeSpread: winner.sd,
       singleBitCorrected: winner.correctedAt >= 0 ? winner.correctedAt : null,

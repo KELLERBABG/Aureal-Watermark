@@ -262,6 +262,8 @@ async function main() {
       console.log(`  mode:     ${res.details.mode}${expectedId !== undefined ? ` (expect id=${expectedId})` : ""}`);
       console.log(`  detected: ${res.detected ? "YES" : "NO"}`);
       console.log(`  confidence: ${res.confidence.toFixed(3)}`);
+      console.log(`  eb/n0:      ${res.ebN0Db > -30 ? `${res.ebN0Db > 0 ? "+" : ""}${res.ebN0Db} dB` : "< -30 dB"}`);
+      console.log(`  sqnr:       ${res.sqnrDb > -30 ? `${res.sqnrDb > 0 ? "+" : ""}${res.sqnrDb} dB` : "< -30 dB"}`);
       console.log(
         `  band hit: ${res.details.bandUsed ? `${Math.round(res.details.bandUsed.lowHz)}-${Math.round(res.details.bandUsed.highHz)} Hz` : "-"} (${res.details.bandsTried} tried)`
       );

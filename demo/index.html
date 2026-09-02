@@ -703,9 +703,12 @@
       const denom = sd / Math.sqrt(BITS_PER_CODEWORD) + 1e-3 * maxAbs + 1e-12;
       const z = mu / denom;
       const confidence = Math.min(1, Math.max(0, (z - Z_FLOOR) / (Z_FULL - Z_FLOOR)));
+      const ebN0 = mu > 0 && sd > 0 ? (mu / sd) ** 2 : 1e-4;
+      const ebN0Db = Number((10 * Math.log10(Math.max(1e-4, ebN0))).toFixed(2));
+      const sqnrDb = Number((10 * Math.log10(Math.max(1e-4, ebN0 * reps))).toFixed(2));
 
       if (!best || confidence > best.confidence) {
-        best = { soft, hard, decoded, correctedAt, mu, sd, z, confidence, ber: berCount / BITS_PER_CODEWORD, reps, shiftUsed: shift };
+        best = { soft, hard, decoded, correctedAt, mu, sd, z, confidence, ebN0Db, sqnrDb, ber: berCount / BITS_PER_CODEWORD, reps, shiftUsed: shift };
       }
     }
     return best;
@@ -738,6 +741,8 @@
       detected,
       confidence: winner.confidence,
       ber: winner.ber,
+      ebN0Db: winner.ebN0Db,
+      sqnrDb: winner.sqnrDb,
       recoveredPayloadId: winner.decoded.crcOk ? winner.decoded.id : null,
       crcOk: winner.decoded.crcOk,
       reps: winner.reps,
@@ -788,7 +793,7 @@
     return out;
   }
 
-  function encodeWavBlob(samples, sampleRate, channels, bitDepth = 16) {
+  function encodeWavArray(samples, sampleRate, channels, bitDepth = 16) {
     const bytesPerSample = bitDepth / 8;
     const frames = Math.floor(samples.length / channels);
     const dataLen = frames * channels * bytesPerSample;
@@ -824,7 +829,123 @@
         offset += 3;
       }
     }
-    return new Blob([buffer], { type: "audio/wav" });
+    return new Uint8Array(buffer);
+  }
+
+  function encodeWavBlob(samples, sampleRate, channels, bitDepth = 16) {
+    const arr = encodeWavArray(samples, sampleRate, channels, bitDepth);
+    return new Blob([arr], { type: "audio/wav" });
+  }
+
+  // --- DEDICATED WEB WORKER ENGINE (ZERO UI BLOCKING) ---
+  let dspWorkerInstance = null;
+  let dspReqCounter = 0;
+  const dspPendingReqs = new Map();
+
+  function getDspWorker() {
+    if (!dspWorkerInstance && typeof Worker !== "undefined") {
+      try {
+        const workerScript = `
+          \${hashSeed.toString()}
+          \${mix.toString()}
+          \${makeRng.toString()}
+          \${makeSymbolStream.toString()}
+          const hannCache = new Map();
+          \${hannWindow.toString()}
+          \${clampInt.toString()}
+          \${resolveBand.toString()}
+          \${bandList.toString()}
+          \${deriveGeometry.toString()}
+          \${buildTemplate.toString()}
+          \${crc16.toString()}
+          \${packCodeword.toString()}
+          \${unpackCodeword.toString()}
+          \${foldRepetitions.toString()}
+          \${scoreHypothesis.toString()}
+          \${detectWatermarkCore.toString()}
+          \${embedWatermarkCore.toString()}
+          \${encodeWavArray.toString()}
+
+          const DEFAULT_KEY = "aural-watermark-default-key";
+          const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
+          const BITS_PER_CODEWORD = 48;
+          const CHIPS_PER_SLOT = 24;
+          const PAYLOAD_BITS = 32;
+          const CRC_BITS = 16;
+          const Z_FLOOR = 3.0;
+          const Z_FULL = 30.0;
+          const MAX_AMPLITUDE = 0.12;
+          const MULTI_BAND_SCALE = 0.7;
+          const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
+          const BAND_PRESETS = Object.freeze({
+            high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+            mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
+          });
+
+          self.onmessage = function(e) {
+            const { id, action, pcm, fmt, opts } = e.data;
+            try {
+              if (action === "detect") {
+                const res = detectWatermarkCore(pcm, fmt, opts);
+                self.postMessage({ id, success: true, res });
+              } else if (action === "embed") {
+                const watermarked = embedWatermarkCore(pcm, fmt, opts);
+                const wavArr = encodeWavArray(watermarked, fmt.sampleRate, fmt.channels, 16);
+                self.postMessage({ id, success: true, wavArr }, [wavArr.buffer]);
+              }
+            } catch (err) {
+              self.postMessage({ id, success: false, error: err.message || String(err) });
+            }
+          };
+        `;
+        const blob = new Blob([workerScript], { type: "application/javascript" });
+        dspWorkerInstance = new Worker(URL.createObjectURL(blob));
+        dspWorkerInstance.onmessage = function(e) {
+          const { id, success, res, wavArr, error } = e.data;
+          const pending = dspPendingReqs.get(id);
+          if (pending) {
+            dspPendingReqs.delete(id);
+            if (success) pending.resolve({ res, wavArr });
+            else pending.reject(new Error(error));
+          }
+        };
+        dspWorkerInstance.onerror = function(err) {
+          console.warn("DSP Web Worker encountered an error, falling back to main thread:", err);
+        };
+      } catch (err) {
+        console.warn("Web Worker creation blocked, falling back to main thread:", err);
+        dspWorkerInstance = null;
+      }
+    }
+    return dspWorkerInstance;
+  }
+
+  async function asyncDetect(pcm, fmt, opts) {
+    const worker = getDspWorker();
+    if (worker) {
+      return new Promise((resolve, reject) => {
+        const id = ++dspReqCounter;
+        dspPendingReqs.set(id, { resolve: (val) => resolve(val.res), reject });
+        worker.postMessage({ id, action: "detect", pcm, fmt, opts }, [pcm.buffer]);
+      });
+    }
+    return detectWatermarkCore(pcm, fmt, opts);
+  }
+
+  async function asyncEmbed(pcm, fmt, opts) {
+    const worker = getDspWorker();
+    if (worker) {
+      return new Promise((resolve, reject) => {
+        const id = ++dspReqCounter;
+        dspPendingReqs.set(id, {
+          resolve: (val) => resolve(new Blob([val.wavArr], { type: "audio/wav" })),
+          reject
+        });
+        worker.postMessage({ id, action: "embed", pcm, fmt, opts }, [pcm.buffer]);
+      });
+    }
+    const watermarked = embedWatermarkCore(pcm, fmt, opts);
+    return encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16);
   }
 
   function parseWav(arrayBuffer) {
@@ -1023,8 +1144,10 @@
     const key = detectKeyInput.value.trim() || undefined;
 
     try {
+      detectBtn.textContent = "Decoding audio...";
       const { pcm, sampleRate, channels } = await decodeAudio(detectBuffer);
-      const result = detectWatermarkCore(pcm, { sampleRate, channels }, {
+      detectBtn.textContent = "Scanning frames (Worker)...";
+      const result = await asyncDetect(pcm, { sampleRate, channels }, {
         payloadId: expectedId,
         key,
         band: "auto",
@@ -1059,6 +1182,14 @@
       ? `#${r.recoveredPayloadId}`
       : (passed && expectedId !== undefined ? `#${expectedId}` : "None");
 
+    const ebn0Display = r.ebN0Db != null
+      ? (r.ebN0Db > -30 ? (r.ebN0Db > 0 ? "+" : "") + r.ebN0Db + " dB" : "< -30 dB")
+      : "—";
+
+    const sqnrDisplay = r.sqnrDb != null
+      ? (r.sqnrDb > -30 ? (r.sqnrDb > 0 ? "+" : "") + r.sqnrDb + " dB" : "< -30 dB")
+      : "—";
+
     detectResultBox.innerHTML = `
       <div class="box-header">
         <span>${statusText}</span>
@@ -1071,6 +1202,14 @@
             <td style="font-weight: 600;">${idVal}</td>
           </tr>
           <tr>
+            <td>Signal-to-Noise (Eb/N0)</td>
+            <td style="font-weight: 600; color: ${passed ? 'var(--cyan)' : 'inherit'};">${ebn0Display}</td>
+          </tr>
+          <tr>
+            <td>Quantization SNR (SQNR)</td>
+            <td>${sqnrDisplay}</td>
+          </tr>
+          <tr>
             <td>Bit Error Rate</td>
             <td>${(r.ber * 100).toFixed(1)}%</td>
           </tr>
@@ -1080,11 +1219,11 @@
           </tr>
           <tr>
             <td>Integrated Frames</td>
-            <td>${r.reps || 0} repetitions</td>
+            <td>${r.reps || 0} repetition(s)</td>
           </tr>
           <tr>
-            <td>CRC-16 Checksum</td>
-            <td>${r.crcOk ? "Valid" : "Invalid"}</td>
+            <td>CRC-16 Integrity</td>
+            <td>${r.crcOk ? "Valid Checksum" : "Failed Checksum"}</td>
           </tr>
         </tbody>
       </table>
@@ -1153,18 +1292,17 @@
     const band = embedBandSelect.value;
 
     embedBtn.disabled = true;
-    embedBtn.textContent = "Embedding watermark...";
+    embedBtn.textContent = "Embedding watermark (Worker)...";
 
     try {
       const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
-      const watermarked = embedWatermarkCore(pcm, { sampleRate, channels }, {
+      lastWavBlob = await asyncEmbed(pcm, { sampleRate, channels }, {
         payloadId,
         key,
         band,
         strength: 0.5,
       });
 
-      lastWavBlob = encodeWavBlob(watermarked, sampleRate, channels, 16);
       const url = URL.createObjectURL(lastWavBlob);
       embedOutputPlayer.src = url;
       embedBadgeId.textContent = `ID #${payloadId}`;
