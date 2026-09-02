@@ -770,6 +770,95 @@
     return { id: id >>> 0, crcOk: crcCalc === crcRx };
   }
 
+  function buildSyncPreamble({ key, sampleRate, geometry, band }) {
+    const { slotLen } = geometry;
+    const syncLen = slotLen;
+    const { lowHz, highHz } = resolveBand(band, sampleRate);
+    const chirpI = new Float64Array(syncLen);
+    const chirpQ = new Float64Array(syncLen);
+    const T = syncLen / sampleRate;
+    const phi0 = ((hashSeed(key + "|sync_chirp") % 1000) / 1000) * 2 * Math.PI;
+
+    for (let n = 0; n < syncLen; n++) {
+      const t = n / sampleRate;
+      const phase = phi0 + 2 * Math.PI * (lowHz * t + ((highHz - lowHz) / (2 * T)) * t * t);
+      const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / syncLen);
+      chirpI[n] = win * Math.cos(phase);
+      chirpQ[n] = win * Math.sin(phase);
+    }
+
+    let normSq = 0;
+    for (let n = 0; n < syncLen; n++) normSq += chirpQ[n] * chirpQ[n];
+    const norm = Math.sqrt(normSq) || 1.0;
+
+    return { chirpI, chirpQ, syncLen, norm };
+  }
+
+  function findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band) {
+    const { frameLen } = geometry;
+    const { chirpI, chirpQ, syncLen, norm } = buildSyncPreamble({ key, sampleRate, geometry, band });
+    const perChannel = Math.floor(pcm.length / channels);
+    const searchLen = Math.min(frameLen, perChannel - syncLen);
+    if (searchLen <= 0) return [];
+
+    const mono = new Float32Array(searchLen + syncLen);
+    for (let i = 0; i < searchLen + syncLen; i++) {
+      let sum = 0;
+      for (let ch = 0; ch < channels; ch++) sum += pcm[i * channels + ch];
+      mono[i] = sum / channels;
+    }
+
+    const stride = 8;
+    let maxEnvSq = -Infinity;
+    let coarseIdx = 0;
+
+    for (let i = 0; i < searchLen; i += stride) {
+      let dotI = 0, dotQ = 0;
+      for (let k = 0; k < syncLen; k++) {
+        const s = mono[i + k];
+        dotI += s * chirpI[k];
+        dotQ += s * chirpQ[k];
+      }
+      const envSq = dotI * dotI + dotQ * dotQ;
+      if (envSq > maxEnvSq) {
+        maxEnvSq = envSq;
+        coarseIdx = i;
+      }
+    }
+
+    let fineIdx = coarseIdx;
+    let fineMaxEnvSq = maxEnvSq;
+    const fineStart = Math.max(0, coarseIdx - stride * 2);
+    const fineEnd = Math.min(searchLen - 1, coarseIdx + stride * 2);
+
+    for (let i = fineStart; i <= fineEnd; i++) {
+      let dotI = 0, dotQ = 0;
+      for (let k = 0; k < syncLen; k++) {
+        const s = mono[i + k];
+        dotI += s * chirpI[k];
+        dotQ += s * chirpQ[k];
+      }
+      const envSq = dotI * dotI + dotQ * dotQ;
+      if (envSq > fineMaxEnvSq) {
+        fineMaxEnvSq = envSq;
+        fineIdx = i;
+      }
+    }
+
+    const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
+    if (envNorm > 0.01) {
+      const offsets = [];
+      for (let delta = -2; delta <= 2; delta++) {
+        const candidate = fineIdx + delta;
+        if (candidate >= 0 && candidate < frameLen) {
+          offsets.push({ shift: candidate, isSyncPreamble: true });
+        }
+      }
+      return offsets;
+    }
+    return [];
+  }
+
   function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
     const folded = new Float64Array(frameLen);
     let count = 0;
@@ -791,12 +880,18 @@
     const perChannel = Math.floor(pcm.length / channels);
     const geometry = deriveGeometry(sampleRate, perChannel);
     const { slotLen, frameLen } = geometry;
-    const maxShift = Math.floor(frameLen / 4);
+
     const candidates = [];
+    const preambleOffsets = findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band);
+    for (const c of preambleOffsets) {
+      candidates.push(c);
+    }
+
+    const maxShift = Math.floor(frameLen / 4);
     for (const f of RESYNC_FRACTIONS) {
       const shift = Math.round(f * frameLen);
       const clamped = Math.max(0, Math.min(maxShift, shift));
-      if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped });
+      if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped, isSyncPreamble: false });
     }
 
     let best = null;
@@ -876,8 +971,13 @@
       const ebN0Db = Number((10 * Math.log10(Math.max(1e-4, ebN0))).toFixed(2));
       const sqnrDb = Number((10 * Math.log10(Math.max(1e-4, ebN0 * reps))).toFixed(2));
 
-      if (!best || confidence > best.confidence) {
-        best = { soft, hard, decoded, correctedAt, mu, sd, z, confidence, ebN0Db, sqnrDb, ber: berCount / BITS_PER_CODEWORD, reps, shiftUsed: shift };
+      const isWinner =
+        !best ||
+        (decoded.crcOk && !best.decoded.crcOk) ||
+        (decoded.crcOk === best.decoded.crcOk && confidence > best.confidence);
+
+      if (isWinner) {
+        best = { soft, hard, decoded, correctedBits, mu, sd, z, confidence, ebN0Db, sqnrDb, ber: berCount / BITS_PER_CODEWORD, reps, shiftUsed: shift, isSyncPreamble: isSyncPreamble || false };
       }
     }
     return best;
@@ -893,9 +993,15 @@
 
     for (const band of bands) {
       const r = scoreHypothesis(pcm, fmt, { key, payloadId: opts.payloadId, sampleRate, band });
-      if (r && (!winner || r.confidence > winner.confidence)) {
-        winner = r;
-        winnerBand = band;
+      if (r) {
+        const isBandWinner =
+          !winner ||
+          (r.decoded.crcOk && !winner.decoded.crcOk) ||
+          (r.decoded.crcOk === winner.decoded.crcOk && r.confidence > winner.confidence);
+        if (isBandWinner) {
+          winner = r;
+          winnerBand = band;
+        }
       }
     }
 
@@ -916,6 +1022,7 @@
       crcOk: winner.decoded.crcOk,
       reps: winner.reps,
       bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}–${Math.round(winnerBand.highHz)} Hz)` : null,
+      syncMethod: winner.isSyncPreamble ? "preamble" : "fractional_grid",
     };
   }
 
@@ -943,6 +1050,12 @@
         for (let n = 0; n < slotLen; n++) {
           wm[off + n] += amp * s * template[off + n];
         }
+      }
+
+      // Embed deterministic stream synchronization preamble at frame boundary
+      const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+      for (let n = 0; n < syncLen; n++) {
+        wm[n] += amp * 0.5 * chirpQ[n];
       }
     }
 

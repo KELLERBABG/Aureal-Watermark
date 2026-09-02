@@ -6,6 +6,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { synthesizeSpeechLike } from "../src/synth.js";
 import { packCodeword, unpackCodeword } from "../src/payload.js";
+import { resamplePcm } from "../src/resample.js";
 
 const RATE = 48000;
 const ID = 0x1234abcd; // 305441741
@@ -181,4 +182,51 @@ test("2-bit soft-decision permutation sweep recovers corrupted codeword", () => 
   }
   assert.ok(repaired !== null, "2-bit sweep should find valid CRC");
   assert.equal(repaired.id, 883921);
+});
+
+test("resampling invariance recovers watermark across 48kHz -> 44.1kHz downsampling", () => {
+  const pcm48 = synthesizeSpeechLike({ seconds: 6, sampleRate: 48000, channels: 1, seed: "resample-test-48" });
+  const fmt48 = { sampleRate: 48000, channels: 1 };
+  const wm48 = embedWatermark(pcm48, fmt48, { payloadId: 771122, key: KEY });
+
+  // Resample to 44.1 kHz (e.g. streaming downsampling)
+  const pcm44 = resamplePcm(wm48, 1, 48000, 44100);
+  const fmt44 = { sampleRate: 44100, channels: 1 };
+
+  const res = detectWatermark(pcm44, fmt44, { expectedId: 771122, key: KEY });
+  assert.equal(res.detected, true, "Watermark should be detected despite resampling");
+  assert.equal(res.recoveredPayloadId, 771122);
+  assert.equal(res.resampled, true);
+  assert.equal(res.normalizedSampleRate, 48000);
+});
+
+test("resampling invariance recovers watermark across 44.1kHz -> 48kHz upsampling", () => {
+  const pcm44 = synthesizeSpeechLike({ seconds: 6, sampleRate: 44100, channels: 1, seed: "resample-test-44" });
+  const fmt44 = { sampleRate: 44100, channels: 1 };
+  const wm44 = embedWatermark(pcm44, fmt44, { payloadId: 334455, key: KEY });
+
+  // Resample to 48 kHz (e.g. broadcast upsampling)
+  const pcm48 = resamplePcm(wm44, 1, 44100, 48000);
+  const fmt48 = { sampleRate: 48000, channels: 1 };
+
+  const res = detectWatermark(pcm48, fmt48, { expectedId: 334455, key: KEY });
+  assert.equal(res.detected, true, "Watermark should be detected despite upsampling");
+  assert.equal(res.recoveredPayloadId, 334455);
+  assert.equal(res.resampled, true);
+  assert.equal(res.normalizedSampleRate, 44100);
+});
+
+test("stream synchronization preamble locks onto arbitrary crop offsets", () => {
+  const pcm = synthesizeSpeechLike({ seconds: 8, sampleRate: 44100, channels: 1, seed: "preamble-sync-test" });
+  const format = { sampleRate: 44100, channels: 1 };
+  const wm = embedWatermark(pcm, format, { payloadId: 998877, key: KEY });
+
+  // Arbitrary crop offset of 5,432 samples (~123ms), not on standard fractional grid
+  const cropOffset = 5432;
+  const cropped = wm.subarray(cropOffset);
+
+  const res = detectWatermark(cropped, format, { expectedId: 998877, key: KEY });
+  assert.equal(res.detected, true, "Watermark should be detected after arbitrary crop");
+  assert.equal(res.recoveredPayloadId, 998877);
+  assert.equal(res.details.syncMethod, "preamble", "Detection should lock via preamble sync");
 });

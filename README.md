@@ -4,7 +4,7 @@
 
 <br>
 
-[![Release](https://img.shields.io/badge/Release-v0.2.1-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
+[![Release](https://img.shields.io/badge/Release-v0.2.2-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
 [![Platform](https://img.shields.io/badge/Platform-Universal%20(.cjs)%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
@@ -43,7 +43,7 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
                                                                      │
                                                     (Sounds 100% identical to humans)
                                                                      │
-                                      Later: Someone uploads or leaks your file
+                                       Later: Someone uploads or leaks your file
                                                                      │
                                                                      ▼
                                                      [ Scan with Aureal Watermark ]
@@ -172,14 +172,15 @@ $$\text{Social Media Re-encode} \longrightarrow \text{Header Metadata Stripped} 
 
 | Transformation / Attack | Survives? | Engineering Notes |
 | :--- | :---: | :--- |
-| **MP3 Compression (128k / 320k)** | **YES** | Robust across 44 automated tests via `Dual` and `High` band presets. |
+| **MP3 Compression (128k / 320k)** | **YES** | Robust across automated test matrix via `Dual` and `High` band presets. |
 | **AAC / M4A Compression (128k)** | **YES** | Survives MDCT lossy psychoacoustic quantization with strong SNR margin. |
+| **Sample Rate Conversion (48k ↔ 44.1k)** | **YES** | Polyphase windowed-sinc resampler automatically normalizes sample rate on scan. |
+| **Arbitrary Cropping & Mid-Track Edits** | **YES** | IQ-envelope chirp matched filter locks onto frame boundaries in a single pass. |
 | **Volume Scaling & Normalization** | **YES** | Tolerates level shifts from $0.1\times$ to $5.0\times$ without phase disruption. |
 | **Hot Master Headroom Limiting** | **YES** | Built-in true-peak limiter ($\le 0.995$) prevents clipping on $0\text{ dBFS}$ loud masters. |
 | **Dynamic Silence Muting** | **YES** | Psychoacoustic masking automatically mutes carrier during quiet intros and pauses. |
 | **Multi-Bit Error Correction** | **YES** | Reliability-ordered 2-bit soft-decision permutation sweep repairs flipped bits. |
 | **Stereo to Mono Downmixing** | **YES** | Interleaved downmixing preserves carrier phase alignment. |
-| **Linear Time Offsets / Cropping** | **YES** | Fractional resync grid ($\pm 1/16, \pm 2/16, \pm 4/16$) absorbs start-offset shifts. |
 | **Additive Noise (−30 dBFS)** | **YES** | Spread-spectrum processing gain extracts signals below host noise floor. |
 | **Non-Linear Time-Stretching** | **NO** | $\pm 1\text{--}2\%$ DAW warp/stretch breaks chip phase coherence *(roadmap: chirp CSS)*. |
 | **Non-Linear Pitch-Shifting** | **NO** | Shifting pitch moves carriers outside the matched-filter frequency band. |

@@ -132,3 +132,29 @@ export function buildTemplate({ key, sampleRate, geometry, band }) {
   }
   return { template, slotNorms };
 }
+
+export const BARKER_7 = Object.freeze([1, 1, 1, -1, -1, 1, -1]);
+
+export function buildSyncPreamble({ key, sampleRate, geometry, band }) {
+  const { slotLen } = geometry;
+  const syncLen = slotLen;
+  const { lowHz, highHz } = resolveBand(band, sampleRate);
+  const chirpI = new Float64Array(syncLen);
+  const chirpQ = new Float64Array(syncLen);
+  const T = syncLen / sampleRate;
+  const phi0 = ((hashSeed(key + "|sync_chirp") % 1000) / 1000) * 2 * Math.PI;
+
+  for (let n = 0; n < syncLen; n++) {
+    const t = n / sampleRate;
+    const phase = phi0 + 2 * Math.PI * (lowHz * t + ((highHz - lowHz) / (2 * T)) * t * t);
+    const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / syncLen);
+    chirpI[n] = win * Math.cos(phase);
+    chirpQ[n] = win * Math.sin(phase);
+  }
+
+  let normSq = 0;
+  for (let n = 0; n < syncLen; n++) normSq += chirpQ[n] * chirpQ[n];
+  const norm = Math.sqrt(normSq) || 1.0;
+
+  return { chirpI, chirpQ, syncLen, norm };
+}

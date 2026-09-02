@@ -5,3 +5,4 @@ dist/
 sea-config.json
 *.log
 .env
+aureal-watermark.cjs

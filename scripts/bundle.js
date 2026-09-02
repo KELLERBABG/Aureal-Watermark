@@ -6,7 +6,7 @@ mkdirSync("dist", { recursive: true });
 
 function stripImportsAndExports(code) {
   return code
-    .replace(/^#!.*\n/, "")
+    .replace(/^#!.*(\r?\n)+/gm, "")
     .replace(/export\s+{[^}]+}\s+from\s+["'][^"']+["'];?/g, "")
     .replace(/import\s+{[^}]+}\s+from\s+["'][^"']+["'];?/g, "")
     .replace(/import\s+[^;]+from\s+["'][^"']+["'];?/g, "")
@@ -20,6 +20,7 @@ function stripImportsAndExports(code) {
 
 let signalCode = stripImportsAndExports(readFileSync("src/signal.js", "utf8"));
 let payloadCode = stripImportsAndExports(readFileSync("src/payload.js", "utf8"));
+let resampleCode = stripImportsAndExports(readFileSync("src/resample.js", "utf8"));
 let embedCode = stripImportsAndExports(readFileSync("src/embed.js", "utf8"));
 let detectCode = stripImportsAndExports(readFileSync("src/detect.js", "utf8"));
 let wavCode = stripImportsAndExports(readFileSync("src/wav.js", "utf8"));
@@ -58,9 +59,13 @@ const { readFile, writeFile } = fsp;
 const { existsSync, readFileSync, writeFileSync, mkdtempSync } = fs;
 const { tmpdir } = os;
 
+const DEFAULT_KEY = "aural-watermark-default-key";
+
 ${signalCode}
 
 ${payloadCode}
+
+${resampleCode}
 
 ${embedCode}
 

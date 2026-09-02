@@ -1,11 +1,13 @@
 import {
   deriveGeometry,
   buildTemplate,
+  buildSyncPreamble,
   bandList,
   BITS_PER_CODEWORD,
 } from "./signal.js";
 import { packCodeword, unpackCodeword, isValidPayloadId } from "./payload.js";
 import { validateFmt } from "./embed.js";
+import { resamplePcm } from "./resample.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
 const Z_FLOOR = 3.0;
@@ -32,22 +34,92 @@ function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
   return { folded, reps: count };
 }
 
+function findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band) {
+  const { frameLen } = geometry;
+  const { chirpI, chirpQ, syncLen, norm } = buildSyncPreamble({ key, sampleRate, geometry, band });
+  const perChannel = Math.floor(pcm.length / channels);
+  const searchLen = Math.min(frameLen, perChannel - syncLen);
+  if (searchLen <= 0) return [];
+
+  const mono = new Float32Array(searchLen + syncLen);
+  for (let i = 0; i < searchLen + syncLen; i++) {
+    let sum = 0;
+    for (let ch = 0; ch < channels; ch++) sum += pcm[i * channels + ch];
+    mono[i] = sum / channels;
+  }
+
+  const stride = 8;
+  let maxEnvSq = -Infinity;
+  let coarseIdx = 0;
+
+  for (let i = 0; i < searchLen; i += stride) {
+    let dotI = 0, dotQ = 0;
+    for (let k = 0; k < syncLen; k++) {
+      const s = mono[i + k];
+      dotI += s * chirpI[k];
+      dotQ += s * chirpQ[k];
+    }
+    const envSq = dotI * dotI + dotQ * dotQ;
+    if (envSq > maxEnvSq) {
+      maxEnvSq = envSq;
+      coarseIdx = i;
+    }
+  }
+
+  let fineIdx = coarseIdx;
+  let fineMaxEnvSq = maxEnvSq;
+  const fineStart = Math.max(0, coarseIdx - stride * 2);
+  const fineEnd = Math.min(searchLen - 1, coarseIdx + stride * 2);
+
+  for (let i = fineStart; i <= fineEnd; i++) {
+    let dotI = 0, dotQ = 0;
+    for (let k = 0; k < syncLen; k++) {
+      const s = mono[i + k];
+      dotI += s * chirpI[k];
+      dotQ += s * chirpQ[k];
+    }
+    const envSq = dotI * dotI + dotQ * dotQ;
+    if (envSq > fineMaxEnvSq) {
+      fineMaxEnvSq = envSq;
+      fineIdx = i;
+    }
+  }
+
+  const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
+  if (envNorm > 0.01) {
+    const offsets = [];
+    for (let delta = -2; delta <= 2; delta++) {
+      const candidate = fineIdx + delta;
+      if (candidate >= 0 && candidate < frameLen) {
+        offsets.push({ shift: candidate, isSyncPreamble: true });
+      }
+    }
+    return offsets;
+  }
+  return [];
+}
+
 function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
   const { channels } = fmt;
   const perChannel = Math.floor(pcm.length / channels);
   const geometry = deriveGeometry(sampleRate, perChannel);
   const { slotLen, frameLen } = geometry;
 
-  const maxShift = Math.floor(frameLen / 4);
   const candidates = [];
+  const preambleOffsets = findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band);
+  for (const c of preambleOffsets) {
+    candidates.push(c);
+  }
+
+  const maxShift = Math.floor(frameLen / 4);
   for (const f of RESYNC_FRACTIONS) {
     const shift = Math.round(f * frameLen);
     const clamped = Math.max(0, Math.min(maxShift, shift));
-    if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped });
+    if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped, isSyncPreamble: false });
   }
 
   let best = null;
-  for (const { shift } of candidates) {
+  for (const { shift, isSyncPreamble } of candidates) {
     const usable = perChannel - shift;
     const { folded, reps } = foldRepetitions(
       pcm,
@@ -139,7 +211,12 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
     const ebN0Db = Number((10 * Math.log10(Math.max(1e-4, ebN0))).toFixed(2));
     const sqnrDb = Number((10 * Math.log10(Math.max(1e-4, ebN0 * reps))).toFixed(2));
 
-    if (!best || confidence > best.confidence) {
+    const isWinner =
+      !best ||
+      (decoded.crcOk && !best.decoded.crcOk) ||
+      (decoded.crcOk === best.decoded.crcOk && confidence > best.confidence);
+
+    if (isWinner) {
       best = {
         soft,
         hard,
@@ -154,6 +231,7 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
         ber: berCount / BITS_PER_CODEWORD,
         reps,
         shiftUsed: shift,
+        isSyncPreamble: isSyncPreamble || false,
       };
     }
   }
@@ -177,9 +255,15 @@ export function detectWatermark(pcm, fmt, opts = {}) {
       sampleRate: validated.sampleRate,
       band,
     });
-    if (r && (!winner || r.confidence > winner.confidence)) {
-      winner = r;
-      winnerBand = band;
+    if (r) {
+      const isBandWinner =
+        !winner ||
+        (r.decoded.crcOk && !winner.decoded.crcOk) ||
+        (r.decoded.crcOk === winner.decoded.crcOk && r.confidence > winner.confidence);
+      if (isBandWinner) {
+        winner = r;
+        winnerBand = band;
+      }
     }
   }
 
@@ -191,6 +275,28 @@ export function detectWatermark(pcm, fmt, opts = {}) {
     opts.payloadId === undefined || winner.decoded.id === opts.payloadId;
   const detected =
     winner.decoded.crcOk && idMatches && winner.confidence >= 0.5 && winner.mu > 0;
+
+  // Resampling Invariance: If native detection fails, try canonical sample rates
+  if (!detected && opts.resample !== false) {
+    const candidateRates = [44100, 48000].filter((r) => r !== validated.sampleRate);
+    for (const targetRate of candidateRates) {
+      const perChannel = Math.floor(pcm.length / validated.channels);
+      if (perChannel < validated.sampleRate * 0.9) continue;
+
+      const resampledPcm = resamplePcm(pcm, validated.channels, validated.sampleRate, targetRate);
+      const resampledFmt = { ...validated, sampleRate: targetRate };
+      const subResult = detectWatermark(resampledPcm, resampledFmt, { ...opts, resample: false });
+      if (subResult.detected) {
+        subResult.resampled = true;
+        subResult.originalSampleRate = validated.sampleRate;
+        subResult.normalizedSampleRate = targetRate;
+        subResult.details.resampled = true;
+        subResult.details.originalSampleRate = validated.sampleRate;
+        subResult.details.normalizedSampleRate = targetRate;
+        return subResult;
+      }
+    }
+  }
 
   return {
     detected,
@@ -215,6 +321,7 @@ export function detectWatermark(pcm, fmt, opts = {}) {
       bandUsed: winnerBand,
       bandsTried: bands.length,
       resyncShiftSamples: winner.shiftUsed,
+      syncMethod: winner.isSyncPreamble ? "preamble" : "fractional_grid",
       sampleRate: validated.sampleRate,
       channels: validated.channels,
       perChannelSamples: Math.floor(pcm.length / validated.channels),

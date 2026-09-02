@@ -1,6 +1,7 @@
 import {
   deriveGeometry,
   buildTemplate,
+  buildSyncPreamble,
   bandList,
 } from "./signal.js";
 import { packCodeword } from "./payload.js";
@@ -39,6 +40,12 @@ export function embedWatermark(pcm, fmt, opts) {
       for (let n = 0; n < slotLen; n++) {
         wm[off + n] += amp * s * template[off + n];
       }
+    }
+
+    // Embed deterministic stream synchronization preamble at frame boundary
+    const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+    for (let n = 0; n < syncLen; n++) {
+      wm[n] += amp * 0.5 * chirpQ[n];
     }
   }
   for (let n = 0; n < frameLen; n++) peakDelta = Math.max(peakDelta, Math.abs(wm[n]));
