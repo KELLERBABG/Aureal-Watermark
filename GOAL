@@ -1,0 +1,94 @@
+# Action Plan: Launching Commercial Software Licensing (Side Business)
+
+This step-by-step operational plan outlines the legal, financial, and technical workflow for transitioning your local audio-watermarking project into a commercial dual-license model while completing vocational training in Germany.
+
+---
+
+## Overview & Architecture
+
+```
+[Customer / Studio]
+        │  Buys License ($249 - $12.5k)
+        ▼
+[Merchant of Record: Polar.sh / Lemon Squeezy]
+   ├── Collects payment (CC / Wire / PayPal)
+   ├── Handles international B2B sales tax & EU VAT
+   ├── Delivers binary / license key / repo access
+   └── Generates compliant invoice for buyer
+        │
+        │  Single monthly consolidation payout
+        ▼
+[Dedicated Business Bank Account (e.g. N26 Business / Finom)]
+        │
+        ▼
+[Finanzamt / Einnahmen-Überschuss-Rechnung (EÜR)]
+```
+
+---
+
+## Phase 1: Pre-Launch Clearance & Isolation (Before Public Links)
+
+### 1.1 Formal Employer Notification (*Nebentätigkeit*)
+* [ ] **Draft formal notice:** Write a clear, brief notice to your HR / management department.
+  * **Core activity:** Independent distribution of software licenses for audio signal processing algorithms.
+  * **Zero conflict of interest:** Explicitly highlight that digital audio processing does not compete with steel processing/distribution.
+  * **Time allocation:** State a weekly time budget of ≤ 8 hours, strictly outside regular training and school hours.
+  * **Resource isolation:** Clarify that all development, support, and infrastructure are maintained 100% on private personal hardware and accounts.
+* [ ] **Obtain written acknowledgment:** Store the confirmation in your private records.
+
+### 1.2 Digital Identity & Work Separation
+* [ ] Ensure the GitHub repository, git author email, and commits use personal credentials (no work emails or tooling).
+* [ ] Verify that no company hardware, network shares, or company internet connections were used in building the release binaries.
+
+---
+
+## Phase 2: Business & Tax Registration
+
+### 2.1 Trade Registration (*Gewerbeanmeldung*)
+* [ ] **Submit online:** Register through the Wirtschafts-Service-Portal.NRW or directly with your local municipal *Gewerbeamt*.
+  * **Field designation:** *Nebenerwerb* (part-time / secondary commercial activity).
+  * **Activity description:**  
+    > *„Entwicklung und digitaler Vertrieb von Standardsoftware und Softwarelizenzen im Nebenerwerb.“*
+  * **Registration fee:** Approx. €20 – €40 (one-time).
+
+### 2.2 Dedicated Bank Account Setup
+* [ ] **Keep Sparkasse Wiedenbrück private:** Do not direct commercial inflows to your personal Girokonto to prevent automated AGB audit flags.
+* [ ] **Open a zero-cost digital business account:**
+  * Open a free account (e.g., **N26 Business Standard** or **Finom Solo**).
+  * Receive a dedicated German IBAN exclusively for receiving payouts and paying for repo infrastructure/domains.
+
+### 2.3 Tax Questionnaire (*Fragebogen zur steuerlichen Erfassung*)
+* [ ] Once the Gewerbeamt registers your data, log into **ELSTER** to complete the questionnaire sent by the *Finanzamt*.
+* [ ] **VAT regime choice (*Kleinunternehmerregelung* vs. Standard):**
+  * *Option A: § 19 UStG (Kleinunternehmer):* Applicable if total revenue in Year 1 remains under €25,000. You do not collect VAT or file monthly *Umsatzsteuervoranmeldungen*.
+  * *Option B: Regelbesteuerung:* If landing early enterprise tiers ($2.9k+ or $12.5k/year) makes you anticipate exceeding €25,000 quickly, register for standard taxation immediately to avoid retroactively switching mid-year.
+
+---
+
+## Phase 3: Commercial Stack & Distribution Architecture
+
+### 3.1 Onboard a Merchant of Record (MoR)
+* [ ] Set up an account on **Polar.sh** (tailored for GitHub repos) or **Lemon Squeezy**.
+* [ ] Connect your dedicated business IBAN for monthly payouts.
+* [ ] Configure your four license tiers:
+  * **Indie Studio:** $249 perpetual
+  * **Promo Leak Suite:** $499 / seat
+  * **Audio Platform:** $2,900+ / year
+  * **Voice AI & Speech:** Custom / Usage-based ($0.01/min or $12.5k/yr)
+* [ ] Let the MoR manage cross-border sales tax remittance, reverse-charge validation, and automated binary delivery.
+
+### 3.2 Legal Pages on Repo & Landing Page
+* [ ] **Impressum:** Include your full legal name, valid contact address (or legally compliant virtual office address), and email address.
+* [ ] **Datenschutzerklärung:** State what telemetry/data is processed (if none, state that the software operates fully offline with no outbound analytics).
+* [ ] **Commercial EULA / Terms of Sale:**
+  * Define permitted seats, commercial redistribution restrictions, and offline activation terms.
+  * Include an explicit "AS IS" warranty disclaimer and limitation of liability for audio processing pipeline failures.
+
+---
+
+## Phase 4: Ongoing Maintenance & Record Keeping
+
+* [ ] **Single monthly booking:** Save the consolidated monthly payout statement and fee summary generated by the MoR.
+* [ ] **Expense tracking:** Keep invoices for domain renewals, external test suites, or tooling subscriptions.
+* [ ] **Annual Tax Filing:** File your annual tax return with **Anlage G** (*Gewerbebetrieb*) and **Anlage EÜR** (*Einnahmen-Überschuss-Rechnung*), submitting:
+  $$\text{Net Profit} = \text{Total MoR Payouts} - \text{Operational Expenses}$$
