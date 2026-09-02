@@ -63,3 +63,81 @@ Target Release: Production Drop / Public Release
 - [ ] Explicit Capability & Boundary Section in README
   - Task: Set clear operational parameters up front.
   - Fix: State explicitly in the main README that the engine is resilient to MP3/AAC compression down to 128 kbps, level shifts, and mono downmixing, but not non-linear DAW time-stretching or pitch-shifting[cite: 1, 2, 7].
+
+
+# Aureal Watermark — Commercialization Strategy & Execution Plan
+Operational Model: Low-Overhead B2B / High-Margin Side Asset
+
+---
+
+## 1. Value Proposition & Target Buyer Matrix
+
+| Buyer Segment | Core Pain Point | Product Configuration | Pricing Model (YOU CAN WEIGH IN ON THE PRICES ASWELL)|
+| :--- | :--- | :--- | :--- |
+| **Independent Labels & A&R Desks** | Pre-release album/single leaks via promo testers, DJs, and reviewers[cite: 1]. | Standalone batch leak tool + local verifier (`scripts/batch_distribute.js`)[cite: 1, 2]. | **$299 – $499** one-time / seat[cite: 1]. |
+| **B2B Audio / Beat Marketplaces** | Content disputes, unauthorized redistribution of preview stems[cite: 1]. | Headless Node.js backend integration (`aureal-watermark.cjs` export hook)[cite: 1, 2, 6]. | **$2,500 – $5,000 / yr** per platform instance[cite: 1]. |
+| **Voice Synthesis / AI Platforms** | EU AI Act Article 50 machine-readable synthetic voice compliance[cite: 7]. | Low-latency audio-layer watermarking (persistence through transcode). | **$0.005 – $0.02 / minute** processed, or **$15k / yr** flat SDK. |
+| **Audio Forensics & Legal Labs** | Proving ownership or chain-of-custody in audio theft disputes[cite: 1, 7]. | Browser-native, client-side offline forensic inspector (`demo/verifier.html`)[cite: 1, 2, 3]. | **$1,500** perpetual license + custom branding. |
+
+---
+
+## 2. Commercial Funnel Implementation
+
+- [ ] Transition from "Contact via GitHub" to Self-Serve Checkout
+  - Problem: Friction kills inbound side-project revenue; enterprise contact links scare off indie buyers[cite: 1].
+  - Execution: Integrate Stripe Payment Links / Gumroad directly into `README.md` and `demo/index.html`[cite: 1].
+  - Tiers:
+    - *Creator / Studio License ($299)*: Unrestricted commercial usage for personal releases, client deliverables, and promo leak generation[cite: 1].
+    - *Platform / SaaS Integration ($2,500/yr)*: Rights to distribute or bundle the engine within SaaS render loops or cloud audio APIs[cite: 1, 6].
+
+- [ ] Software License Key System
+  - Task: Implement a lightweight `--license-key <TOKEN>` check in `bin/auralwatermark.js` and Web Studio[cite: 2].
+  - Mechanism: Use a basic ed25519-signed offline JWT/payload (e.g., verifying `licensee_id` and `expiry`) so clients can run strictly air-gapped without connecting to a license server[cite: 1, 2].
+
+- [ ] Web Studio In-App Conversion Banner
+  - Placement: Positioned directly above the WAV export button in `demo/index.html`[cite: 1].
+  - Copy: *"Commercial release or streaming platform? Secure your commercial production license & SLA."*[cite: 1]
+
+---
+
+## 3. Product Packaging: The "Promo Leak" Workflow
+
+- [ ] Release the "Promo Distributor" Preset
+  - Problem: Users understand "leak tracking" faster than abstract DSSS carrier concepts[cite: 1].
+  - Task: Ship `scripts/batch_distribute.js` out-of-the-box[cite: 1]:
+    ```bash
+    node scripts/batch_distribute.js album_master.wav --recipients "DJ_Snake,BBC_Radio1,Mixmag"
+    ```
+  - Output: Outputs uniquely tagged `.wav` files and auto-generates a secure `leak_manifest.json` mapping recipient names to uint32 IDs[cite: 1, 4].
+
+- [ ] Provide One-Click Forensic Audit Script
+  - Task: Provide `scripts/audit_leak.js`[cite: 1]:
+    ```bash
+    node scripts/audit_leak.js leaked_file.mp3 --manifest leak_manifest.json
+    ```
+  - Output: Immediately outputs the responsible recipient name, bit error rate (BER), and statistical confidence[cite: 1, 2, 4].
+
+---
+
+## 4. Regulatory & Enterprise Positioning (EU AI Act & C2PA Bridge)
+
+- [ ] Position as "Persistent Metadata Protection"
+  - Technical Hook: Standard C2PA Content Credentials metadata (`id3`, RIFF metadata chunks) is completely stripped by social media platforms and message apps[cite: 2].
+  - Value Proposition: Aureal's 32-bit payload ID can act as a pointer/lookup key to a centralized or distributed C2PA provenance manifest[cite: 4, 7].
+  - Marketing Line: *"The watermark that keeps C2PA Content Credentials alive across social media re-encodes."*[cite: 1]
+
+- [ ] B2B Outreach Target List (Voice AI Startups)
+  - Target Profile: Seed-to-Series B text-to-speech (TTS), AI podcasting, and voice-cloning startups needing immediate compliance with EU AI Act Article 50 machine-readable requirements[cite: 7].
+  - Pitch: *"Zero dependencies, runs natively in standard Node.js without native build bindings, <1s per asset, undetectable to listeners."*[cite: 1, 2]
+
+---
+
+## 5. Intellectual Property & Brand Protection
+
+- [ ] Dual-Licensing Enforcement
+  - License: Keep PolyForm Noncommercial 1.0.0 in the public repository[cite: 1, 3, 7].
+  - Protection: Clearly define commercial exclusions (commercial music releases, paywalled content, SaaS pipelines)[cite: 1, 7].
+  - Contact: Provide a dedicated commercial contact channel (`licensing@aurealwatermark.com` or custom domain) rather than personal GitHub issues[cite: 1].
+
+- [ ] Trademark & Documentation Sanitization
+  - Ensure consistent branding across `README.md`, `WHITEPAPER.md`, and `package.json` (unifying any legacy naming like "Aural" vs. "Aureal")[cite: 1, 2, 3].
