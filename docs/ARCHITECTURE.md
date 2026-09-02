@@ -27,7 +27,7 @@ src/
     aural-watermark-verify.js   verifyWav(arrayBuffer, expectedId, key, opts)
                                 DataView RIFF parser, PCM 8/16/24/32-int + float32
 demo/
-  index.html / verifier.html   offline browser studio & verifier (pure client-side)
+  studio.html / verifier.html  offline browser studio & verifier (pure client-side)
 docs/
   CODEBASE_WIKI.md             detailed file-by-file functions and algorithm reference
 test/

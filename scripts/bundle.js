@@ -34,8 +34,12 @@ wavCode = wavCode.replace(/const\s+{\s*readFile\s*}\s*=\s*await import\("node:fs
 wavCode = wavCode.replace(/const\s+{\s*writeFile\s*}\s*=\s*await import\("node:fs\/promises"\);/g, "const { writeFile } = fsp;");
 
 // Embed complete HTML inside getStudioHtml() and getPricingHtml()
-const rawStudioHtml = JSON.stringify(readFileSync("index.html", "utf8"));
+const rawStudioHtml = JSON.stringify(readFileSync("studio.html", "utf8"));
 const rawPricingHtml = JSON.stringify(readFileSync("pricing.html", "utf8"));
+const rawIconIcoBase64 = JSON.stringify(readFileSync("assets/icon.ico").toString("base64"));
+const rawIconPngBase64 = JSON.stringify(readFileSync("assets/icon.png").toString("base64"));
+const rawFaviconSvgBase64 = JSON.stringify(readFileSync("assets/favicon.svg").toString("base64"));
+
 cliCode = cliCode.replace(
   /function getStudioHtml\(\)\s*{[\s\S]*?return `[\s\S]*?`;\s*}/,
   `function getStudioHtml() { return ${rawStudioHtml}; }`
@@ -43,6 +47,25 @@ cliCode = cliCode.replace(
 cliCode = cliCode.replace(
   /function getPricingHtml\(\)\s*{[\s\S]*?return "";\s*}/,
   `function getPricingHtml() { return ${rawPricingHtml}; }`
+);
+cliCode = cliCode.replace(
+  /function writeEmbeddedIcons\(targetDir\)\s*{[\s\S]*?^}/m,
+  `function writeEmbeddedIcons(targetDir) {
+  try {
+    const icoBuf = Buffer.from(${rawIconIcoBase64}, "base64");
+    const pngBuf = Buffer.from(${rawIconPngBase64}, "base64");
+    const svgBuf = Buffer.from(${rawFaviconSvgBase64}, "base64");
+    writeFileSync(join(targetDir, "favicon.ico"), icoBuf);
+    writeFileSync(join(targetDir, "icon.png"), pngBuf);
+    writeFileSync(join(targetDir, "favicon.svg"), svgBuf);
+    const assetsDir = join(targetDir, "assets");
+    if (!existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
+    writeFileSync(join(assetsDir, "icon.ico"), icoBuf);
+    writeFileSync(join(assetsDir, "icon.png"), pngBuf);
+    writeFileSync(join(assetsDir, "favicon.svg"), svgBuf);
+    writeFileSync(join(assetsDir, "logo.svg"), svgBuf);
+  } catch {}
+}`
 );
 
 const cjsBundle = `#!/usr/bin/env node
@@ -56,7 +79,7 @@ const { join, dirname } = require("node:path");
 
 const { argv, exit, stdin, stdout } = process;
 const { readFile, writeFile } = fsp;
-const { existsSync, readFileSync, writeFileSync, mkdtempSync } = fs;
+const { existsSync, readFileSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync } = fs;
 const { tmpdir } = os;
 
 const DEFAULT_KEY = "aural-watermark-default-key";

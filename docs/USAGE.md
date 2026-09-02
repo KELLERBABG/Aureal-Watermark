@@ -52,7 +52,7 @@ Synthesizes speech-like audio with harmonic formants and amplitude envelope for 
 
 ## 3. Web Studio & Offline Browser Verifier
 
-Open `demo/index.html` or `demo/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
+Open `studio.html` or `demo/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
 
 * **Verify Audio Tab:** Select or drop any audio file (MP3, WAV, AAC, M4A, OGG, FLAC) to extract or verify the provenance payload.
 * **Embed Watermark Tab:** Select a source audio file, enter a 32-bit ID, choose the frequency band, and export the watermarked audio.

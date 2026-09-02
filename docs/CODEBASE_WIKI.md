@@ -20,8 +20,10 @@ Aureal-Watermark/
 │   ├── synth.js                    # Deterministic harmonic speech-like audio synthesizer
 │   └── browser/
 │       └── aural-watermark-verify.js # Browser-native AudioBuffer & DataView verifier
+├── studio.html                     # Interactive Studio Web UI (Pure client-side offline app)
+├── pricing.html                    # Commercial Licensing Matrix & Tier Specifications
 ├── demo/
-│   ├── index.html                  # Interactive Studio Web UI (Mirror)
+│   ├── studio.html                 # Interactive Studio Web UI (Mirror)
 │   └── verifier.html               # Dual-tab Embed & Verify Studio (Runs offline over file://)
 ├── docs/
 │   ├── CODEBASE_WIKI.md            # (This file) Complete codebase reference
@@ -167,7 +169,7 @@ Aureal-Watermark/
 
 ---
 
-### `demo/verifier.html` & `demo/index.html`
+### `studio.html` & `demo/verifier.html`
 * **Role:** Interactive Web Studio & Offline Verification Application.
 * **Architecture:**
   * 100% self-contained single-page application with inlined CSS, HTML5 Web Audio API decoding, and inlined DSP detection/embedding engines.

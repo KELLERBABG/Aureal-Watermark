@@ -3,7 +3,7 @@
 
 import { argv, exit } from "node:process";
 import { spawn, exec } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -76,9 +76,10 @@ function die(msg, code = 2) {
 function getStudioHtml() {
   const candidates = [
     join(process.cwd(), "studio.html"),
+    join(process.cwd(), "demo", "studio.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "studio.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "studio.html"),
     join(process.cwd(), "index.html"),
-    join(process.cwd(), "demo", "index.html"),
-    join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "index.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "index.html"),
   ];
 
@@ -106,6 +107,35 @@ function getPricingHtml() {
   }
 
   return "";
+}
+
+function writeEmbeddedIcons(targetDir) {
+  const assetsDir = join(targetDir, "assets");
+  if (!existsSync(assetsDir)) {
+    try { mkdirSync(assetsDir, { recursive: true }); } catch {}
+  }
+  const candidates = [
+    join(process.cwd(), "assets"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "assets")
+  ];
+  for (const c of candidates) {
+    if (existsSync(join(c, "icon.ico"))) {
+      try {
+        copyFileSync(join(c, "icon.ico"), join(targetDir, "favicon.ico"));
+        copyFileSync(join(c, "icon.ico"), join(assetsDir, "icon.ico"));
+        if (existsSync(join(c, "icon.png"))) {
+          copyFileSync(join(c, "icon.png"), join(targetDir, "icon.png"));
+          copyFileSync(join(c, "icon.png"), join(assetsDir, "icon.png"));
+        }
+        if (existsSync(join(c, "favicon.svg"))) {
+          copyFileSync(join(c, "favicon.svg"), join(targetDir, "favicon.svg"));
+          copyFileSync(join(c, "favicon.svg"), join(assetsDir, "favicon.svg"));
+          copyFileSync(join(c, "favicon.svg"), join(assetsDir, "logo.svg"));
+        }
+        break;
+      } catch {}
+    }
+  }
 }
 
 function findAppRuntime() {
@@ -139,13 +169,17 @@ function findAppRuntime() {
 function launchDesktopApp() {
   const html = getStudioHtml();
   const pricingHtml = getPricingHtml();
-  const localFile = join(tmpdir(), "aureal-watermark-studio.html");
+  const localFile = join(tmpdir(), "studio.html");
+  const localStudioAlias = join(tmpdir(), "aureal-watermark-studio.html");
   const localPricingFile = join(tmpdir(), "pricing.html");
+
   writeFileSync(localFile, html, "utf8");
+  writeFileSync(localStudioAlias, html, "utf8");
   if (pricingHtml) writeFileSync(localPricingFile, pricingHtml, "utf8");
+  writeEmbeddedIcons(tmpdir());
 
   // Format file:/// URL properly with forward slashes
-  const fileUrl = "file:///" + localFile.split("\\").join("/");
+  const fileUrl = "file:///" + localFile.replace(/\\/g, "/");
   const runtime = findAppRuntime();
 
   console.log(`\n========================================================`);
@@ -154,11 +188,15 @@ function launchDesktopApp() {
   console.log(`Launching standalone Desktop Studio...\n`);
 
   if (runtime && runtime.bin) {
+    const profileDir = join(tmpdir(), "aureal-watermark-profile");
     const appArgs = [
       `--app=${fileUrl}`,
-      `--window-size=1180,820`,
+      `--window-size=1180,840`,
+      `--user-data-dir=${profileDir}`,
       `--app-id=aureal-watermark-studio`,
+      `--class=aureal-watermark-studio`,
       `--no-first-run`,
+      `--no-default-browser-check`,
     ];
 
     try {
