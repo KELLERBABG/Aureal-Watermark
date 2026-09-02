@@ -7,11 +7,11 @@
 [![Release](https://img.shields.io/badge/Release-v0.2.1-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
-[![Platform](https://img.shields.io/badge/Platform-Desktop%20App%20%7C%20CLI%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
+[![Platform](https://img.shields.io/badge/Platform-Universal%20(.cjs)%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://kellerbabg.github.io/Aureal-Watermark/)
 
 <br>
 
-[**Open Web Studio**](https://kellerbabg.github.io/Aureal-Watermark/) &bull; [**Download Desktop App (.exe)**](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest) &bull; [**Technical Deep Dive**](docs/TECHNICAL_SPECIFICATIONS.md) &bull; [**Code Wiki**](docs/CODEBASE_WIKI.md)
+[**Open Web Studio**](https://kellerbabg.github.io/Aureal-Watermark/) &bull; [**Download Universal (.cjs)**](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest) &bull; [**Technical Deep Dive**](docs/TECHNICAL_SPECIFICATIONS.md) &bull; [**Code Wiki**](docs/CODEBASE_WIKI.md)
 
 </div>
 
@@ -61,56 +61,40 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
 
 ## 3 Easy Ways to Use It
 
-### Option 1: Desktop App (Easiest)
+### Option 1: Web Studio (Easiest — In Your Browser)
 
 No installation or technical setup needed:
 
-1. Download **[`aureal-watermark-windows-x64.exe`](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)** from the Releases page.
-2. Double-click to open your personal offline desktop studio window.
-3. Drag and drop your audio file to protect or verify it instantly.
-
----
-
-### Option 2: Web Studio (In Your Browser)
-
-You can run the full studio directly in your web browser:
-
 👉 **[Launch Interactive Web Studio](https://kellerbabg.github.io/Aureal-Watermark/)**
 
-*(Works 100% client-side in browser memory. Nothing ever leaves your device).*
+*(Runs 100% client-side in browser memory. Nothing ever leaves your device).*
 
 ---
 
-### Option 3: Command Line (For Developers & Automated Servers)
+### Option 2: Universal Standalone Script (`aureal-watermark.cjs`)
 
-Run directly from PowerShell, Terminal, or server scripts:
+A single, zero-dependency file that runs on **Windows, macOS, and Linux** using standard Node.js (&ge; 18):
 
-```powershell
-# 1. Embed an ID number into a song
-.\aureal-watermark.exe embed master.wav protected.wav --id 883921
-
-# 2. Check an audio file to see if it contains your ID
-.\aureal-watermark.exe detect protected.wav --id 883921
-
-# 3. Blind scan (automatically finds any embedded ID in an unknown file)
-.\aureal-watermark.exe detect mystery_audio.wav --json
-```
-
-Or using Node.js:
+1. Download **[`aureal-watermark.cjs`](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest/download/aureal-watermark.cjs)** from the Releases page.
+2. Run from your terminal or command prompt:
 
 ```bash
-# Clone the repository
-git clone https://github.com/KELLERBABG/Aureal-Watermark.git
-cd Aureal-Watermark
+# 1. Embed an ID number into a song
+node aureal-watermark.cjs embed master.wav protected.wav --id 883921
 
-# Embed and scan
-node bin/auralwatermark.js embed input.wav output.wav --id 883921
-node bin/auralwatermark.js detect output.wav --id 883921
+# 2. Check an audio file to see if it contains your ID
+node aureal-watermark.cjs detect protected.wav --id 883921
+
+# 3. Blind scan (automatically extracts any embedded ID from an unknown file)
+node aureal-watermark.cjs detect mystery_audio.wav --json
+
+# 4. Launch your local offline Web Studio
+node aureal-watermark.cjs studio
 ```
 
 ---
 
-## JavaScript / Node.js API
+### Option 3: JavaScript / Node.js API (For Developers & Backends)
 
 Integrate protection directly into your own apps and export pipelines:
 
