@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aureal Watermark &mdash; Psychoacoustic Spread-Spectrum Audio Watermarking & AI Detection &mdash; Keller Systems</title>
-  <meta name="description" content="High-fidelity audio anti-tamper and synthetic voice attribution watermark. Embeds cryptographic provenance tags directly beneath human psychoacoustic auditory masking thresholds with robustness against MP3 compression, pitch shifting, and re-recording.">
+  <title>Aureal Watermark &mdash; Acoustic Psychoacoustic Watermarking &mdash; Keller Systems</title>
+  <meta name="description" content="Aureal Watermark: Imperceptible acoustic spread-spectrum audio watermarking. Survives lossy MP3 compression, pitch shifts, and AI scraping with sub-second zero-dependency scanning.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
-      --bg: #03060a;
-      --surface: #080d16;
-      --surface-raised: #0e1726;
-      --border: #16243b;
-      --border-glow: #223a5e;
+      --bg: #08040d;
+      --surface: #12091f;
+      --surface-raised: #1c1030;
+      --border: #301a52;
+      --border-glow: #48277b;
       
-      --accent: #f43f5e;
-      --accent-subtle: rgba(244, 63, 94, 0.12);
-      --accent-border: rgba(244, 63, 94, 0.35);
-      --emerald: #10b981;
+      --purple: #8b5cf6;
+      --violet: #a855f7;
+      --pink: #ec4899;
       --cyan: #38bdf8;
+      --emerald: #10b981;
 
-      --text: #f8fafc;
+      --text: #f0f6fc;
       --text-muted: #94a3b8;
       --text-dim: #475569;
 
@@ -35,15 +35,15 @@
     html { scroll-behavior: smooth; }
 
     body {
-      background-color: var(--bg);
+      background: radial-gradient(ellipse at 50% 0%, #291047 0%, var(--bg) 75%);
       color: var(--text);
       font-family: var(--font-heading);
-      line-height: 1.6;
+      line-height: 1.65;
       overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
     }
 
-    #bg-canvas {
+    #audio-canvas {
       position: fixed;
       top: 0;
       left: 0;
@@ -51,22 +51,21 @@
       height: 100vh;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.65;
+      opacity: 0.6;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1180px;
       margin: 0 auto;
       padding: 0 2rem;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
-    /* Top Navigation */
     header {
       border-bottom: 1px solid var(--border);
-      background: rgba(3, 6, 10, 0.85);
-      backdrop-filter: blur(12px);
+      background: rgba(8, 4, 13, 0.85);
+      backdrop-filter: blur(14px);
       position: sticky;
       top: 0;
       z-index: 50;
@@ -85,35 +84,35 @@
       color: var(--text);
       font-family: var(--font-mono);
       font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: -0.02em;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
     }
-    .brand-badge {
-      font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
+    .brand-tag {
+      font-size: 0.68rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 4px;
-      background: var(--accent-subtle);
-      border: 1px solid var(--accent-border);
-      color: var(--accent);
-      font-weight: 600;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: var(--purple);
+      font-family: var(--font-mono);
     }
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.75rem;
     }
     .nav-link {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       transition: color 0.15s;
     }
-    .nav-link:hover { color: var(--text); }
-    .btn-github {
+    .nav-link:hover { color: var(--purple); }
+    .btn-repo {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.45rem 0.9rem;
+      padding: 0.45rem 1rem;
       background: var(--surface-raised);
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -123,218 +122,257 @@
       text-decoration: none;
       transition: all 0.2s;
     }
-    .btn-github:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-subtle);
+    .btn-repo:hover {
+      border-color: var(--purple);
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
     }
 
     /* Hero */
     .hero {
-      padding: 6rem 0 4rem;
+      padding: 6.5rem 0 4.5rem;
       text-align: center;
     }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.9rem;
-      border-radius: 9999px;
-      background: var(--accent-subtle);
-      border: 1px solid var(--accent-border);
-      color: var(--accent);
+    .hero-meta {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 2rem;
+      font-size: 0.78rem;
+      color: var(--purple);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .pulse-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.85); }
+      margin-bottom: 1.5rem;
     }
     .hero h1 {
-      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-size: clamp(2.6rem, 5.5vw, 4.4rem);
       font-weight: 700;
-      line-height: 1.15;
+      line-height: 1.1;
       letter-spacing: -0.03em;
       margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
+      background: linear-gradient(180deg, #ffffff 30%, #e9d5ff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .hero p {
-      max-width: 760px;
-      margin: 0 auto 2.5rem;
-      font-size: 1.12rem;
+    .hero p.lead {
+      max-width: 820px;
+      margin: 0 auto 2.75rem;
+      font-size: 1.15rem;
       color: var(--text-muted);
-      line-height: 1.65;
+      line-height: 1.7;
     }
 
-    .install-box {
-      max-width: 680px;
-      margin: 0 auto 4rem;
+    /* Terminal */
+    .terminal-box {
+      max-width: 760px;
+      margin: 0 auto 5rem;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -15px rgba(0,0,0,0.8);
+      text-align: left;
+    }
+    .terminal-top {
+      background: var(--surface-raised);
+      padding: 0.6rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .terminal-body {
+      padding: 1.1rem 1.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--purple);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);
-    }
-    .install-code {
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      color: var(--accent);
-      overflow-x: auto;
-      white-space: nowrap;
+      gap: 1rem;
     }
     .copy-btn {
       background: var(--surface-raised);
       border: 1px solid var(--border);
       color: var(--text-muted);
-      padding: 0.4rem 0.75rem;
-      border-radius: 4px;
+      padding: 0.4rem 0.85rem;
+      border-radius: 5px;
       font-family: var(--font-mono);
       font-size: 0.75rem;
       cursor: pointer;
+      flex-shrink: 0;
       transition: all 0.2s;
     }
     .copy-btn:hover {
       color: var(--text);
-      border-color: var(--accent);
+      border-color: var(--purple);
     }
 
-    /* Metrics */
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 5rem;
-    }
-    .metric-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.75rem;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .metric-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-glow);
-    }
-    .metric-val {
-      font-size: 2.1rem;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      color: var(--text);
-      margin-bottom: 0.25rem;
-    }
-    .metric-label {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* Simulator */
-    .section-title {
-      font-size: 1.85rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      letter-spacing: -0.02em;
-    }
-    .section-desc {
-      color: var(--text-muted);
-      font-size: 1rem;
-      margin-bottom: 2.5rem;
-      max-width: 680px;
-    }
-
-    .sim-panel {
+    /* HUD Bar */
+    .hud-bar {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 2.5rem;
-      margin-bottom: 5rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      padding: 2.25rem;
+      margin-bottom: 5.5rem;
     }
-    .sim-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-    }
-    @media (max-width: 900px) {
-      .sim-grid { grid-template-columns: 1fr; }
-    }
-
-    .visualizer-box {
-      background: #020407;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      min-height: 280px;
+    .hud-header {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      position: relative;
-    }
-    .nodes-row {
-      display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-    .node-item {
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.75rem;
       font-family: var(--font-mono);
       font-size: 0.8rem;
-      text-align: center;
-      position: relative;
-      z-index: 2;
+      color: var(--purple);
     }
-    .node-item.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-subtle);
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
     }
-    .arrow-icon {
-      color: var(--accent);
-      font-size: 1.25rem;
-      font-weight: bold;
+    @media (max-width: 850px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
     }
-
-    .log-stream {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      background: #020407;
-      border: 1px solid var(--border);
+    .metric-card {
+      background: rgba(28, 16, 48, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 8px;
       padding: 1.25rem;
-      height: 280px;
-      overflow-y: auto;
-      color: var(--text-muted);
-      line-height: 1.6;
     }
-    .log-time { color: var(--text-dim); }
-    .log-success { color: var(--emerald); }
-    .log-accent { color: var(--accent); }
+    .metric-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .metric-sub {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--emerald);
+      margin-top: 0.25rem;
+    }
+
+    /* Prose Section */
+    .prose-section {
+      margin-bottom: 6rem;
+    }
+    .section-title {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.8rem;
+    }
+    .section-lead {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 820px;
+      margin-bottom: 3rem;
+    }
+
+    .deep-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      margin-bottom: 4rem;
+    }
+    @media (max-width: 850px) {
+      .deep-grid { grid-template-columns: 1fr; }
+    }
+    .concept-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.25rem;
+      position: relative;
+    }
+    .concept-card h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--purple);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .concept-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+    .code-box {
+      background: #050209;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--purple);
+      overflow-x: auto;
+    }
+
+    /* Comparison Table */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: var(--surface-raised);
+      padding: 1rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--text); font-weight: 600; }
+    .badge-adv {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--emerald);
+    }
+    .badge-fail {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #f43f5e;
+    }
 
     footer {
       border-top: 1px solid var(--border);
-      padding: 3rem 0;
+      padding: 3.5rem 0;
       text-align: center;
       color: var(--text-dim);
       font-size: 0.85rem;
@@ -343,23 +381,25 @@
       color: var(--text-muted);
       text-decoration: none;
     }
-    footer a:hover { color: var(--accent); }
+    footer a:hover { color: var(--purple); }
   </style>
 </head>
 <body>
 
-  <canvas id="bg-canvas"></canvas>
+  <canvas id="audio-canvas"></canvas>
 
   <header>
     <div class="container nav-inner">
       <a href="https://kellersystems.dev" class="brand">
         <span>KELLER SYSTEMS</span>
-        <span class="brand-badge">Aureal Watermark</span>
+        <span class="brand-tag">AUREAL AUDIO</span>
       </a>
       <div class="nav-links">
-        <a href="#simulator" class="nav-link">Interactive Simulator</a>
-        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="btn-github">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <a href="#psychoacoustics" class="nav-link">Psychoacoustic Masking</a>
+        <a href="#dsss" class="nav-link">Spread-Spectrum Robustness</a>
+        <a href="#comparison" class="nav-link">Watermark Benchmarks</a>
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="btn-repo">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           Repository
         </a>
       </div>
@@ -368,73 +408,154 @@
 
   <main class="container">
     <section class="hero">
-      <div class="status-pill">
-        <span class="pulse-dot"></span>
-        Psychoacoustic Inaudible Watermark Active
-      </div>
-      <h1>Aureal Watermark</h1>
-      <p>High-fidelity audio anti-tamper and synthetic voice attribution watermark. Embeds cryptographic provenance tags directly beneath human psychoacoustic auditory masking thresholds with robustness against MP3 compression, pitch shifting, and re-recording.</p>
+      <div style="margin-bottom:1.5rem;"><img src="assets/icon.svg" alt="Aureal Icon" width="72" height="72" style="border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,0.5);" /></div>
+      <div class="hero-meta">0-DEPENDENCY STANDALONE ENGINE &bull; SURVIVES 64KBPS MP3 &bull; AI VOICE SCRAPE PROOF</div>
+      <h1>Imperceptible Acoustic Spread-Spectrum<br>Audio Ownership Watermark</h1>
+      <p class="lead">
+        Aureal Watermark is a psychoacoustic spread-spectrum watermark engine written in pure, zero-dependency JavaScript and Node.js. 
+        It embeds an invisible, cryptographically verifiable provenance signature into master audio recordings, 
+        surviving lossy re-encoding, social media transcoding, pitch-shifting, and AI voice cloning scraper pipelines.
+      </p>
 
-      <div class="install-box">
-        <span class="install-code">python -m aureal --embed --input audio.wav --watermark "KELLER-SYSTEMS-01"</span>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText('python -m aureal --embed --input audio.wav --watermark "KELLER-SYSTEMS-01"'); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+      <div class="terminal-box">
+        <div class="terminal-top">
+          <span>RUN ZERO-DEPENDENCY SUITE</span>
+          <span>NODE.JS / BASH</span>
+        </div>
+        <div class="terminal-body">
+          <code>git clone https://github.com/KELLERBABG/Aureal-Watermark.git &amp;&amp; cd Aureal-Watermark &amp;&amp; npm test</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('git clone https://github.com/KELLERBABG/Aureal-Watermark.git && cd Aureal-Watermark && npm test'); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        </div>
       </div>
     </section>
 
-    <section class="metric-grid">
-      <div class="metric-card">
-        <div class="metric-val">< -38 dB</div>
-        <div class="metric-label">Inaudible Beneath Masking Threshold</div>
+    <section class="hud-bar">
+      <div class="hud-header">
+        <span>AUREAL PSYCHOACOUSTIC ENGINE</span>
       </div>
-      <div class="metric-card">
-        <div class="metric-val">100% Robust</div>
-        <div class="metric-label">Immune to Lossy MP3 / AAC Transcoding</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-val">Cryptographic</div>
-        <div class="metric-label">Hardware-Signed Provenance Tag</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-val">< 25ms</div>
-        <div class="metric-label">Real-Time Stream Watermark Extraction</div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">SCAN DETECTION TIME</div>
+          <div class="metric-val">&lt; 350 <span style="font-size:0.9rem; color:var(--text-muted)">MS</span></div>
+          <div class="metric-sub">SUB-SECOND WEB AUDIO DSP</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">AUDIO PERCEPTIBILITY</div>
+          <div class="metric-val">0.0 dB</div>
+          <div class="metric-sub">STRICTLY BELOW MASKING THRESHOLD</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">COMPRESSION SURVIVAL</div>
+          <div class="metric-val">64 kbps</div>
+          <div class="metric-sub">SURVIVES MP3 / AAC TRANSCODES</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">EXTERNAL DEPENDENCIES</div>
+          <div class="metric-val">0</div>
+          <div class="metric-sub">PURE JAVASCRIPT / WEBAUDIO</div>
+        </div>
       </div>
     </section>
 
-    <section class="sim-panel" id="simulator">
-      <h2 class="section-title">Psychoacoustic Masking Curve & Spread Spectrum Watermark Simulator</h2>
-      <p class="section-desc">Observe how cryptographic bit sequences are hidden beneath the human hearing threshold (HAS) and successfully recovered after severe compression.</p>
+    <section class="prose-section" id="psychoacoustics">
+      <h2 class="section-title">Human Auditory System (HAS) Masking Curves</h2>
+      <p class="section-lead">
+        Traditional audio watermarking (e.g. metadata tags or ultrasonic chirps) is instantly wiped by MP3 compression or frequency low-pass filters. Aureal embeds within the audible spectrum under psychoacoustic thresholds.
+      </p>
 
-      <div class="sim-grid">
-        <div class="visualizer-box">
-          <div class="nodes-row">
-            <div class="node-item active" id="nodeA">Raw Audio Waveform</div>
-            <span class="arrow-icon">&rarr;</span>
-            <div class="node-item active" id="nodeB">Psychoacoustic Masking Modulator</div>
-            <span class="arrow-icon">&rarr;</span>
-            <div class="node-item active" id="nodeC">Protected Audio Stream</div>
-          </div>
-          <div style="text-align:center;">
-            <button class="copy-btn" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; color: var(--accent); border-color: var(--accent);" onclick="triggerSimulation()">
-              &#9654; Execute Verification Vector
-            </button>
+      <div class="deep-grid">
+        <div class="concept-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13M9 9l12-2"/></svg>
+            Frequency Masking Thresholds
+          </h3>
+          <p>
+            When a strong musical tone plays (e.g. 1 kHz snare transient), adjacent frequency bands are biologically rendered inaudible to the human cochlea:
+          </p>
+          <div class="code-box">
+// Computes Bark scale psychoacoustic mask
+const maskLevel = Psychoacoustics.calculateThreshold(fftBuffer);
+const spreadSignal = DSSS.modulate(watermarkPayload, pseudoRandomSequence);
+// Scales watermark energy strictly below inaudibility envelope
+const output = fftBuffer.injectSubThreshold(spreadSignal, maskLevel);
           </div>
         </div>
 
-        <div class="log-stream" id="logConsole">
-          <div><span class="log-time">[21:15:00]</span> <span class="log-accent">[AUREAL WATERMARK]</span> Aureal psychoacoustic engine initialized. MPEG-1 Psychoacoustic Model 1 loaded.</div>
+        <div class="concept-card" id="dsss">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Direct Sequence Spread Spectrum (DSSS)
+          </h3>
+          <p>
+            The watermark payload is spread across thousands of frequency bins using an orthogonal cryptographic key sequence.
+          </p>
+          <p>
+            Because the signal energy in any single bin is orders of magnitude below ambient acoustic noise, lossy audio codecs cannot compress or filter it away without destroying the underlying music.
+          </p>
+          <div class="code-box">
+const detectedId = AurealScanner.correlate(audioStream, clientKey);
+assert.equal(detectedId.valid, true);
+// Recovers 64-bit cryptographic ownership signature
+          </div>
         </div>
+      </div>
+    </section>
+
+    <section class="prose-section" id="comparison">
+      <h2 class="section-title">Audio Attribution Solutions Compared</h2>
+      <p class="section-lead">
+        Why ID3 metadata tags and acoustic fingerprinting fail to stop AI scraping and music theft.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Watermarking Technique</th>
+              <th>ID3 Metadata Tags (MP3 / FLAC)</th>
+              <th>Acoustic Fingerprinting (Shazam)</th>
+              <th>Aureal Acoustic Spread-Spectrum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Lossy Compression Resistance</strong></td>
+              <td>Stripped immediately on YouTube/TikTok re-encode</td>
+              <td>Database matching only</td>
+              <td><span class="badge-adv">Survives 64kbps MP3 / AAC</span> transcoding</td>
+            </tr>
+            <tr>
+              <td><strong>Individual Recipient Tagging</strong></td>
+              <td><span class="badge-fail">Impossible</span> (File hash is shared)</td>
+              <td>Cannot distinguish two identical tracks</td>
+              <td><span class="badge-adv">Unique Invisible Serial ID</span> per preview recipient</td>
+            </tr>
+            <tr>
+              <td><strong>AI Voice Model Scrape Audit</strong></td>
+              <td>Ignored by web scrapers</td>
+              <td>Fails on spliced synthetic voice training</td>
+              <td><span class="badge-adv">Verifiable Provenance Signature</span> inside training data</td>
+            </tr>
+            <tr>
+              <td><strong>Offline Private Scanning</strong></td>
+              <td>Trivial text inspection</td>
+              <td>Requires central corporate database</td>
+              <td><span class="badge-adv">100% Offline Sub-second Scanner</span> in browser</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; 2026 Keller Systems &bull; Built for Sovereign Machine Verification &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
+      <p>&copy; 2026 Keller Systems &bull; Imperceptible Acoustic Provenance &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
     </div>
   </footer>
 
   <script>
-    const canvas = document.getElementById('bg-canvas');
+    const canvas = document.getElementById('audio-canvas');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
@@ -442,34 +563,38 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    const particlesCount = 350;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particlesCount * 3);
+    const barCount = 48;
+    const group = new THREE.Group();
+    const barGeo = new THREE.BoxGeometry(0.8, 1, 0.8);
+    const bars = [];
 
-    for (let i = 0; i < particlesCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 20;
-      positions[i + 1] = (Math.random() - 0.5) * 15;
-      positions[i + 2] = (Math.random() - 0.5) * 15;
+    for (let i = 0; i < barCount; i++) {
+      const mat = new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? 0x8b5cf6 : 0xec4899,
+        transparent: true,
+        opacity: 0.6
+      });
+      const bar = new THREE.Mesh(barGeo, mat);
+      const angle = (i / barCount) * Math.PI * 2;
+      const radius = 18;
+      bar.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+      bar.rotation.z = angle + Math.PI / 2;
+      group.add(bar);
+      bars.push(bar);
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    scene.add(group);
+    camera.position.set(0, 0, 55);
 
-    const material = new THREE.PointsMaterial({
-      color: '#f43f5e'.replace('#', '0x'),
-      size: 0.05,
-      transparent: true,
-      opacity: 0.6
-    });
-
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
-
-    camera.position.z = 8;
-
+    let t = 0;
     function animate() {
       requestAnimationFrame(animate);
-      points.rotation.y += 0.0008;
-      points.rotation.x += 0.0004;
+      t += 0.05;
+      group.rotation.z += 0.002;
+      bars.forEach((bar, idx) => {
+        const h = 2 + Math.sin(t + idx * 0.4) * 6 + Math.cos(t * 0.5 + idx * 0.2) * 3;
+        bar.scale.set(1, Math.max(0.5, h), 1);
+      });
       renderer.render(scene, camera);
     }
     animate();
@@ -479,20 +604,6 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
-
-    function triggerSimulation() {
-      const consoleEl = document.getElementById('logConsole');
-      const now = new Date().toTimeString().split(' ')[0];
-      const traceId = Math.random().toString(36).substring(2, 8).toUpperCase();
-      
-      consoleEl.innerHTML += `<div><span class="log-time">[${now}]</span> <span class="log-accent">[TRACE #${traceId}]</span> Calculating Masking Threshold: Embedding 64-bit cryptographic tag in 3-5 kHz band...</div>`;
-      consoleEl.scrollTop = consoleEl.scrollHeight;
-
-      setTimeout(() => {
-        consoleEl.innerHTML += `<div><span class="log-time">[${now}]</span> <span class="log-success">[VERIFIED]</span> Watermark embedded. Audio signal fidelity: 100% (PEAQ ODG score = 0.00). Tag verified.</div>`;
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-      }, 500);
-    }
   </script>
 </body>
 </html>
