@@ -871,7 +871,7 @@
     }
 
     let best = null;
-    for (const { shift } of candidates) {
+    for (const { shift, isSyncPreamble } of candidates) {
       const usable = perChannel - shift;
       const { folded, reps } = foldRepetitions(pcm, channels, frameLen, shift, perChannel);
       if (reps < 1 || usable < frameLen) continue;
