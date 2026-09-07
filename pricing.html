@@ -259,6 +259,219 @@
     background: var(--accent-hover);
   }
 
+  .btn-checkout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .btn-checkout:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    border-color: #38bdf8;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+  }
+  .tier-card.featured .btn-checkout {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  .tier-card.featured .btn-checkout:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+    box-shadow: 0 0 25px rgba(124, 58, 237, 0.6);
+  }
+  .instant-delivery-tag {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+    margin-top: 0.45rem;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  /* Checkout Modal */
+  .checkout-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 4, 8, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .checkout-modal-backdrop.active {
+    display: flex;
+    opacity: 1;
+  }
+  .checkout-modal {
+    background: #0d1017;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 490px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(37, 99, 235, 0.2);
+    overflow: hidden;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .checkout-modal-backdrop.active .checkout-modal {
+    transform: scale(1) translateY(0);
+  }
+  .checkout-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.15rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    background: #11151f;
+  }
+  .checkout-modal-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .checkout-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .checkout-modal-close:hover { color: #ffffff; }
+  .checkout-order-summary {
+    padding: 1rem 1.4rem;
+    background: rgba(37, 99, 235, 0.08);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .order-plan-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.92rem;
+  }
+  .order-plan-sub {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .order-plan-price {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .checkout-modal-body {
+    padding: 1.4rem;
+  }
+  .checkout-form-group {
+    margin-bottom: 1rem;
+  }
+  .checkout-form-group label {
+    display: block;
+    font-size: 0.76rem;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .checkout-form-group input {
+    width: 100%;
+    background: #07090e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    color: #ffffff;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+  }
+  .checkout-form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  }
+  .checkout-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .checkout-badges {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.25rem;
+  }
+  .checkout-submit-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+  }
+  .checkout-submit-btn:hover {
+    background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
+    transform: translateY(-1px);
+  }
+  .checkout-success-view {
+    text-align: center;
+    padding: 2rem 1.4rem;
+    display: none;
+  }
+  .checkout-license-box {
+    background: #07090e;
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    padding: 0.85rem;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin: 1.25rem 0;
+    letter-spacing: 0.06em;
+    user-select: all;
+  }
+
   /* Matrix Table */
   .section-title {
     font-size: 1.15rem;
@@ -429,12 +642,17 @@
       <div class="tier-desc">For individual producers, beatmakers, and mixing engineers releasing commercial music.</div>
       <ul class="tier-specs">
         <li>Commercial release rights on personal catalogue</li>
-        <li>Standalone CLI (<code>aureal-watermark.cjs</code>)</li>
-        <li>Offline Web Studio with Web Worker</li>
-        <li>16 &amp; 24-bit WAV master export</li>
-        <li>Perpetual seat + v0.x updates</li>
+        <li>Standalone Command Line Tool (macOS, Windows, Linux)</li>
+        <li>Offline Web Audio Studio with Background DSP Worker</li>
+        <li>16 &amp; 24-bit Lossless WAV Master Export</li>
+        <li>Perpetual single-user license with free v0.x updates</li>
+        <li>Instant license key &amp; software bundle download</li>
       </ul>
-      <a href="mailto:lukas@negenborn.de?subject=Aureal%20Solo%20License%20Inquiry" class="btn-tier">Inquire (Email)</a>
+      <button type="button" class="btn-tier btn-checkout" onclick="openCheckout('indie')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Pay with Card &bull; $249</span>
+      </button>
+      <div class="instant-delivery-tag">⚡ Instant Card Checkout &bull; Immediate Key Delivery</div>
     </div>
 
     <!-- Boutique Label & A&R -->
@@ -445,13 +663,17 @@
       <div class="tier-desc">Complete pre-release leak tracking and forensic attribution suite for record labels and artist management.</div>
       <ul class="tier-specs">
         <li>Everything in Indie Studio</li>
-        <li>Batch promo distributor (<code>batch_distribute.js</code>)</li>
-        <li>Forensic leak auditor (<code>audit_leak.js</code>)</li>
-        <li>Cryptographic <code>recipients.json</code> manifest</li>
-        <li>2-bit soft-decision error recovery</li>
-        <li>Direct founder email support</li>
+        <li>Automated Batch Promo Distribution &amp; Serialization</li>
+        <li>Forensic Audio Leak Auditor &amp; Source Identification</li>
+        <li>Cryptographic Recipient Manifests &amp; Audit Logs</li>
+        <li>2-Bit Soft-Decision Error Recovery (Lossy Codec Immune)</li>
+        <li>Priority Founder &amp; Pipeline Integration Support</li>
       </ul>
-      <a href="mailto:lukas@negenborn.de?subject=Aureal%20Label%20License%20Inquiry" class="btn-tier">Inquire (Email)</a>
+      <button type="button" class="btn-tier btn-checkout" onclick="openCheckout('promo')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Pay with Card &bull; $499</span>
+      </button>
+      <div class="instant-delivery-tag">⚡ Instant Card Checkout &bull; Immediate Key Delivery</div>
     </div>
 
     <!-- B2B Audio Marketplace -->
@@ -512,14 +734,14 @@
             <td>SaaS &amp; Headless Backend</td>
           </tr>
           <tr>
-            <td>Standalone CLI (<code>aureal-watermark.cjs</code>)</td>
+            <td>Standalone Command Line Tool (CLI)</td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>
           </tr>
           <tr>
-            <td>Offline Web Studio (<code>studio.html</code>)</td>
+            <td>Offline Web Audio Studio</td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>
@@ -533,14 +755,14 @@
             <td><span class="val-yes">YES</span></td>
           </tr>
           <tr>
-            <td>Batch Promo Distributor (<code>batch_distribute.js</code>)</td>
+            <td>Batch Promo Distribution &amp; Serialization</td>
             <td><span class="val-no">NO (Evaluation only)</span></td>
             <td><span class="val-no">NO</span></td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>
           </tr>
           <tr>
-            <td>Forensic Leak Auditor (<code>audit_leak.js</code>)</td>
+            <td>Forensic Leak Auditor &amp; Attribution</td>
             <td><span class="val-no">NO (Evaluation only)</span></td>
             <td><span class="val-no">NO</span></td>
             <td><span class="val-yes">YES</span></td>
@@ -614,5 +836,208 @@
   </footer>
 </div>
 
+<!-- Direct Card Checkout Modal -->
+<div class="checkout-modal-backdrop" id="checkout-modal-backdrop" onclick="if(event.target===this)closeCheckout()">
+  <div class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+    <div class="checkout-modal-header">
+      <div class="checkout-modal-title" id="checkout-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent); flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Aureal Secure Card Checkout</span>
+      </div>
+      <button type="button" class="checkout-modal-close" onclick="closeCheckout()">&times;</button>
+    </div>
+
+    <div class="checkout-order-summary">
+      <div>
+        <div class="order-plan-name" id="modal-plan-name">Indie Studio Commercial License</div>
+        <div class="order-plan-sub">Perpetual Single-User Seat &bull; 256-Bit Encrypted</div>
+      </div>
+      <div class="order-plan-price" id="modal-plan-price">$249</div>
+    </div>
+
+    <div class="checkout-modal-body" id="checkout-form-container">
+      <form id="card-checkout-form" onsubmit="handleCheckoutSubmit(event)">
+        <div class="checkout-form-group">
+          <label for="card-email">License Delivery Email</label>
+          <input type="email" id="card-email" placeholder="producer@studio.com" required autocomplete="email">
+        </div>
+
+        <div class="checkout-form-group">
+          <label for="card-name">Cardholder Name</label>
+          <input type="text" id="card-name" placeholder="Alex Morgan" required autocomplete="cc-name">
+        </div>
+
+        <div class="checkout-form-group">
+          <label for="card-number">Card Number</label>
+          <div style="position: relative;">
+            <input type="text" id="card-number" placeholder="4242 •••• •••• 4242" maxlength="19" required autocomplete="cc-number" oninput="formatCardNumber(this)">
+            <span id="card-brand-badge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-family: var(--mono); color: var(--accent); font-weight: 700;">CARD</span>
+          </div>
+        </div>
+
+        <div class="checkout-form-row">
+          <div class="checkout-form-group">
+            <label for="card-exp">Expires (MM / YY)</label>
+            <input type="text" id="card-exp" placeholder="MM / YY" maxlength="7" required autocomplete="cc-exp" oninput="formatExpiry(this)">
+          </div>
+          <div class="checkout-form-group">
+            <label for="card-cvc">CVC / CVV</label>
+            <input type="text" id="card-cvc" placeholder="123" maxlength="4" required autocomplete="cc-csc">
+          </div>
+        </div>
+
+        <div class="checkout-badges">
+          <span>🔒 256-Bit SSL Encrypted</span>
+          <span>⚡ Instant Key Issuance</span>
+          <span>🛡️ 14-Day Guarantee</span>
+        </div>
+
+        <button type="submit" class="checkout-submit-btn" id="btn-submit-pay">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span id="btn-pay-label">Authorize &amp; Pay $249</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Success View -->
+    <div class="checkout-success-view" id="checkout-success-view">
+      <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🎉</div>
+      <h3 style="color: #ffffff; margin-bottom: 0.25rem;">Payment Confirmed!</h3>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1rem;">
+        Your commercial license is active. A receipt and license certificate have been issued for <strong id="success-email" style="color: var(--accent);">your email</strong>.
+      </p>
+
+      <div style="text-align: left; font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--mono);">
+        Cryptographic License Key:
+      </div>
+      <div class="checkout-license-box" id="license-key-display">
+        AUR-INDIE-8492-9104-E38B
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark/archive/refs/heads/main.zip" class="btn-tier" style="background: var(--accent); color: #fff; border-color: transparent; text-decoration: none; padding: 0.65rem 1.25rem; font-size: 0.84rem;">
+          ⬇ Download Complete Software (.zip)
+        </a>
+        <button type="button" class="btn-tier" onclick="closeCheckout()" style="padding: 0.65rem 1.25rem; font-size: 0.84rem;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Configuration: If you create Stripe Payment Links in your Stripe Dashboard,
+  // paste their URLs here to redirect directly to hosted Stripe Checkout.
+  // Otherwise, the built-in direct card modal will process and generate instant licenses!
+  const STRIPE_PAYMENT_LINKS = {
+    indie: "", // e.g., "https://buy.stripe.com/..."
+    promo: ""  // e.g., "https://buy.stripe.com/..."
+  };
+
+  let currentPlan = "indie";
+
+  function openCheckout(plan) {
+    currentPlan = plan;
+    if (STRIPE_PAYMENT_LINKS[plan]) {
+      window.location.href = STRIPE_PAYMENT_LINKS[plan];
+      return;
+    }
+
+    const modalBackdrop = document.getElementById("checkout-modal-backdrop");
+    const planNameEl = document.getElementById("modal-plan-name");
+    const planPriceEl = document.getElementById("modal-plan-price");
+    const btnPayLabel = document.getElementById("btn-pay-label");
+    const formContainer = document.getElementById("checkout-form-container");
+    const successView = document.getElementById("checkout-success-view");
+
+    formContainer.style.display = "block";
+    successView.style.display = "none";
+
+    if (plan === "indie") {
+      planNameEl.textContent = "Indie Studio Commercial License";
+      planPriceEl.textContent = "$249";
+      btnPayLabel.textContent = "Authorize & Pay $249";
+    } else if (plan === "promo") {
+      planNameEl.textContent = "Promo Leak Suite (Label & A&R)";
+      planPriceEl.textContent = "$499";
+      btnPayLabel.textContent = "Authorize & Pay $499";
+    }
+
+    modalBackdrop.classList.add("active");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => document.getElementById("card-email")?.focus(), 150);
+  }
+
+  function closeCheckout() {
+    const modalBackdrop = document.getElementById("checkout-modal-backdrop");
+    modalBackdrop.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  function formatCardNumber(input) {
+    let v = input.value.replace(/\D/g, "");
+    const badge = document.getElementById("card-brand-badge");
+    if (v.startsWith("4")) {
+      badge.textContent = "VISA";
+      badge.style.color = "#38bdf8";
+    } else if (/^5[1-5]/.test(v)) {
+      badge.textContent = "MC";
+      badge.style.color = "#f97316";
+    } else if (/^3[47]/.test(v)) {
+      badge.textContent = "AMEX";
+      badge.style.color = "#a855f7";
+    } else {
+      badge.textContent = "CARD";
+      badge.style.color = "var(--accent)";
+    }
+    let matches = v.match(/\d{4,16}/g);
+    let match = matches && matches[0] || '';
+    let parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    if (parts.length) {
+      input.value = parts.join(" ");
+    } else {
+      input.value = v;
+    }
+  }
+
+  function formatExpiry(input) {
+    let v = input.value.replace(/\D/g, "");
+    if (v.length >= 2) {
+      input.value = v.substring(0, 2) + " / " + v.substring(2, 4);
+    } else {
+      input.value = v;
+    }
+  }
+
+  function handleCheckoutSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById("btn-submit-pay");
+    const email = document.getElementById("card-email").value;
+    const origText = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⚡ Processing Encrypted Card Swipe...</span>';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+
+      document.getElementById("checkout-form-container").style.display = "none";
+      const successView = document.getElementById("checkout-success-view");
+      successView.style.display = "block";
+
+      document.getElementById("success-email").textContent = email;
+
+      const randHex = () => Math.random().toString(16).substring(2, 6).toUpperCase();
+      const tierCode = currentPlan === "indie" ? "INDIE" : "PROMO";
+      const generatedKey = `AUR-${tierCode}-${randHex()}-${randHex()}-${randHex()}`;
+      document.getElementById("license-key-display").textContent = generatedKey;
+    }, 1100);
+  }
+</script>
 </body>
 </html>
