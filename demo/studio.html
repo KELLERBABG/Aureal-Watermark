@@ -550,9 +550,9 @@
       </div>
 
       <div class="form-group">
-        <label for="detect-key">Secret Key (Optional)</label>
-        <input type="text" id="detect-key" placeholder="Default key">
-        <div class="field-hint">Salt string used during embedding if customized.</div>
+        <label for="detect-key">Secret Studio Key (Optional)</label>
+        <input type="text" id="detect-key" placeholder="Default public key (Shared)">
+        <div class="field-hint">Leave blank to scan using the default public key, or enter your private studio key.</div>
       </div>
 
       <button type="button" class="btn" id="detect-btn" disabled>Scan Audio</button>
@@ -569,21 +569,25 @@
           <div class="file-sub">WAV, MP3, FLAC, M4A</div>
         </div>
         <audio id="embed-preview" controls></audio>
+        <div id="embed-precheck-box" style="display:none; margin-top: 0.75rem;"></div>
       </div>
 
       <div class="form-group">
         <label for="embed-id">
           <span>Payload ID</span>
-          <span class="action-link" id="btn-rand-id">Random</span>
+          <span class="action-link" id="btn-rand-id" title="Generate Cryptographically Secure Random ID">🎲 Roll Secure ID</span>
         </label>
         <input type="number" id="embed-id" placeholder="e.g. 883921" min="0" max="4294967295">
-        <div class="field-hint">32-bit integer (recipient or tracking ID).</div>
+        <div class="field-hint">32-bit tracking ID (over 4.29 billion combinations). Unique per recipient.</div>
       </div>
 
       <div class="form-group">
-        <label for="embed-key">Secret Key (Optional)</label>
-        <input type="text" id="embed-key" placeholder="Default key">
-        <div class="field-hint">Restricts detection to entities holding this key.</div>
+        <label for="embed-key">
+          <span>Secret Studio Key (Optional)</span>
+          <span class="action-link" id="btn-rand-key" title="Generate Random Private Studio Key">🔑 Generate Key</span>
+        </label>
+        <input type="text" id="embed-key" placeholder="Default public key (Shared)">
+        <div class="field-hint">Private Studio Namespace. When set, only entities possessing this exact key can detect or extract your IDs.</div>
       </div>
 
       <div class="form-group">
@@ -1628,32 +1632,79 @@
   const btnDownload = document.getElementById("btn-download");
   const btnVerifyNow = document.getElementById("btn-verify-now");
   const btnRandId = document.getElementById("btn-rand-id");
+  const btnRandKey = document.getElementById("btn-rand-key");
+  const embedPrecheckBox = document.getElementById("embed-precheck-box");
   const embedBadgeId = document.getElementById("embed-badge-id");
 
   let embedBuffer = null;
   let lastWavBlob = null;
   let lastWavFileName = "watermarked.wav";
 
-  btnRandId.addEventListener("click", () => {
-    embedIdInput.value = Math.floor(100000 + Math.random() * 900000);
-  });
+  function rollSecureId() {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    embedIdInput.value = (arr[0] % 900000) + 100000;
+  }
+
+  btnRandId.addEventListener("click", rollSecureId);
+
+  if (btnRandKey) {
+    btnRandKey.addEventListener("click", () => {
+      const arr = new Uint8Array(8);
+      crypto.getRandomValues(arr);
+      embedKeyInput.value = "studio_" + Array.from(arr).map(b => b.toString(16).padStart(2, "0")).join("");
+    });
+  }
+
+  // Automatically initialize with a secure random ID
+  rollSecureId();
 
   setupDragDrop(embedDropZone, embedFileInput, async (file) => {
     embedFileLabel.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
     embedPreview.src = URL.createObjectURL(file);
     embedPreview.style.display = "block";
     embedResultBox.style.display = "none";
+    embedPrecheckBox.style.display = "block";
+    embedPrecheckBox.innerHTML = `
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); color: #7dd3fc; padding: 0.55rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
+        <span>🔍 Scanning audio for existing watermarks...</span>
+      </div>`;
     lastWavFileName = file.name.replace(/\.[^/.]+$/, "") + "_watermarked.wav";
     embedBtn.disabled = true;
-    embedBtn.textContent = "Loading file...";
+    embedBtn.textContent = "Analyzing audio...";
 
     try {
       embedBuffer = await file.arrayBuffer();
       embedBtn.disabled = false;
       embedBtn.textContent = "Embed Watermark & Export";
+
+      // Non-blocking pre-check to detect if file is already watermarked
+      const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
+      const precheck = await asyncDetect(pcm, { sampleRate, channels }, {
+        key: embedKeyInput.value.trim() || undefined,
+        band: "auto"
+      });
+
+      if (precheck && precheck.detected && precheck.confidence >= 0.75) {
+        embedPrecheckBox.innerHTML = `
+          <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem; line-height: 1.45;">
+            <div style="font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
+              <span>⚠️ Existing Watermark Detected</span>
+              <span style="font-family: ui-monospace, monospace; background: rgba(0,0,0,0.3); padding: 2px 7px; border-radius: 4px; color: #ffffff;">ID #${precheck.recoveredPayloadId} (${Math.round(precheck.confidence * 100)}% Match)</span>
+            </div>
+            <div>This audio already contains an active watermark! Stacking consecutive watermarks creates acoustic cross-talk and will corrupt recovery. We recommend using the original pristine master.</div>
+          </div>`;
+      } else {
+        embedPrecheckBox.innerHTML = `
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6ee7b7; padding: 0.5rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
+            <span>✓ Pristine Master</span>
+            <span style="color: var(--text-muted); font-size: 0.76rem;">No prior watermark detected. Ready for secure tagging.</span>
+          </div>`;
+      }
     } catch (err) {
+      embedBtn.disabled = false;
       embedBtn.textContent = "Embed Watermark & Export";
-      alert(`File read error: ${err.message || err}`);
+      embedPrecheckBox.style.display = "none";
     }
   });
 
