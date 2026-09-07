@@ -17,6 +17,9 @@ Write-Host "5. Copying node.exe to dist/aureal-watermark.exe..."
 $nodePath = (Get-Command node).Source
 Copy-Item $nodePath -Destination "dist/aureal-watermark.exe" -Force
 
+Write-Host "5.5. Stamping official Aureal icon and PE metadata with rcedit..."
+node scripts/stamp-icon.cjs
+
 Write-Host "6. Injecting SEA blob with postject..."
 npx.cmd --yes postject dist/aureal-watermark.exe NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
