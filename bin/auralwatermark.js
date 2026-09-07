@@ -127,6 +127,10 @@ function writeEmbeddedIcons(targetDir) {
           copyFileSync(join(c, "icon.png"), join(targetDir, "icon.png"));
           copyFileSync(join(c, "icon.png"), join(assetsDir, "icon.png"));
         }
+        if (existsSync(join(c, "icon.svg"))) {
+          copyFileSync(join(c, "icon.svg"), join(targetDir, "icon.svg"));
+          copyFileSync(join(c, "icon.svg"), join(assetsDir, "icon.svg"));
+        }
         if (existsSync(join(c, "favicon.svg"))) {
           copyFileSync(join(c, "favicon.svg"), join(targetDir, "favicon.svg"));
           copyFileSync(join(c, "favicon.svg"), join(assetsDir, "favicon.svg"));

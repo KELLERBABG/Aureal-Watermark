@@ -38,6 +38,7 @@ const rawStudioHtml = JSON.stringify(readFileSync("studio.html", "utf8"));
 const rawPricingHtml = JSON.stringify(readFileSync("pricing.html", "utf8"));
 const rawIconIcoBase64 = JSON.stringify(readFileSync("assets/icon.ico").toString("base64"));
 const rawIconPngBase64 = JSON.stringify(readFileSync("assets/icon.png").toString("base64"));
+const rawIconSvgBase64 = JSON.stringify(readFileSync("assets/icon.svg").toString("base64"));
 const rawFaviconSvgBase64 = JSON.stringify(readFileSync("assets/favicon.svg").toString("base64"));
 
 cliCode = cliCode.replace(
@@ -54,16 +55,19 @@ cliCode = cliCode.replace(
   try {
     const icoBuf = Buffer.from(${rawIconIcoBase64}, "base64");
     const pngBuf = Buffer.from(${rawIconPngBase64}, "base64");
+    const iconSvgBuf = Buffer.from(${rawIconSvgBase64}, "base64");
     const svgBuf = Buffer.from(${rawFaviconSvgBase64}, "base64");
     writeFileSync(join(targetDir, "favicon.ico"), icoBuf);
     writeFileSync(join(targetDir, "icon.png"), pngBuf);
     writeFileSync(join(targetDir, "favicon.svg"), svgBuf);
+    writeFileSync(join(targetDir, "icon.svg"), iconSvgBuf);
     const assetsDir = join(targetDir, "assets");
     if (!existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
     writeFileSync(join(assetsDir, "icon.ico"), icoBuf);
     writeFileSync(join(assetsDir, "icon.png"), pngBuf);
+    writeFileSync(join(assetsDir, "icon.svg"), iconSvgBuf);
     writeFileSync(join(assetsDir, "favicon.svg"), svgBuf);
-    writeFileSync(join(assetsDir, "logo.svg"), svgBuf);
+    writeFileSync(join(assetsDir, "logo.svg"), iconSvgBuf);
   } catch {}
 }`
 );
