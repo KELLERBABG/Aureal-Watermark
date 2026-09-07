@@ -11,7 +11,7 @@
   const MAX_AMPLITUDE = 0.12;
   const MULTI_BAND_SCALE = 0.7;
   const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
-  const DEFAULT_KEY = "aureal-universal-salt-2026";
+  const DEFAULT_KEY = "aureal-provenance-salt-2026";
 
   const BAND_PRESETS = Object.freeze({
     high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
