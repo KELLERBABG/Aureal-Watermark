@@ -638,14 +638,14 @@
     <div class="tier-card">
       <div class="tier-tag">[ SOLO CREATOR ]</div>
       <div class="tier-title">Indie Studio</div>
-      <div class="tier-price">$249 <span>/ perpetual</span></div>
-      <div class="tier-desc">For individual producers, beatmakers, and mixing engineers releasing commercial music.</div>
+      <div class="tier-price">$249 <span>/ unlimited perpetual</span></div>
+      <div class="tier-desc">For individual producers, beatmakers, and mixing engineers releasing commercial music with zero track limits.</div>
       <ul class="tier-specs">
-        <li>Commercial release rights on personal catalogue</li>
+        <li><strong>Unlimited</strong> commercial releases on personal catalogue</li>
         <li>Standalone Command Line Tool (macOS, Windows, Linux)</li>
         <li>Offline Web Audio Studio with Background DSP Worker</li>
         <li>16 &amp; 24-bit Lossless WAV Master Export</li>
-        <li>Perpetual single-user license with free v0.x updates</li>
+        <li>Perpetual lifetime license with free v0.x updates</li>
         <li>Instant license key &amp; software bundle download</li>
       </ul>
       <button type="button" class="btn-tier btn-checkout" onclick="openCheckout('indie')">
@@ -659,14 +659,14 @@
     <div class="tier-card featured">
       <div class="tier-tag">[ LABEL &amp; A&amp;R DESK ]</div>
       <div class="tier-title">Promo Leak Suite</div>
-      <div class="tier-price">$499 <span>/ seat</span></div>
-      <div class="tier-desc">Complete pre-release leak tracking and forensic attribution suite for record labels and artist management.</div>
+      <div class="tier-price">$499 <span>/ unlimited perpetual</span></div>
+      <div class="tier-desc">Complete pre-release leak tracking and forensic attribution suite for record labels with unlimited artists &amp; promo runs.</div>
       <ul class="tier-specs">
         <li>Everything in Indie Studio</li>
-        <li>Automated Batch Promo Distribution &amp; Serialization</li>
+        <li><strong>Unlimited</strong> promo pool distributions &amp; album campaigns</li>
+        <li><strong>Unlimited</strong> recipient serializations across full roster</li>
         <li>Forensic Audio Leak Auditor &amp; Source Identification</li>
         <li>Cryptographic Recipient Manifests &amp; Audit Logs</li>
-        <li>2-Bit Soft-Decision Error Recovery (Lossy Codec Immune)</li>
         <li>Priority Founder &amp; Pipeline Integration Support</li>
       </ul>
       <button type="button" class="btn-tier btn-checkout" onclick="openCheckout('promo')">
@@ -850,7 +850,7 @@
     <div class="checkout-order-summary">
       <div>
         <div class="order-plan-name" id="modal-plan-name">Indie Studio Commercial License</div>
-        <div class="order-plan-sub">Perpetual Single-User Seat &bull; 256-Bit Encrypted</div>
+        <div class="order-plan-sub">Unlimited Perpetual License &bull; 256-Bit Encrypted</div>
       </div>
       <div class="order-plan-price" id="modal-plan-price">$249</div>
     </div>
@@ -927,20 +927,20 @@
 </div>
 
 <script>
-  // Configuration: If you create Stripe Payment Links in your Stripe Dashboard,
-  // paste their URLs here to redirect directly to hosted Stripe Checkout.
-  // Otherwise, the built-in direct card modal will process and generate instant licenses!
-  const STRIPE_PAYMENT_LINKS = {
-    indie: "", // e.g., "https://buy.stripe.com/..."
-    promo: ""  // e.g., "https://buy.stripe.com/..."
+  // Configuration: If you use an external Merchant of Record (Polar.sh, Lemon Squeezy, Paddle),
+  // paste your product checkout URLs here to redirect directly to their hosted checkout.
+  // If left empty, the built-in direct card modal will process and generate instant licenses!
+  const CHECKOUT_PAYMENT_LINKS = {
+    indie: "", // e.g., "https://polar.sh/..." or "https://aureal.lemonsqueezy.com/buy/..."
+    promo: ""  // e.g., "https://polar.sh/..." or "https://aureal.lemonsqueezy.com/buy/..."
   };
 
   let currentPlan = "indie";
 
   function openCheckout(plan) {
     currentPlan = plan;
-    if (STRIPE_PAYMENT_LINKS[plan]) {
-      window.location.href = STRIPE_PAYMENT_LINKS[plan];
+    if (CHECKOUT_PAYMENT_LINKS[plan]) {
+      window.location.href = CHECKOUT_PAYMENT_LINKS[plan];
       return;
     }
 
@@ -955,11 +955,11 @@
     successView.style.display = "none";
 
     if (plan === "indie") {
-      planNameEl.textContent = "Indie Studio Commercial License";
+      planNameEl.textContent = "Indie Studio (Unlimited Perpetual License)";
       planPriceEl.textContent = "$249";
       btnPayLabel.textContent = "Authorize & Pay $249";
     } else if (plan === "promo") {
-      planNameEl.textContent = "Promo Leak Suite (Label & A&R)";
+      planNameEl.textContent = "Promo Leak Suite (Unlimited Perpetual License)";
       planPriceEl.textContent = "$499";
       btnPayLabel.textContent = "Authorize & Pay $499";
     }
