@@ -648,10 +648,10 @@
         <li>Perpetual lifetime license with free v0.x updates</li>
         <li>Instant license key &amp; software bundle download</li>
       </ul>
-      <button type="button" class="btn-tier btn-checkout" onclick="openCheckout('indie')">
+      <a href="https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq" class="btn-tier btn-checkout">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
         <span>Pay with Card &bull; $249</span>
-      </button>
+      </a>
       <div class="instant-delivery-tag">⚡ Instant Card Checkout &bull; Immediate Key Delivery</div>
     </div>
 
@@ -669,10 +669,10 @@
         <li>Cryptographic Recipient Manifests &amp; Audit Logs</li>
         <li>Priority Founder &amp; Pipeline Integration Support</li>
       </ul>
-      <button type="button" class="btn-tier btn-checkout" onclick="openCheckout('promo')">
+      <a href="https://buy.polar.sh/polar_cl_yJRWpGLnbQTA8xrpZcnxaqssxDdjegF3RGkea1ClCZG" class="btn-tier btn-checkout">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
         <span>Pay with Card &bull; $499</span>
-      </button>
+      </a>
       <div class="instant-delivery-tag">⚡ Instant Card Checkout &bull; Immediate Key Delivery</div>
     </div>
 
@@ -931,8 +931,8 @@
   // paste your product checkout URLs here to redirect directly to their hosted checkout.
   // If left empty, the built-in direct card modal will process and generate instant licenses!
   const CHECKOUT_PAYMENT_LINKS = {
-    indie: "", // e.g., "https://polar.sh/..." or "https://aureal.lemonsqueezy.com/buy/..."
-    promo: ""  // e.g., "https://polar.sh/..." or "https://aureal.lemonsqueezy.com/buy/..."
+    indie: "https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq",
+    promo: "https://buy.polar.sh/polar_cl_yJRWpGLnbQTA8xrpZcnxaqssxDdjegF3RGkea1ClCZG"
   };
 
   let currentPlan = "indie";
