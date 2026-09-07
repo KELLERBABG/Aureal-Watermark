@@ -1126,6 +1126,9 @@
   const dspPendingReqs = new Map();
 
   function getDspWorker() {
+    if (typeof window !== "undefined" && window.location && window.location.protocol === "file:") {
+      return null;
+    }
     if (!dspWorkerInstance && typeof Worker !== "undefined") {
       try {
         const workerScript = `
@@ -1196,6 +1199,11 @@
         };
         dspWorkerInstance.onerror = function(err) {
           console.warn("DSP Web Worker encountered an error, falling back to main thread:", err);
+          for (const req of dspPendingReqs.values()) {
+            req.reject(new Error(err?.message || "Web Worker error"));
+          }
+          dspPendingReqs.clear();
+          try { dspWorkerInstance.terminate(); } catch {}
           dspWorkerInstance = null;
         };
       } catch (err) {
@@ -1212,12 +1220,20 @@
       try {
         return await new Promise((resolve, reject) => {
           const id = ++dspReqCounter;
-          dspPendingReqs.set(id, { resolve: (val) => resolve(val.res), reject });
+          const timer = setTimeout(() => {
+            dspPendingReqs.delete(id);
+            reject(new Error("Worker timed out"));
+          }, 8000);
+          dspPendingReqs.set(id, {
+            resolve: (val) => { clearTimeout(timer); resolve(val.res); },
+            reject: (err) => { clearTimeout(timer); reject(err); }
+          });
           const pcmCopy = new Float32Array(pcm);
           worker.postMessage({ id, action: "detect", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
         });
       } catch (workerErr) {
         console.warn("DSP Web Worker detect failed, falling back to main thread:", workerErr);
+        try { dspWorkerInstance?.terminate(); } catch {}
         dspWorkerInstance = null;
       }
     }
@@ -1230,15 +1246,20 @@
       try {
         return await new Promise((resolve, reject) => {
           const id = ++dspReqCounter;
+          const timer = setTimeout(() => {
+            dspPendingReqs.delete(id);
+            reject(new Error("Worker timed out"));
+          }, 8000);
           dspPendingReqs.set(id, {
-            resolve: (val) => resolve(new Blob([val.wavArr], { type: "audio/wav" })),
-            reject
+            resolve: (val) => { clearTimeout(timer); resolve(new Blob([val.wavArr], { type: "audio/wav" })); },
+            reject: (err) => { clearTimeout(timer); reject(err); }
           });
           const pcmCopy = new Float32Array(pcm);
           worker.postMessage({ id, action: "embed", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
         });
       } catch (workerErr) {
         console.warn("DSP Web Worker embed failed, falling back to main thread:", workerErr);
+        try { dspWorkerInstance?.terminate(); } catch {}
         dspWorkerInstance = null;
       }
     }
@@ -1444,7 +1465,7 @@
     try {
       detectBtn.textContent = "Decoding audio...";
       const { pcm, sampleRate, channels } = await decodeAudio(detectBuffer);
-      detectBtn.textContent = "Scanning frames (Worker)...";
+      detectBtn.textContent = getDspWorker() ? "Scanning frames (Worker)..." : "Scanning frames (DSP)...";
       const result = await asyncDetect(pcm, { sampleRate, channels }, {
         payloadId: expectedId,
         key,
@@ -1590,7 +1611,7 @@
     const band = embedBandSelect.value;
 
     embedBtn.disabled = true;
-    embedBtn.textContent = "Embedding watermark (Worker)...";
+    embedBtn.textContent = getDspWorker() ? "Embedding watermark (Worker)..." : "Embedding watermark (DSP)...";
 
     try {
       const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
