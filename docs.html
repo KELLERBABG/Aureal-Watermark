@@ -574,7 +574,7 @@
         <div class="code-wrapper">
           <div class="code-top">
             <span class="code-lang">Bash / Terminal</span>
-            <button class="btn-copy-code" onclick="navigator.clipboard.writeText('node bin/auralwatermark.js gen test.wav --seconds 30\nnode bin/auralwatermark.js embed test.wav marked.wav --id 1234567 --key my-secret\nnode bin/auralwatermark.js detect marked.wav --id 1234567 --key my-secret'); this.innerText='COPIED!'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
           </div>
           <pre><code># 1. Synthesize 30 seconds of speech-like audio (no sample file needed)
 node bin/auralwatermark.js gen test.wav --seconds 30 --rate 44100
@@ -714,7 +714,7 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
         <div class="code-wrapper">
           <div class="code-top">
             <span class="code-lang">JavaScript (ESM / Browser)</span>
-            <button class="btn-copy-code" onclick="navigator.clipboard.writeText('import { verifyAudioBuffer } from \"./src/browser/aural-watermark-verify.js\";\n\nconst audioContext = new AudioContext();\nconst response = await fetch(\"streamed_audio.mp3\");\nconst arrayBuffer = await response.arrayBuffer();\nconst audioBuffer = await audioContext.decodeAudioData(arrayBuffer);\n\nconst result = verifyAudioBuffer(audioBuffer, 1234567, \"my-secret-key\");\nconsole.log(\"Watermark detected:\", result.detected);\nconsole.log(\"Confidence:\", result.confidence);\nconsole.log(\"Bit Error Rate:\", result.ber);'); this.innerText='COPIED!'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
           </div>
           <pre><code>import { verifyAudioBuffer } from "./src/browser/aural-watermark-verify.js";
 
@@ -751,7 +751,7 @@ if (result.detected) {
         <div class="code-wrapper">
           <div class="code-top">
             <span class="code-lang">JavaScript (Node.js)</span>
-            <button class="btn-copy-code" onclick="navigator.clipboard.writeText('import { embedWatermark, detectWatermark } from \"aureal-watermark\";\nimport { readWavFile, writeWavFile } from \"aureal-watermark/src/wav.js\";\n\nconst wav = await readWavFile(\"master.wav\");\nconst fmt = { sampleRate: wav.sampleRate, channels: wav.channels };\n\n// Embed unique recipient watermark\nconst watermarkedPcm = embedWatermark(wav.samples, fmt, {\n  payloadId: 987654,\n  key: process.env.WATERMARK_SALT,\n  strength: 0.5,\n  band: \"dual\"\n});\n\nawait writeWavFile(\"preview_watermarked.wav\", watermarkedPcm, { ...fmt, bitDepth: 16 });'); this.innerText='COPIED!'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
           </div>
           <pre><code>import { embedWatermark, detectWatermark } from "aureal-watermark";
 import { readWavFile, writeWavFile } from "aureal-watermark/src/wav.js";
@@ -876,6 +876,20 @@ console.log(verification);
   </footer>
 
   <script>
+    // Copy code helper
+    function copyCode(btn) {
+      const codeWrapper = btn.closest('.code-wrapper');
+      const code = codeWrapper ? codeWrapper.querySelector('pre code')?.innerText : '';
+      if (!code) return;
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerText;
+        btn.innerText = 'COPIED!';
+        setTimeout(() => { btn.innerText = orig; }, 2000);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+      });
+    }
+
     // Highlight active sidebar item on scroll
     const sections = document.querySelectorAll('.doc-section');
     const navLinks = document.querySelectorAll('.sidebar-menu a');
