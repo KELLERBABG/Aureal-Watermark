@@ -1537,19 +1537,19 @@ assert.equal(detectedId.valid, true);
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Recovered Recipient ID:</span>
-                    <strong style="color:#ffffff; font-size:1.1rem; letter-spacing:0.04em;">#\${res.recoveredPayloadId}</strong>
+                    <strong style="color:#ffffff; font-size:1.1rem; letter-spacing:0.04em;">#${res.recoveredPayloadId}</strong>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Attribution Confidence:</span>
-                    <span style="color:var(--emerald);">\${(res.confidence * 100).toFixed(1)}% (Z-score: 18.2)</span>
+                    <span style="color:var(--emerald);">${(res.confidence * 100).toFixed(1)}% (Z-score: 18.2)</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Bit Error Rate (BER):</span>
-                    <span style="color:var(--emerald);">\${(res.ber * 100).toFixed(1)}% (0 / 48 bits corrupted)</span>
+                    <span style="color:var(--emerald);">${(res.ber * 100).toFixed(1)}% (0 / 48 bits corrupted)</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Carrier Frequency Band:</span>
-                    <span>\${res.bandUsed}</span>
+                    <span>${res.bandUsed}</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Transcode Survival:</span>
@@ -1570,7 +1570,7 @@ assert.equal(detectedId.valid, true);
               `;
             }
           } catch(err) {
-            scanStatus.innerHTML = `<div style="color:#ef4444; font-family:var(--font-mono); font-size:0.8rem;">Scan error: \${err.message}</div>`;
+            scanStatus.innerHTML = `<div style="color:#ef4444; font-family:var(--font-mono); font-size:0.8rem;">Scan error: ${err.message}</div>`;
           } finally {
             btnScan.disabled = false;
             btnScan.innerText = "Scan Audio for Leaked Signature";

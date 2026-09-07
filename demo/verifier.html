@@ -1168,25 +1168,25 @@
     if (!dspWorkerInstance && typeof Worker !== "undefined") {
       try {
         const workerScript = `
-          \${hashSeed.toString()}
-          \${mix.toString()}
-          \${makeRng.toString()}
-          \${makeSymbolStream.toString()}
+          ${hashSeed.toString()}
+          ${mix.toString()}
+          ${makeRng.toString()}
+          ${makeSymbolStream.toString()}
           const hannCache = new Map();
-          \${hannWindow.toString()}
-          \${clampInt.toString()}
-          \${resolveBand.toString()}
-          \${bandList.toString()}
-          \${deriveGeometry.toString()}
-          \${buildTemplate.toString()}
-          \${crc16.toString()}
-          \${packCodeword.toString()}
-          \${unpackCodeword.toString()}
-          \${foldRepetitions.toString()}
-          \${scoreHypothesis.toString()}
-          \${detectWatermarkCore.toString()}
-          \${embedWatermarkCore.toString()}
-          \${encodeWavArray.toString()}
+          ${hannWindow.toString()}
+          ${clampInt.toString()}
+          ${resolveBand.toString()}
+          ${bandList.toString()}
+          ${deriveGeometry.toString()}
+          ${buildTemplate.toString()}
+          ${crc16.toString()}
+          ${packCodeword.toString()}
+          ${unpackCodeword.toString()}
+          ${foldRepetitions.toString()}
+          ${scoreHypothesis.toString()}
+          ${detectWatermarkCore.toString()}
+          ${embedWatermarkCore.toString()}
+          ${encodeWavArray.toString()}
 
           const DEFAULT_KEY = "aural-watermark-default-key";
           const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
