@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aureal &bull; Headbar Branding Design Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+
+<style>
+  :root {
+    --bg: #07030c;
+    --surface: #12091f;
+    --surface-raised: #1c1030;
+    --border: #301a52;
+    --border-glow: #48277b;
+    
+    --purple: #8b5cf6;
+    --violet: #a855f7;
+    --pink: #ec4899;
+    --cyan: #38bdf8;
+    --emerald: #10b981;
+
+    --text: #f0f6fc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+
+    --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(ellipse at 50% 0%, #200a38 0%, var(--bg) 75%);
+    color: var(--text);
+    font-family: var(--font-heading);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-banner {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+  .hero-banner h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg, #ffffff 30%, #e9d5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.75rem;
+  }
+  .hero-banner p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* Preview Card */
+  .preview-section {
+    margin-bottom: 3.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .preview-section:hover {
+    border-color: var(--purple);
+    box-shadow: 0 16px 42px rgba(139, 92, 246, 0.12);
+  }
+  .preview-meta {
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(28, 16, 48, 0.45);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .preview-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .preview-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge-current {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #f87171;
+  }
+  .badge-rec {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+  }
+  .badge-opt {
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: #c084fc;
+  }
+  .preview-desc {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  /* Mock Header Canvas */
+  .mock-header-wrapper {
+    background: rgba(8, 4, 13, 0.95);
+    padding: 0.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .mock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+
+  /* Mock Nav Links */
+  .mock-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .mock-nav-link {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    text-decoration: none;
+    cursor: default;
+  }
+  .mock-btn-repo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+  }
+  .mock-btn-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    background: linear-gradient(135deg, var(--purple) 0%, #6366f1 100%);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* ============================================================ */
+  /* STYLE DEFINITIONS FOR EACH OPTION                            */
+  /* ============================================================ */
+
+  /* CURRENT STYLE (As it is now) */
+  .brand-current {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+  }
+  .brand-current .brand-tag {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: var(--purple);
+    font-family: var(--font-mono);
+  }
+
+  /* OPTION 1: STACKED ENTERPRISE LOCKUP (RECOMMENDED) */
+  .brand-opt1 {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+  }
+  .brand-opt1-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-opt1-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 75%);
+    filter: blur(4px);
+    pointer-events: none;
+  }
+  .brand-opt1-titles {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.18;
+  }
+  .brand-opt1-product {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .brand-opt1-product span.sub-accent {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+  .brand-opt1-company {
+    font-family: var(--font-heading);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* OPTION 2: CLEAN BREADCRUMB / SLASH */
+  .brand-opt2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    font-family: var(--font-heading);
+  }
+  .brand-opt2-company {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .brand-opt2-slash {
+    color: var(--border-glow);
+    font-size: 1.15rem;
+    font-weight: 300;
+    margin: 0 0.1rem;
+  }
+  .brand-opt2-product {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--purple);
+    letter-spacing: -0.01em;
+  }
+
+  /* OPTION 3: PRODUCT WITH MUTED BYLINE */
+  .brand-opt3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    font-family: var(--font-heading);
+  }
+  .brand-opt3-product {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+  }
+  .brand-opt3-byline {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .brand-opt3-byline strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* OPTION 4: REFINED COMPANY WITH GLOWING PILL */
+  .brand-opt4 {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+    font-family: var(--font-heading);
+  }
+  .brand-opt4-company {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .brand-opt4-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .brand-opt4-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+  }
+
+  /* OPTION 5: MINIMAL WORDMARK WITH SEPARATOR DOT */
+  .brand-opt5 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    font-family: var(--font-heading);
+  }
+  .brand-opt5-company {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .brand-opt5-dot {
+    color: var(--cyan);
+    font-size: 0.9rem;
+  }
+  .brand-opt5-product {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .brand-opt5-version {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.25rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="hero-banner">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <img src="assets/icon.svg" width="36" height="36" style="border-radius: 8px;" alt="Logo">
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--purple); letter-spacing: 0.05em;">KELLER SYSTEMS &bull; BRANDING LAB</span>
+    </div>
+    <h1>Headbar Branding &amp; Typography Showcase</h1>
+    <p>Compare the current header against 5 refined, spacious layouts designed to give <strong>Keller Systems</strong> and <strong>Aureal Watermark</strong> an open, premium enterprise feel.</p>
+  </div>
+
+  <!-- CURRENT VERSION -->
+  <div class="preview-section">
+    <div class="preview-meta">
+      <div>
+        <div class="preview-title">
+          <span>Current Version</span>
+          <span class="preview-badge badge-current">CURRENT (CRAMPED)</span>
+        </div>
+        <div class="preview-desc">Uses rigid uppercase monospace with tight letter-spacing and a boxed tag. Feels dense and heavy horizontally.</div>
+      </div>
+    </div>
+    <div class="mock-header-wrapper">
+      <div class="mock-header">
+        <a href="#" class="brand-current" onclick="return false;">
+          <img src="assets/icon.svg" alt="Aureal Logo" width="28" height="28" style="border-radius:6px; flex-shrink:0;" />
+          <span>KELLER SYSTEMS</span>
+          <span class="brand-tag">AUREAL AUDIO</span>
+        </a>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Studio</span>
+          <span class="mock-nav-link">Pricing</span>
+          <span class="mock-nav-link">Documentation</span>
+          <span class="mock-btn-repo">Repository</span>
+          <span class="mock-btn-cta">Launch Studio &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 1: STACKED ENTERPRISE LOCKUP (RECOMMENDED) -->
+  <div class="preview-section" style="border-color: rgba(16, 185, 129, 0.45); box-shadow: 0 0 28px rgba(16, 185, 129, 0.08);">
+    <div class="preview-meta" style="background: rgba(16, 185, 129, 0.05);">
+      <div>
+        <div class="preview-title">
+          <span>Option 1: Stacked Enterprise Lockup</span>
+          <span class="preview-badge badge-rec">RECOMMENDED &bull; MOST SPACIOUS</span>
+        </div>
+        <div class="preview-desc">Stacks <strong>Aureal Watermark</strong> above <strong>KELLER SYSTEMS</strong>. Eliminates horizontal clutter completely while giving both product and parent company prominent, prestigious placement. Matches modern tech giants (Linear, Vercel, JetBrains).</div>
+      </div>
+    </div>
+    <div class="mock-header-wrapper">
+      <div class="mock-header">
+        <a href="#" class="brand-opt1" onclick="return false;">
+          <div class="brand-opt1-icon-wrap">
+            <div class="brand-opt1-glow"></div>
+            <img src="assets/icon.svg" alt="Aureal Logo" width="32" height="32" style="border-radius:7px; flex-shrink:0;" />
+          </div>
+          <div class="brand-opt1-titles">
+            <div class="brand-opt1-product">Aureal <span class="sub-accent">Watermark</span></div>
+            <div class="brand-opt1-company">Keller Systems</div>
+          </div>
+        </a>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Studio</span>
+          <span class="mock-nav-link">Pricing</span>
+          <span class="mock-nav-link">Documentation</span>
+          <span class="mock-btn-repo">Repository</span>
+          <span class="mock-btn-cta">Launch Studio &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 2: CLEAN BREADCRUMB SLASH -->
+  <div class="preview-section">
+    <div class="preview-meta">
+      <div>
+        <div class="preview-title">
+          <span>Option 2: Clean Breadcrumb Slash</span>
+          <span class="preview-badge badge-opt">ORGANIZED &bull; LIGHTWEIGHT</span>
+        </div>
+        <div class="preview-desc">Displays <strong>Keller Systems / Aureal Watermark</strong> in clean Space Grotesk with a subtle slash divider. Replaces rigid monospace with proportional typography and open letter-spacing.</div>
+      </div>
+    </div>
+    <div class="mock-header-wrapper">
+      <div class="mock-header">
+        <a href="#" class="brand-opt2" onclick="return false;">
+          <img src="assets/icon.svg" alt="Aureal Logo" width="30" height="30" style="border-radius:7px; flex-shrink:0;" />
+          <span class="brand-opt2-company">Keller Systems</span>
+          <span class="brand-opt2-slash">/</span>
+          <span class="brand-opt2-product">Aureal Watermark</span>
+        </a>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Studio</span>
+          <span class="mock-nav-link">Pricing</span>
+          <span class="mock-nav-link">Documentation</span>
+          <span class="mock-btn-repo">Repository</span>
+          <span class="mock-btn-cta">Launch Studio &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 3: PRODUCT WITH BYLINE -->
+  <div class="preview-section">
+    <div class="preview-meta">
+      <div>
+        <div class="preview-title">
+          <span>Option 3: Product with Byline</span>
+          <span class="preview-badge badge-opt">PRODUCT-FIRST</span>
+        </div>
+        <div class="preview-desc">Focuses immediately on <strong>Aureal Watermark</strong> in crisp white, followed smoothly by an unboxed, natural <strong>by Keller Systems</strong> byline.</div>
+      </div>
+    </div>
+    <div class="mock-header-wrapper">
+      <div class="mock-header">
+        <a href="#" class="brand-opt3" onclick="return false;">
+          <img src="assets/icon.svg" alt="Aureal Logo" width="30" height="30" style="border-radius:7px; flex-shrink:0;" />
+          <span class="brand-opt3-product">Aureal Watermark</span>
+          <span class="brand-opt3-byline">by <strong>Keller Systems</strong></span>
+        </a>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Studio</span>
+          <span class="mock-nav-link">Pricing</span>
+          <span class="mock-nav-link">Documentation</span>
+          <span class="mock-btn-repo">Repository</span>
+          <span class="mock-btn-cta">Launch Studio &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 4: REFINED COMPANY WITH GLOWING PILL -->
+  <div class="preview-section">
+    <div class="preview-meta">
+      <div>
+        <div class="preview-title">
+          <span>Option 4: Company Primary with Glowing Pill</span>
+          <span class="preview-badge badge-opt">CORPORATE PORTAL</span>
+        </div>
+        <div class="preview-desc">Keeps <strong>KELLER SYSTEMS</strong> in front with relaxed letter-spacing, accompanied by a soft, rounded cyan pill for <strong>Aureal Audio</strong> with an ambient pulse dot.</div>
+      </div>
+    </div>
+    <div class="mock-header-wrapper">
+      <div class="mock-header">
+        <a href="#" class="brand-opt4" onclick="return false;">
+          <img src="assets/icon.svg" alt="Aureal Logo" width="30" height="30" style="border-radius:7px; flex-shrink:0;" />
+          <span class="brand-opt4-company">Keller Systems</span>
+          <span class="brand-opt4-pill">Aureal Audio</span>
+        </a>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Studio</span>
+          <span class="mock-nav-link">Pricing</span>
+          <span class="mock-nav-link">Documentation</span>
+          <span class="mock-btn-repo">Repository</span>
+          <span class="mock-btn-cta">Launch Studio &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 5: MINIMAL WORDMARK WITH SEPARATOR DOT -->
+  <div class="preview-section">
+    <div class="preview-meta">
+      <div>
+        <div class="preview-title">
+          <span>Option 5: Minimal Wordmark with Separator Dot</span>
+          <span class="preview-badge badge-opt">MINIMALIST &bull; SLEEK</span>
+        </div>
+        <div class="preview-desc">Sleek horizontal lockup: <strong>Keller Systems &bull; Aureal</strong> with an elegant version badge <strong>v0.2.2</strong>. Quiet, balanced, and clean.</div>
+      </div>
+    </div>
+    <div class="mock-header-wrapper">
+      <div class="mock-header">
+        <a href="#" class="brand-opt5" onclick="return false;">
+          <img src="assets/icon.svg" alt="Aureal Logo" width="28" height="28" style="border-radius:6px; flex-shrink:0;" />
+          <span class="brand-opt5-company">Keller Systems</span>
+          <span class="brand-opt5-dot">&bull;</span>
+          <span class="brand-opt5-product">Aureal</span>
+          <span class="brand-opt5-version">v0.2.2</span>
+        </a>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Studio</span>
+          <span class="mock-nav-link">Pricing</span>
+          <span class="mock-nav-link">Documentation</span>
+          <span class="mock-btn-repo">Repository</span>
+          <span class="mock-btn-cta">Launch Studio &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 4rem; color: var(--text-muted); font-size: 0.9rem;">
+    <p>Tell me which option number you like best (e.g. <strong>Option 1</strong>, <strong>Option 2</strong>, etc.), or if you'd like any custom tweaks!</p>
+  </div>
+
+</div>
+
+</body>
+</html>
