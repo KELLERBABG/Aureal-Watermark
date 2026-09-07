@@ -1,4 +1,4 @@
-﻿// scripts/publish-release-v024.js
+// scripts/publish-release-v024.js
 import fs from "node:fs";
 
 const token = "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";
@@ -51,23 +51,9 @@ async function main() {
   console.log("Checking for release v0.2.4 on GitHub...");
 
   if (!fs.existsSync("dist/aureal-watermark.exe") || fs.statSync("dist/aureal-watermark.exe").size < 1000) {
-    console.log("Fetching aureal-watermark.exe from v0.2.3...");
-    const rel23Res = await fetch(`https://api.github.com/repos/${repo}/releases/tags/v0.2.3`, {
-      headers: { Authorization: "Bearer " + token, "User-Agent": "NodeJS" }
-    });
-    if (rel23Res.ok) {
-      const rel23 = await rel23Res.json();
-      const exeAsset = rel23.assets.find(a => a.name === "aureal-watermark.exe");
-      if (exeAsset) {
-        const exeRes = await fetch(`https://api.github.com/repos/${repo}/releases/assets/${exeAsset.id}`, {
-          headers: { Authorization: "Bearer " + token, Accept: "application/octet-stream", "User-Agent": "NodeJS" }
-        });
-        const exeBuf = Buffer.from(await exeRes.arrayBuffer());
-        fs.writeFileSync("dist/aureal-watermark.exe", exeBuf);
-        console.log(`Downloaded and saved dist/aureal-watermark.exe (${exeBuf.length} bytes).`);
-      }
-    }
+    throw new Error("dist/aureal-watermark.exe not found! Run scripts/build-all.ps1 first.");
   }
+  console.log(`Found built binary dist/aureal-watermark.exe (${fs.statSync("dist/aureal-watermark.exe").size} bytes)`);
 
   const get24 = await fetch(`https://api.github.com/repos/${repo}/releases/tags/v0.2.4`, {
     headers: { Authorization: "Bearer " + token, "User-Agent": "NodeJS" }
