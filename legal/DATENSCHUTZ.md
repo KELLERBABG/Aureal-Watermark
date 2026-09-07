@@ -1,4 +1,4 @@
-﻿# Datenschutzerklärung (Privacy Policy)
+# Datenschutzerklärung (Privacy Policy)
 
 **Garantie: 100% Offline &bull; Keine Telemetrie &bull; Keine Audio-Uploads**
 
@@ -11,7 +11,7 @@ Aureal Watermark ist auf maximale Vertraulichkeit und Datensouveränität ausgel
 
 ## 2. Verantwortliche Stelle
 Lukas Negenborn  
-E-Mail: [lukas@negenborn.de](mailto:lukas@negenborn.de)
+E-Mail: [contact@kellersystems.dev](mailto:contact@kellersystems.dev)
 
 ## 3. Webhosting über GitHub Pages
 Diese Dokumentations- und Studio-Webseite wird auf Servern von GitHub, Inc. (88 Colin P Kelly Jr St, San Francisco, CA 94107, USA) gehostet. Beim Aufruf der Seiten erfasst GitHub automatisch Zugriffsdaten (Server-Logfiles, IP-Adresse, Datum/Uhrzeit) zur Sicherstellung der Betriebssicherheit und Abwehr von Cyberangriffen gemäß Art. 6 Abs. 1 lit. f DSGVO. Die Datenübermittlung in die USA ist durch EU-Standardvertragsklauseln (SCC) abgesichert.

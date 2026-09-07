@@ -44,6 +44,6 @@ Any use of Aureal Watermark by a business, commercial entity, revenue-generating
 ### Obtaining a Commercial License
 To purchase a commercial license or discuss custom enterprise terms (per-seat, per-stream, or perpetual binary redistribution), please consult [docs/COMMERCIAL_LICENSING.md](docs/COMMERCIAL_LICENSING.md) or contact:
 
-* **Email:** [lukas@negenborn.de](mailto:lukas@negenborn.de)
+* **Email:** [enterprise@kellersystems.dev](mailto:enterprise@kellersystems.dev)
 * **Repository Inquiries:** [https://github.com/KELLERBABG/Aureal-Watermark/issues](https://github.com/KELLERBABG/Aureal-Watermark/issues)
 * **GitHub Organization:** [@KELLERBABG](https://github.com/KELLERBABG)

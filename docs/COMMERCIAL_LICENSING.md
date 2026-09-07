@@ -41,6 +41,6 @@ Commercial licenses do not require continuous internet connectivity or intrusive
 
 To purchase a commercial license, activate an enterprise SLA, or request a custom integration pilot:
 
-1. **Email:** Licensing inquiries can be submitted directly to **[lukas@negenborn.de](mailto:lukas@negenborn.de)** (Founder / Lead Maintainer).
-2. **GitHub Inquiries:** Open a confidential discussion or inquiry on the [GitHub Repository](https://github.com/KELLERBABG/Aureal-Watermark).
+1. **Email:** Licensing inquiries can be submitted directly to **[enterprise@kellersystems.dev](mailto:enterprise@kellersystems.dev)** (Founder / Licensing Desk).
+2. **Instant Checkout:** Solo and Label tiers can be purchased directly with card via Polar.sh on the [Pricing Page](https://aureal.kellersystems.dev/pricing).
 3. **Invoicing:** Wire transfer, Stripe invoice, and corporate purchase orders (PO) are accepted with same-day digital license certificate issuance.
