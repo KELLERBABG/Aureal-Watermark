@@ -1235,6 +1235,7 @@
         };
         dspWorkerInstance.onerror = function(err) {
           console.warn("DSP Web Worker encountered an error, falling back to main thread:", err);
+          dspWorkerInstance = null;
         };
       } catch (err) {
         console.warn("Web Worker creation blocked, falling back to main thread:", err);
@@ -1247,11 +1248,17 @@
   async function asyncDetect(pcm, fmt, opts) {
     const worker = getDspWorker();
     if (worker) {
-      return new Promise((resolve, reject) => {
-        const id = ++dspReqCounter;
-        dspPendingReqs.set(id, { resolve: (val) => resolve(val.res), reject });
-        worker.postMessage({ id, action: "detect", pcm, fmt, opts }, [pcm.buffer]);
-      });
+      try {
+        return await new Promise((resolve, reject) => {
+          const id = ++dspReqCounter;
+          dspPendingReqs.set(id, { resolve: (val) => resolve(val.res), reject });
+          const pcmCopy = new Float32Array(pcm);
+          worker.postMessage({ id, action: "detect", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
+        });
+      } catch (workerErr) {
+        console.warn("DSP Web Worker detect failed, falling back to main thread:", workerErr);
+        dspWorkerInstance = null;
+      }
     }
     return detectWatermarkCore(pcm, fmt, opts);
   }
@@ -1259,14 +1266,20 @@
   async function asyncEmbed(pcm, fmt, opts) {
     const worker = getDspWorker();
     if (worker) {
-      return new Promise((resolve, reject) => {
-        const id = ++dspReqCounter;
-        dspPendingReqs.set(id, {
-          resolve: (val) => resolve(new Blob([val.wavArr], { type: "audio/wav" })),
-          reject
+      try {
+        return await new Promise((resolve, reject) => {
+          const id = ++dspReqCounter;
+          dspPendingReqs.set(id, {
+            resolve: (val) => resolve(new Blob([val.wavArr], { type: "audio/wav" })),
+            reject
+          });
+          const pcmCopy = new Float32Array(pcm);
+          worker.postMessage({ id, action: "embed", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
         });
-        worker.postMessage({ id, action: "embed", pcm, fmt, opts }, [pcm.buffer]);
-      });
+      } catch (workerErr) {
+        console.warn("DSP Web Worker embed failed, falling back to main thread:", workerErr);
+        dspWorkerInstance = null;
+      }
     }
     const watermarked = embedWatermarkCore(pcm, fmt, opts);
     return encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16);
