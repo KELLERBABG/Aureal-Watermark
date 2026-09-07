@@ -5,13 +5,13 @@
 <br>
 
 [![Release](https://img.shields.io/badge/Release-v0.2.2-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
-[![License](https://img.shields.io/badge/License-Dual%20(Noncommercial%20%2F%20Commercial)-059669?style=flat-square)](LICENSE.md)
-[![Dependencies](https://img.shields.io/badge/Dependencies-0%20(Pure%20Stdlib)-blueviolet?style=flat-square)](package.json)
-[![Platform](https://img.shields.io/badge/Platform-Universal%20(.cjs)%20%7C%20Node.js%20%7C%20Web%20Audio-111827?style=flat-square)](https://aureal.kellersystems.dev/studio.html)
+[![Security](https://img.shields.io/badge/Air--Gap%20Security-100%25%20On--Premise-059669?style=flat-square)](https://aureal.kellersystems.dev)
+[![Audio Transparency](https://img.shields.io/badge/Audio%20Transparency-Bit--Transparent%20(%E2%89%A4%20-60%20dBFS)-0891b2?style=flat-square)](docs/TECHNICAL_SPECIFICATIONS.md)
+[![Commercial](https://img.shields.io/badge/Commercial%20Licenses-Available%20via%20Polar-8b5cf6?style=flat-square)](https://aureal.kellersystems.dev/pricing.html)
 
 <br>
 
-[**Open Web Studio**](https://aureal.kellersystems.dev/studio.html) &bull; [**Download Universal (.cjs)**](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest) &bull; [**Technical Deep Dive**](docs/TECHNICAL_SPECIFICATIONS.md) &bull; [**Code Wiki**](docs/CODEBASE_WIKI.md)
+[**Launch Web Studio**](https://aureal.kellersystems.dev/studio.html) &bull; [**Commercial Licensing & Pricing**](https://aureal.kellersystems.dev/pricing.html) &bull; [**Documentation**](https://aureal.kellersystems.dev/docs.html) &bull; [**Technical Specifications**](docs/TECHNICAL_SPECIFICATIONS.md)
 
 </div>
 
@@ -32,7 +32,7 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
 * **Detect AI Training & Cloning:** Prove that your voice or music was scraped and used to train an AI model without your permission.
 * **Survives MP3 Compression:** The watermark stays intact through heavy MP3 and AAC compression, volume changes, and format conversions.
 * **100% Private & Offline:** Everything runs directly on your computer. Your audio files are never uploaded to any server or third party.
-* **Zero Dependencies:** Pure, lightweight code with no external bloat or complicated installs.
+* **Air-Gapped & Studio Compliant:** Pure offline signal processing. Audio masters and stems never touch the cloud or any third party.
 
 ---
 
@@ -71,7 +71,7 @@ No installation or technical setup needed:
 
 ---
 
-### Option 2: Universal Standalone Script (`aureal-watermark.cjs`)
+### Option 2: Standalone Command Line Tool (Universal CLI)
 
 A single, zero-dependency file that runs on **Windows, macOS, and Linux** using standard Node.js (&ge; 18):
 
