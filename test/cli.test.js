@@ -12,7 +12,11 @@ const cli = join(dirname(fileURLToPath(import.meta.url)), "..", "bin", "auralwat
 const work = mkdtempSync(join(tmpdir(), "aw-cli-"));
 
 function run(args) {
-  const r = spawnSync(process.execPath, [cli, ...args], { encoding: "utf8" });
+  const r = spawnSync(process.execPath, [cli, ...args], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true
+  });
   return {
     status: r.status,
     stdout: r.stdout ?? "",

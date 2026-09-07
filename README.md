@@ -4,7 +4,7 @@
 
 <br>
 
-[![Release](https://img.shields.io/badge/Release-v0.2.2-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
+[![Release](https://img.shields.io/badge/Release-v0.2.3-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
 [![Security](https://img.shields.io/badge/Air--Gap%20Security-100%25%20On--Premise-059669?style=flat-square)](https://aureal.kellersystems.dev)
 [![Audio Transparency](https://img.shields.io/badge/Audio%20Transparency-Bit--Transparent%20(%E2%89%A4%20-60%20dBFS)-0891b2?style=flat-square)](docs/TECHNICAL_SPECIFICATIONS.md)
 [![Commercial](https://img.shields.io/badge/Commercial%20Licenses-Available%20via%20Polar-8b5cf6?style=flat-square)](https://aureal.kellersystems.dev/pricing.html)
