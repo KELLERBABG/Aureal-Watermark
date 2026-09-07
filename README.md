@@ -65,7 +65,7 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
 
 No installation or technical setup needed:
 
-👉 **[Launch Interactive Web Studio](https://aureal.kellersystems.dev/studio.html)**
+**[Launch Interactive Web Studio &rarr;](https://aureal.kellersystems.dev/studio.html)**
 
 *(Runs 100% client-side in browser memory. Nothing ever leaves your device).*
 

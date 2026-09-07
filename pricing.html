@@ -682,7 +682,7 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
         <span>Pay with Card &bull; $249</span>
       </a>
-      <div class="instant-delivery-tag">⚡ Instant Card Checkout &bull; Immediate Key Delivery</div>
+      <div class="instant-delivery-tag">Instant Card Checkout &bull; Immediate Key Delivery</div>
     </div>
 
     <!-- Boutique Label & A&R -->
@@ -703,7 +703,7 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
         <span>Pay with Card &bull; $499</span>
       </a>
-      <div class="instant-delivery-tag">⚡ Instant Card Checkout &bull; Immediate Key Delivery</div>
+      <div class="instant-delivery-tag">Instant Card Checkout &bull; Immediate Key Delivery</div>
     </div>
 
     <!-- B2B Audio Marketplace -->
@@ -917,9 +917,9 @@
         </div>
 
         <div class="checkout-badges">
-          <span>🔒 256-Bit SSL Encrypted</span>
-          <span>⚡ Instant Key Issuance</span>
-          <span>🛡️ 14-Day Guarantee</span>
+          <span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> 256-Bit SSL Encrypted</span>
+          <span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg> Instant Key Issuance</span>
+          <span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> 14-Day Guarantee</span>
         </div>
 
         <button type="submit" class="checkout-submit-btn" id="btn-submit-pay">
@@ -931,7 +931,9 @@
 
     <!-- Success View -->
     <div class="checkout-success-view" id="checkout-success-view">
-      <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🎉</div>
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #10b981; margin-bottom: 0.75rem;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
       <h3 style="color: #ffffff; margin-bottom: 0.25rem;">Payment Confirmed!</h3>
       <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1rem;">
         Your commercial license is active. A receipt and license certificate have been issued for <strong id="success-email" style="color: var(--accent);">your email</strong>.
@@ -1050,7 +1052,7 @@
     const origText = btn.innerHTML;
 
     btn.disabled = true;
-    btn.innerHTML = '<span>⚡ Processing Encrypted Card Swipe...</span>';
+    btn.innerHTML = '<span>Processing Encrypted Card Transaction...</span>';
 
     setTimeout(() => {
       btn.disabled = false;

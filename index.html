@@ -253,30 +253,68 @@
       letter-spacing: 0.02em;
     }
 
-    /* Executive Studio Trust Badges */
-    .exec-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-      margin: 2.25rem 0 3.5rem;
-    }
-    .exec-badge {
-      display: inline-flex;
+    /* Executive Studio Specifications Bar */
+    .hero-specs-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: rgba(28, 16, 48, 0.75);
-      border: 1px solid rgba(139, 92, 246, 0.25);
-      border-radius: 9999px;
-      font-size: 0.82rem;
-      color: #e2e8f0;
-      font-weight: 500;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background: rgba(18, 9, 31, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(139, 92, 246, 0.08);
+      max-width: 1060px;
+      margin: 2.75rem auto 3.5rem;
+      padding: 1.15rem 1.5rem;
+      gap: 1.25rem;
     }
-    .exec-badge span.icon {
-      font-size: 0.95rem;
+    .spec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      text-align: left;
+    }
+    .spec-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--cyan);
+    }
+    .spec-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .spec-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    .spec-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+      margin-top: 0.15rem;
+    }
+    @media (max-width: 960px) {
+      .hero-specs-bar {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        padding: 1.25rem;
+      }
+    }
+    @media (max-width: 540px) {
+      .hero-specs-bar {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
     }
 
     /* In-Browser Live Demo Widget */
@@ -882,24 +920,59 @@
 
       <div class="hero-actions">
         <a href="#live-demo" class="btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Test Live Demo Below
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Interactive Studio Demo
         </a>
         <a href="pricing.html" class="btn-secondary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          Commercial Pricing &amp; SLAs
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          Commercial Licenses &amp; SLAs
         </a>
         <a href="docs.html" class="btn-tertiary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
           Documentation
         </a>
       </div>
 
-      <div class="exec-badges">
-        <div class="exec-badge"><span class="icon">🛡️</span> 100% Air-Gapped / Zero Cloud Leak Risk</div>
-        <div class="exec-badge"><span class="icon">🎯</span> Recipient-Level Leak Identification</div>
-        <div class="exec-badge"><span class="icon">🎧</span> 0.0 dB Perceptual Delta (Golden Ears Approved)</div>
-        <div class="exec-badge"><span class="icon">⚖️</span> Court-Admissible Provenance Cryptography</div>
+      <div class="hero-specs-bar">
+        <div class="spec-item">
+          <div class="spec-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div class="spec-text">
+            <span class="spec-title">100% Air-Gapped DSP</span>
+            <span class="spec-sub">Zero network transmission</span>
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          </div>
+          <div class="spec-text">
+            <span class="spec-title">Forensic Serialization</span>
+            <span class="spec-sub">Deterministic leak attribution</span>
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"></path></svg>
+          </div>
+          <div class="spec-text">
+            <span class="spec-title">Bit-Transparent Audio</span>
+            <span class="spec-sub">Psychoacoustic masking &le; -60 dBFS</span>
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <div class="spec-text">
+            <span class="spec-title">Cryptographic Integrity</span>
+            <span class="spec-sub">48-bit codeword &amp; CRC-16</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -913,10 +986,12 @@
           </div>
           <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
             <button type="button" class="demo-btn primary" id="btn-demo-synth" style="padding: 0.45rem 0.95rem; font-size: 0.78rem;">
-              <span>⚡ 1-Click Load Studio Sample</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <span>Load Reference Track</span>
             </button>
             <label class="demo-btn secondary" style="padding: 0.45rem 0.95rem; font-size: 0.78rem; cursor: pointer; margin: 0;">
-              <span>📁 Select Your File</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Select Audio File</span>
               <input type="file" id="demo-file-input" accept="audio/*,.wav,.mp3,.m4a,.flac" style="display: none;">
             </label>
           </div>
@@ -954,13 +1029,14 @@
               </div>
 
               <button type="button" class="demo-btn primary" id="btn-demo-embed" style="width: 100%; justify-content: center; margin-top: 0.5rem;" disabled>
-                <span>🔒 Embed Imperceptible Watermark</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Embed Imperceptible Signature</span>
               </button>
 
               <!-- A/B Comparison & Download -->
               <div id="demo-ab-section" class="demo-ab-box" style="display: none;">
                 <div style="font-size: 0.78rem; font-weight: 600; color: var(--cyan); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
-                  <span>A/B GOLDEN EARS AUDITION</span>
+                  <span>A/B MASTER AUDITION</span>
                   <span style="color: var(--emerald);">0.0 dB DELTA</span>
                 </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
@@ -968,7 +1044,8 @@
                   <button type="button" class="demo-btn primary" id="btn-listen-marked" style="flex: 1; justify-content: center; font-size: 0.75rem;">Watermarked Copy</button>
                 </div>
                 <a id="btn-download-marked" class="demo-btn secondary" style="width: 100%; justify-content: center; font-size: 0.75rem; text-decoration: none;" download="aureal_watermarked.wav">
-                  ⬇ Download Watermarked WAV
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Download Watermarked WAV
                 </a>
               </div>
             </div>
@@ -985,12 +1062,13 @@
               </p>
 
               <button type="button" class="demo-btn secondary" id="btn-demo-scan" style="width: 100%; justify-content: center;" disabled>
-                <span>🔍 Scan Audio for Leaked Provenance</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Scan Audio for Leaked Signature</span>
               </button>
 
               <div id="demo-scan-status" style="margin-top: 1.25rem;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--text-dim); font-size: 0.82rem; font-family: var(--font-mono);">
-                  Click "⚡ 1-Click Load Studio Sample" above to test watermark embedding and leak extraction...
+                  Click "Load Reference Track" above to test watermark embedding and leak extraction...
                 </div>
               </div>
             </div>
@@ -1329,7 +1407,7 @@ assert.equal(detectedId.valid, true);
         origBlobUrl = URL.createObjectURL(blob);
         playerOrig.src = origBlobUrl;
 
-        loadedBadge.textContent = "⚡ Synthetic Studio Master (5s Harmonic Arpeggio)";
+        loadedBadge.textContent = "Reference Track Loaded (5s Harmonic Master)";
         loadedBadge.style.color = "var(--emerald)";
         btnEmbed.disabled = false;
         btnScan.disabled = false;
@@ -1400,7 +1478,7 @@ assert.equal(detectedId.valid, true);
             btnDownloadMarked.href = markedBlobUrl;
 
             abSection.style.display = "block";
-            btnEmbed.innerText = "✔ Watermark Embedded (Sub-Threshold)";
+            btnEmbed.innerText = "Watermark Embedded (Sub-Threshold)";
             btnScan.disabled = false;
 
             scanStatus.innerHTML = '<div style="background: rgba(139, 92, 246, 0.1); border: 1px solid var(--purple); border-radius: 8px; padding: 1.25rem; text-align: center; color: #e2e8f0; font-size: 0.82rem; font-family: var(--font-mono);">' +
@@ -1482,7 +1560,7 @@ assert.equal(detectedId.valid, true);
             } else {
               scanStatus.innerHTML = `
                 <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:1.25rem; font-family:var(--font-mono); font-size:0.82rem;">
-                  <div style="color:#ef4444; font-weight:700; margin-bottom:0.5rem;">✕ NO WATERMARK DETECTED IN AUDIO STREAM</div>
+                  <div style="color:#ef4444; font-weight:700; margin-bottom:0.5rem;">NO WATERMARK DETECTED IN AUDIO STREAM</div>
                   <p style="color:var(--text-muted); margin:0;">Audio is clean / unwatermarked, or cryptographic seed key does not match.</p>
                 </div>
               `;
@@ -1491,7 +1569,7 @@ assert.equal(detectedId.valid, true);
             scanStatus.innerHTML = `<div style="color:#ef4444; font-family:var(--font-mono); font-size:0.8rem;">Scan error: \${err.message}</div>`;
           } finally {
             btnScan.disabled = false;
-            btnScan.innerText = "🔍 Scan Audio for Leaked Provenance";
+            btnScan.innerText = "Scan Audio for Leaked Signature";
           }
         }, 150);
       });
