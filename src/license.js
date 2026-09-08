@@ -1,4 +1,4 @@
-﻿// src/license.js — Aureal Polar.sh Commercial License Validator & Offline Manager
+// src/license.js — Aureal Polar.sh Commercial License Validator & Offline Manager
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -147,7 +147,9 @@ export function saveLocalLicense(record) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(filePath, JSON.stringify(record, null, 2), "utf8");
+    const safeRecord = { ...record };
+    delete safeRecord.key;
+    fs.writeFileSync(filePath, JSON.stringify(safeRecord, null, 2), "utf8");
   } catch (err) {
     console.warn(`[Aureal License] Could not write offline license file: ${err.message}`);
   }
@@ -163,7 +165,7 @@ export function loadLocalLicense() {
     if (!fs.existsSync(filePath)) return null;
     const raw = fs.readFileSync(filePath, "utf8");
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.key && (parsed.status === "granted" || parsed.status === "active")) {
+    if (parsed && (parsed.status === "granted" || parsed.status === "active") && !parsed.key) {
       if (parsed.expiresAt) {
         const exp = new Date(parsed.expiresAt).getTime();
         if (Date.now() > exp) return null;
