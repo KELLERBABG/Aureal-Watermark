@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commercial Licensing & Pricing â€” Aureal Watermark</title>
+<meta name="description" content="Commercial production licenses, feature comparison, and enterprise terms for Aureal Watermark.">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="/assets/icon.png">
+  <link rel="shortcut icon" href="/assets/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<style>
+  :root {
+    --bg: #0d0e11;
+    --card: #14161b;
+    --card-subtle: #111317;
+    --border: #222630;
+    --border-bright: #323846;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --cyan: #38bdf8;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2.5rem 1.25rem 4rem 1.25rem;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.25rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .brand-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 75%);
+    filter: blur(4px);
+    pointer-events: none;
+  }
+  .brand-titles {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.18;
+  }
+  .brand-product {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .brand-product span.sub-accent {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+  .brand-company {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .nav-btn {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text);
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .nav-btn:hover {
+    border-color: var(--border-bright);
+    color: var(--cyan);
+  }
+
+  /* Page Title */
+  .page-intro {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-intro h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #f0f6fc;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-intro p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    line-height: 1.55;
+  }
+
+  .dual-license-note {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin-top: 0.75rem;
+    color: var(--cyan);
+  }
+
+  /* Tiers Grid */
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 3.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .tiers-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .tiers-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .tier-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.35rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tier-card.featured {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: #101520;
+  }
+
+  .tier-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .tier-card.featured .tier-tag {
+    color: var(--cyan);
+  }
+
+  .tier-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 0.25rem;
+  }
+
+  .tier-price {
+    font-family: var(--mono);
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 0.5rem;
+  }
+
+  .tier-price span {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .tier-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 1.15rem;
+    min-height: 2.8rem;
+  }
+
+  .tier-specs {
+    list-style: none;
+    font-size: 0.76rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+  }
+
+  .tier-specs li {
+    padding-left: 0.85rem;
+    position: relative;
+    margin-bottom: 0.4rem;
+  }
+
+  .tier-specs li::before {
+    content: "â€“";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+
+  .tier-specs code {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+  }
+
+  .btn-tier {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #1b1f27;
+    color: var(--text);
+    transition: background 0.15s, border-color 0.15s;
+    margin-top: auto;
+  }
+
+  .btn-tier:hover {
+    background: #252b36;
+    border-color: var(--border-bright);
+    color: #ffffff;
+  }
+
+  .tier-card.featured .btn-tier {
+    background: var(--accent);
+    border-color: #3b82f6;
+    color: #ffffff;
+  }
+
+  .tier-card.featured .btn-tier:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn-checkout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .btn-checkout:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    border-color: #38bdf8;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+  }
+  .tier-card.featured .btn-checkout {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  .tier-card.featured .btn-checkout:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+    box-shadow: 0 0 25px rgba(124, 58, 237, 0.6);
+  }
+  .instant-delivery-tag {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+    margin-top: 0.45rem;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  /* Checkout Modal */
+  .checkout-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 4, 8, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .checkout-modal-backdrop.active {
+    display: flex;
+    opacity: 1;
+  }
+  .checkout-modal {
+    background: #0d1017;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 490px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(37, 99, 235, 0.2);
+    overflow: hidden;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .checkout-modal-backdrop.active .checkout-modal {
+    transform: scale(1) translateY(0);
+  }
+  .checkout-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.15rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    background: #11151f;
+  }
+  .checkout-modal-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .checkout-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .checkout-modal-close:hover { color: #ffffff; }
+  .checkout-order-summary {
+    padding: 1rem 1.4rem;
+    background: rgba(37, 99, 235, 0.08);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .order-plan-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.92rem;
+  }
+  .order-plan-sub {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+  .order-plan-price {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .checkout-modal-body {
+    padding: 1.4rem;
+  }
+  .checkout-form-group {
+    margin-bottom: 1rem;
+  }
+  .checkout-form-group label {
+    display: block;
+    font-size: 0.76rem;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .checkout-form-group input {
+    width: 100%;
+    background: #07090e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    color: #ffffff;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+  }
+  .checkout-form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  }
+  .checkout-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .checkout-badges {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.25rem;
+  }
+  .checkout-submit-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+  }
+  .checkout-submit-btn:hover {
+    background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
+    transform: translateY(-1px);
+  }
+  .checkout-success-view {
+    text-align: center;
+    padding: 2rem 1.4rem;
+    display: none;
+  }
+  .checkout-license-box {
+    background: #07090e;
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    padding: 0.85rem;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin: 1.25rem 0;
+    letter-spacing: 0.06em;
+    user-select: all;
+  }
+
+  /* Matrix Table */
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .matrix-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    margin-bottom: 3.5rem;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    text-align: left;
+  }
+
+  .matrix-table th {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: #101216;
+    color: var(--text-muted);
+  }
+
+  .matrix-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+  }
+
+  .matrix-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .matrix-table code {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--cyan);
+  }
+
+  .val-yes {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: #34d399;
+  }
+
+  .val-no {
+    font-family: var(--mono);
+    color: var(--text-muted);
+  }
+
+  /* Procurement & Operations */
+  .procurement-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 3.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .procurement-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .info-box {
+    background: var(--card-subtle);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .info-box h3 {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-box p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  .footer {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .footer {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  .footer a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    color: var(--cyan);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Nav Bar -->
+  <header class="nav-header">
+    <a href="/" class="nav-brand">
+      <div class="brand-icon-wrap">
+        <div class="brand-glow"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32" style="border-radius:7px; flex-shrink:0; position:relative;">
+          <defs>
+            <linearGradient id="aurBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#160c2b" />
+              <stop offset="45%" stop-color="#0b0617" />
+              <stop offset="100%" stop-color="#040208" />
+            </linearGradient>
+            <linearGradient id="aurBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#a855f7" stop-opacity="0.85" />
+              <stop offset="50%" stop-color="#6366f1" stop-opacity="0.4" />
+              <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.8" />
+            </linearGradient>
+            <linearGradient id="sonicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#c084fc" />
+              <stop offset="50%" stop-color="#8b5cf6" />
+              <stop offset="100%" stop-color="#06b6d4" />
+            </linearGradient>
+            <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="40%" stop-color="#f3e8ff" />
+              <stop offset="100%" stop-color="#38bdf8" />
+            </linearGradient>
+            <filter id="crispGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <rect width="512" height="512" rx="116" fill="url(#aurBg)" />
+          <rect x="2" y="2" width="508" height="508" rx="114" fill="none" stroke="url(#aurBorder)" stroke-width="3" />
+          <g opacity="0.3" stroke="#a855f7" stroke-width="1.8" fill="none" stroke-dasharray="5 7">
+            <circle cx="256" cy="256" r="212" />
+            <circle cx="256" cy="256" r="168" />
+            <circle cx="256" cy="256" r="124" />
+          </g>
+          <circle cx="256" cy="256" r="124" fill="rgba(139, 92, 246, 0.04)" />
+          <g stroke="url(#sonicGrad)" fill="none" stroke-linecap="round" filter="url(#crispGlow)">
+            <path d="M 108 152 A 180 180 0 0 0 108 360" stroke-width="5.5" opacity="0.45" />
+            <path d="M 148 182 A 130 130 0 0 0 148 330" stroke-width="7.5" opacity="0.75" />
+            <path d="M 188 214 A 80 80 0 0 0 188 298" stroke-width="9.5" opacity="0.95" />
+            <path d="M 324 214 A 80 80 0 0 1 324 298" stroke-width="9.5" opacity="0.95" />
+            <path d="M 364 182 A 130 130 0 0 1 364 330" stroke-width="7.5" opacity="0.75" />
+            <path d="M 404 152 A 180 180 0 0 1 404 360" stroke-width="5.5" opacity="0.45" />
+          </g>
+          <g fill="url(#coreGrad)" filter="url(#crispGlow)">
+            <rect x="249" y="104" width="14" height="304" rx="7" />
+            <rect x="227" y="142" width="12" height="228" rx="6" opacity="0.92" />
+            <rect x="273" y="142" width="12" height="228" rx="6" opacity="0.92" />
+            <rect x="207" y="184" width="10" height="144" rx="5" opacity="0.75" />
+            <rect x="295" y="184" width="10" height="144" rx="5" opacity="0.75" />
+            <rect x="189" y="218" width="8" height="76" rx="4" opacity="0.55" />
+            <rect x="315" y="218" width="8" height="76" rx="4" opacity="0.55" />
+          </g>
+          <circle cx="256" cy="256" r="16" fill="#ffffff" filter="url(#crispGlow)" />
+          <circle cx="256" cy="256" r="8" fill="#0b0617" />
+          <circle cx="256" cy="256" r="3.5" fill="#38bdf8" />
+          <g stroke="rgba(255, 255, 255, 0.45)" stroke-width="2" stroke-linecap="round">
+            <line x1="256" y1="44" x2="256" y2="70" />
+            <line x1="256" y1="442" x2="256" y2="468" />
+            <line x1="44" y1="256" x2="70" y2="256" />
+            <line x1="442" y1="256" x2="468" y2="256" />
+          </g>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <div class="brand-product">Aureal <span class="sub-accent">Watermark</span></div>
+        <div class="brand-company">Keller Systems</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-btn">Home</a>
+      <a href="/studio" class="nav-btn">Studio</a>
+      <a href="/docs" class="nav-btn">Docs</a>
+      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="nav-btn">GitHub</a>
+    </div>
+  </header>
+
+  <!-- Page Intro -->
+  <section class="page-intro">
+    <h1>Commercial Licensing &amp; Enterprise SLAs</h1>
+    <p>
+      Forensic acoustic watermark licensing tailored for independent producers, record labels, and major entertainment studios. Choose a production tier or request custom enterprise deployment.
+    </p>
+    <div class="dual-license-note">
+      Non-commercial academic evaluation is free. All commercial releases, pre-release promotional pools, film cue distribution, and automated content protection require an active commercial license or Enterprise MSA.
+    </div>
+  </section>
+
+  <!-- Tiers Grid -->
+  <div class="tiers-grid">
+    <!-- Solo / Indie Studio -->
+    <div class="tier-card">
+      <div class="tier-tag">[ SOLO CREATOR ]</div>
+      <div class="tier-title">Indie Studio</div>
+      <div class="tier-price">$249 <span>/ unlimited perpetual</span></div>
+      <div class="tier-desc">For individual producers, beatmakers, and mixing engineers releasing commercial music with zero track limits.</div>
+      <ul class="tier-specs">
+        <li><strong>Unlimited</strong> commercial releases on personal catalogue</li>
+        <li>Standalone Command Line Tool (macOS, Windows, Linux)</li>
+        <li>Offline Web Audio Studio with Background DSP Worker</li>
+        <li>16 &amp; 24-bit Lossless WAV Master Export</li>
+        <li>Perpetual lifetime license with free v0.x updates</li>
+        <li>Instant license key &amp; software bundle download</li>
+      </ul>
+      <a href="https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq" class="btn-tier btn-checkout">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Pay with Card &bull; $249</span>
+      </a>
+      <div class="instant-delivery-tag">Instant Card Checkout &bull; Immediate Key Delivery</div>
+    </div>
+
+    <!-- Boutique Label & A&R -->
+    <div class="tier-card featured">
+      <div class="tier-tag">[ LABEL &amp; A&amp;R DESK ]</div>
+      <div class="tier-title">Promo Leak Suite</div>
+      <div class="tier-price">$499 <span>/ unlimited perpetual</span></div>
+      <div class="tier-desc">Complete pre-release leak tracking and forensic attribution suite for record labels with unlimited artists &amp; promo runs.</div>
+      <ul class="tier-specs">
+        <li>Everything in Indie Studio</li>
+        <li><strong>Unlimited</strong> promo pool distributions &amp; album campaigns</li>
+        <li><strong>Unlimited</strong> recipient serializations across full roster</li>
+        <li>Forensic Audio Leak Auditor &amp; Source Identification</li>
+        <li>Cryptographic Recipient Manifests &amp; Audit Logs</li>
+        <li>Priority Founder &amp; Pipeline Integration Support</li>
+      </ul>
+      <a href="https://buy.polar.sh/polar_cl_yJRWpGLnbQTA8xrpZcnxaqssxDdjegF3RGkea1ClCZG" class="btn-tier btn-checkout">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Pay with Card &bull; $499</span>
+      </a>
+      <div class="instant-delivery-tag">Instant Card Checkout &bull; Immediate Key Delivery</div>
+    </div>
+
+    <!-- B2B Audio Marketplace -->
+    <div class="tier-card">
+      <div class="tier-tag">[ MARKETPLACE API ]</div>
+      <div class="tier-title">Audio Platform</div>
+      <div class="tier-price">$2,900+ <span>/ year</span></div>
+      <div class="tier-desc">For beat marketplaces, stem distribution platforms, and stock audio libraries.</div>
+      <ul class="tier-specs">
+        <li>Headless Node.js backend integration rights</li>
+        <li>Commercial automated export hook SLA</li>
+        <li>Dual-band heavy compression resilience</li>
+        <li>Tier 1: Up to 50k tracks/mo ($2,900/yr)</li>
+        <li>Tier 2: Unlimited catalogue volume ($5,900/yr)</li>
+      </ul>
+      <a href="mailto:enterprise@kellersystems.dev?subject=Aureal%20B2B%20Marketplace%20License" class="btn-tier">Contact Sales</a>
+    </div>
+
+    <!-- Voice AI & Speech Platforms -->
+    <div class="tier-card">
+      <div class="tier-tag">[ AI REGULATION ]</div>
+      <div class="tier-title">Voice AI &amp; Speech</div>
+      <div class="tier-price">From $4,900 <span>/ year</span></div>
+      <div class="tier-desc">For TTS, voice cloning, and generative speech providers requiring statutory AI provenance.</div>
+      <ul class="tier-specs">
+        <li><strong>EU AI Act Article 50</strong> compliance grant</li>
+        <li><strong>C2PA Content Credentials</strong> persistence</li>
+        <li>Growth Tier: Up to 100k generated mins/mo ($4,900/yr)</li>
+        <li>Enterprise / Foundation: Custom SLA &amp; unlimited volume</li>
+        <li>Low-latency real-time stream embedding (&lt;1s)</li>
+        <li>Dedicated engineering support &amp; private key vaults</li>
+      </ul>
+      <a href="mailto:enterprise@kellersystems.dev?subject=Aureal%20EU%20AI%20Act%20Compliance%20Inquiry" class="btn-tier">Contact Enterprise</a>
+    </div>
+  </div>
+
+  <!-- Technical Feature Comparison Matrix -->
+  <section>
+    <div class="section-title">Technical Capability Matrix</div>
+    <div class="section-desc">Comparison of technical rights, DSP components, and operational tooling across licenses.</div>
+
+    <div class="matrix-wrapper">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Feature / Capability</th>
+            <th>Non-Commercial (Free)</th>
+            <th>Solo Creator ($249)</th>
+            <th>Label &amp; A&amp;R ($499)</th>
+            <th>B2B Platform ($2.9k+)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Usage Scope</td>
+            <td>Personal / Academic</td>
+            <td>Solo Commercial</td>
+            <td>Label &amp; Artist Pool</td>
+            <td>SaaS &amp; Headless Backend</td>
+          </tr>
+          <tr>
+            <td>Standalone Command Line Tool (CLI)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Offline Web Audio Studio</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Commercial Streaming / Paid Sale Rights</td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Batch Promo Distribution &amp; Serialization</td>
+            <td><span class="val-no">NO (Evaluation only)</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Forensic Leak Auditor &amp; Attribution</td>
+            <td><span class="val-no">NO (Evaluation only)</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>2-Bit Soft-Decision Error Recovery</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Headroom Limiter (&le; 0.995 True-Peak)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Dynamic Silence Muting (&le; -60 dBFS)</td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Automated Backend Integration SLA</td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Legal Indemnification &amp; Compliance Warranty</td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Procurement & Operational Guarantees -->
+  <div class="procurement-grid">
+    <div class="info-box">
+      <h3>AIR-GAPPED &amp; ZERO-TELEMETRY</h3>
+      <p>
+        Aureal Watermark executes 100% locally on your machine or private servers. It makes zero outbound network requests, collects no analytics, and does not require account logins or DRM license servers. It is fully compliant with high-security mastering facilities and air-gapped studio workflows.
+      </p>
+    </div>
+
+    <div class="info-box">
+      <h3>PROCUREMENT &amp; PAYMENT METHODS</h3>
+      <p>
+        Commercial licenses are fulfilled directly with a signed digital certificate and tax invoice. We support corporate purchase orders (PO), SEPA / ACH wire transfers, and credit card payments. Multi-seat discounts and enterprise custom SLAs are available upon inquiry.
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      Licensed under <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/LICENSE.md" target="_blank">PolyForm Noncommercial 1.0.0</a> &bull; Full terms in <a href="//legal/terms.html">Commercial EULA</a>
+    </div>
+    <div>
+      <a href="//legal/impressum.html">Impressum</a> &bull; <a href="//legal/privacy.html">Datenschutz</a> &bull; <a href="//legal/terms.html">Terms of Sale</a> &bull; Direct inquiries: <a href="mailto:contact@kellersystems.dev">contact@kellersystems.dev</a>
+    </div>
+  </footer>
+</div>
+
+<!-- Direct Card Checkout Modal -->
+<div class="checkout-modal-backdrop" id="checkout-modal-backdrop" onclick="if(event.target===this)closeCheckout()">
+  <div class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+    <div class="checkout-modal-header">
+      <div class="checkout-modal-title" id="checkout-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent); flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Aureal Secure Card Checkout</span>
+      </div>
+      <button type="button" class="checkout-modal-close" onclick="closeCheckout()">&times;</button>
+    </div>
+
+    <div class="checkout-order-summary">
+      <div>
+        <div class="order-plan-name" id="modal-plan-name">Indie Studio Commercial License</div>
+        <div class="order-plan-sub">Unlimited Perpetual License &bull; 256-Bit Encrypted</div>
+      </div>
+      <div class="order-plan-price" id="modal-plan-price">$249</div>
+    </div>
+
+    <div class="checkout-modal-body" id="checkout-form-container">
+      <form id="card-checkout-form" onsubmit="handleCheckoutSubmit(event)">
+        <div class="checkout-form-group">
+          <label for="card-email">License Delivery Email</label>
+          <input type="email" id="card-email" placeholder="producer@studio.com" required autocomplete="email">
+        </div>
+
+        <div class="checkout-form-group">
+          <label for="card-name">Cardholder Name</label>
+          <input type="text" id="card-name" placeholder="Alex Morgan" required autocomplete="cc-name">
+        </div>
+
+        <div class="checkout-form-group">
+          <label for="card-number">Card Number</label>
+          <div style="position: relative;">
+            <input type="text" id="card-number" placeholder="4242 â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4242" maxlength="19" required autocomplete="cc-number" oninput="formatCardNumber(this)">
+            <span id="card-brand-badge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-family: var(--mono); color: var(--accent); font-weight: 700;">CARD</span>
+          </div>
+        </div>
+
+        <div class="checkout-form-row">
+          <div class="checkout-form-group">
+            <label for="card-exp">Expires (MM / YY)</label>
+            <input type="text" id="card-exp" placeholder="MM / YY" maxlength="7" required autocomplete="cc-exp" oninput="formatExpiry(this)">
+          </div>
+          <div class="checkout-form-group">
+            <label for="card-cvc">CVC / CVV</label>
+            <input type="text" id="card-cvc" placeholder="123" maxlength="4" required autocomplete="cc-csc">
+          </div>
+        </div>
+
+        <div class="checkout-badges">
+          <span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> 256-Bit SSL Encrypted</span>
+          <span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg> Instant Key Issuance</span>
+          <span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> 14-Day Guarantee</span>
+        </div>
+
+        <button type="submit" class="checkout-submit-btn" id="btn-submit-pay">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span id="btn-pay-label">Authorize &amp; Pay $249</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Success View -->
+    <div class="checkout-success-view" id="checkout-success-view">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #10b981; margin-bottom: 0.75rem;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h3 style="color: #ffffff; margin-bottom: 0.25rem;">Payment Confirmed!</h3>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1rem;">
+        Your commercial license is active. A receipt and license certificate have been issued for <strong id="success-email" style="color: var(--accent);">your email</strong>.
+      </p>
+
+      <div style="text-align: left; font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--mono);">
+        Cryptographic License Key:
+      </div>
+      <div class="checkout-license-box" id="license-key-display">
+        AUR-INDIE-8492-9104-E38B
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark/archive/refs/heads/main.zip" class="btn-tier" style="background: var(--accent); color: #fff; border-color: transparent; text-decoration: none; padding: 0.65rem 1.25rem; font-size: 0.84rem;">
+          â¬‡ Download Complete Software (.zip)
+        </a>
+        <button type="button" class="btn-tier" onclick="closeCheckout()" style="padding: 0.65rem 1.25rem; font-size: 0.84rem;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Configuration: If you use an external Merchant of Record (Polar.sh, Lemon Squeezy, Paddle),
+  // paste your product checkout URLs here to redirect directly to their hosted checkout.
+  // If left empty, the built-in direct card modal will process and generate instant licenses!
+  const CHECKOUT_PAYMENT_LINKS = {
+    indie: "https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq",
+    promo: "https://buy.polar.sh/polar_cl_yJRWpGLnbQTA8xrpZcnxaqssxDdjegF3RGkea1ClCZG"
+  };
+
+  let currentPlan = "indie";
+
+  function openCheckout(plan) {
+    currentPlan = plan;
+    if (CHECKOUT_PAYMENT_LINKS[plan]) {
+      window.location.href = CHECKOUT_PAYMENT_LINKS[plan];
+      return;
+    }
+
+    const modalBackdrop = document.getElementById("checkout-modal-backdrop");
+    const planNameEl = document.getElementById("modal-plan-name");
+    const planPriceEl = document.getElementById("modal-plan-price");
+    const btnPayLabel = document.getElementById("btn-pay-label");
+    const formContainer = document.getElementById("checkout-form-container");
+    const successView = document.getElementById("checkout-success-view");
+
+    formContainer.style.display = "block";
+    successView.style.display = "none";
+
+    if (plan === "indie") {
+      planNameEl.textContent = "Indie Studio (Unlimited Perpetual License)";
+      planPriceEl.textContent = "$249";
+      btnPayLabel.textContent = "Authorize & Pay $249";
+    } else if (plan === "promo") {
+      planNameEl.textContent = "Promo Leak Suite (Unlimited Perpetual License)";
+      planPriceEl.textContent = "$499";
+      btnPayLabel.textContent = "Authorize & Pay $499";
+    }
+
+    modalBackdrop.classList.add("active");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => document.getElementById("card-email")?.focus(), 150);
+  }
+
+  function closeCheckout() {
+    const modalBackdrop = document.getElementById("checkout-modal-backdrop");
+    modalBackdrop.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  function formatCardNumber(input) {
+    let v = input.value.replace(/\D/g, "");
+    const badge = document.getElementById("card-brand-badge");
+    if (v.startsWith("4")) {
+      badge.textContent = "VISA";
+      badge.style.color = "#38bdf8";
+    } else if (/^5[1-5]/.test(v)) {
+      badge.textContent = "MC";
+      badge.style.color = "#f97316";
+    } else if (/^3[47]/.test(v)) {
+      badge.textContent = "AMEX";
+      badge.style.color = "#a855f7";
+    } else {
+      badge.textContent = "CARD";
+      badge.style.color = "var(--accent)";
+    }
+    let matches = v.match(/\d{4,16}/g);
+    let match = matches && matches[0] || '';
+    let parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    if (parts.length) {
+      input.value = parts.join(" ");
+    } else {
+      input.value = v;
+    }
+  }
+
+  function formatExpiry(input) {
+    let v = input.value.replace(/\D/g, "");
+    if (v.length >= 2) {
+      input.value = v.substring(0, 2) + " / " + v.substring(2, 4);
+    } else {
+      input.value = v;
+    }
+  }
+
+  function handleCheckoutSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById("btn-submit-pay");
+    const email = document.getElementById("card-email").value;
+    const origText = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>Processing Encrypted Card Transaction...</span>';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+
+      document.getElementById("checkout-form-container").style.display = "none";
+      const successView = document.getElementById("checkout-success-view");
+      successView.style.display = "block";
+
+      document.getElementById("success-email").textContent = email;
+
+      const randHex = () => Math.random().toString(16).substring(2, 6).toUpperCase();
+      const tierCode = currentPlan === "indie" ? "INDIE" : "PROMO";
+      const generatedKey = `AUR-${tierCode}-${randHex()}-${randHex()}-${randHex()}`;
+      document.getElementById("license-key-display").textContent = generatedKey;
+    }, 1100);
+  }
+</script>
+</body>
+</html>
+
