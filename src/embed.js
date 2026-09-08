@@ -28,27 +28,24 @@ export function embedWatermark(pcm, fmt, opts) {
   const codeword = packCodeword(opts.payloadId);
   const { slotLen, frameLen, reps, bits } = geometry;
 
-  const wm = new Float64Array(frameLen);
   let peakDelta = 0;
-  for (const band of bands) {
-    const built = buildTemplate({ key, sampleRate, geometry, band });
-    const { template } = built;
+  const wmMid = synthesizeWatermarkFrame({ key, sampleRate, geometry, bands, codeword, amp });
+  const wmSide = channels >= 2
+    ? synthesizeWatermarkFrame({ key: key + "|side", sampleRate, geometry, bands, codeword, amp })
+    : null;
 
-    for (let b = 0; b < bits; b++) {
-      const s = codeword[b];
-      const off = b * slotLen;
-      for (let n = 0; n < slotLen; n++) {
-        wm[off + n] += amp * s * template[off + n];
-      }
+  const SQRT2_INV = 1 / Math.SQRT2;
+  const wmLeft = channels >= 2 ? new Float64Array(frameLen) : wmMid;
+  const wmRight = channels >= 2 ? new Float64Array(frameLen) : wmMid;
+  if (channels >= 2) {
+    for (let n = 0; n < frameLen; n++) {
+      wmLeft[n] = (wmMid[n] + wmSide[n]) * SQRT2_INV;
+      wmRight[n] = (wmMid[n] - wmSide[n]) * SQRT2_INV;
+      peakDelta = Math.max(peakDelta, Math.abs(wmLeft[n]), Math.abs(wmRight[n]));
     }
-
-    // Embed deterministic stream synchronization preamble at frame boundary
-    const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
-    for (let n = 0; n < syncLen; n++) {
-      wm[n] += amp * 0.5 * chirpQ[n];
-    }
+  } else {
+    for (let n = 0; n < frameLen; n++) peakDelta = Math.max(peakDelta, Math.abs(wmMid[n]));
   }
-  for (let n = 0; n < frameLen; n++) peakDelta = Math.max(peakDelta, Math.abs(wm[n]));
 
   const out = new Float32Array(pcm.length);
   out.set(pcm);
@@ -56,6 +53,7 @@ export function embedWatermark(pcm, fmt, opts) {
   for (let r = 0; r < reps; r++) {
     const base = r * frameLen * channels;
     for (let ch = 0; ch < channels; ch++) {
+      const channelWm = ch === 0 ? wmLeft : (ch === 1 ? wmRight : wmMid);
       for (let b = 0; b < bits; b++) {
         const slotOffset = base + ch + b * slotLen * channels;
         // Compute slot RMS for psychoacoustic masking
@@ -71,7 +69,7 @@ export function embedWatermark(pcm, fmt, opts) {
           const wmSlotBase = b * slotLen;
           let o = slotOffset;
           for (let n = 0; n < slotLen; n++) {
-            out[o] += wm[wmSlotBase + n] * mask;
+            out[o] += channelWm[wmSlotBase + n] * mask;
             o += channels;
           }
         }
@@ -123,3 +121,25 @@ export function validateFmt(fmt, totalSamples) {
   }
   return { sampleRate, channels };
 }
+
+function synthesizeWatermarkFrame({ key, sampleRate, geometry, bands, codeword, amp }) {
+  const { slotLen, frameLen, bits } = geometry;
+  const wm = new Float64Array(frameLen);
+  for (const band of bands) {
+    const built = buildTemplate({ key, sampleRate, geometry, band });
+    const { template } = built;
+    for (let b = 0; b < bits; b++) {
+      const s = codeword[b];
+      const off = b * slotLen;
+      for (let n = 0; n < slotLen; n++) {
+        wm[off + n] += amp * s * template[off + n];
+      }
+    }
+    const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+    for (let n = 0; n < syncLen; n++) {
+      wm[n] += amp * 0.5 * chirpQ[n];
+    }
+  }
+  return wm;
+}
+

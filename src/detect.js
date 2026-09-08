@@ -14,23 +14,56 @@ const Z_FLOOR = 3.0;
 const Z_FULL = 30.0;
 const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
 
-function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
+function foldRepetitions(pcm, channels, frameLen, startOffset, totalSamples, isSide = false) {
   const folded = new Float64Array(frameLen);
   let count = 0;
   for (
     let base = startOffset;
-    base + frameLen <= usableSamples;
+    base + frameLen <= totalSamples;
     base += frameLen
   ) {
     let idx = base * channels;
     for (let n = 0; n < frameLen; n++) {
-      let acc = 0;
-      for (let ch = 0; ch < channels; ch++) acc += pcm[idx + ch];
-      folded[n] += acc;
+      if (isSide && channels >= 2) {
+        folded[n] += pcm[idx] - pcm[idx + 1];
+      } else {
+        let acc = 0;
+        for (let ch = 0; ch < channels; ch++) acc += pcm[idx + ch];
+        folded[n] += acc;
+      }
       idx += channels;
     }
     count++;
   }
+
+  // Circular modulo frame folding for unaligned crops (when totalSamples >= frameLen but count is 0)
+  if (count === 0 && totalSamples >= frameLen) {
+    const hits = new Uint16Array(frameLen);
+    for (let i = 0; i < totalSamples; i++) {
+      const pos = ((i - startOffset) % frameLen + frameLen) % frameLen;
+      const idx = i * channels;
+      if (isSide && channels >= 2) {
+        folded[pos] += pcm[idx] - pcm[idx + 1];
+      } else {
+        let acc = 0;
+        for (let ch = 0; ch < channels; ch++) acc += pcm[idx + ch];
+        folded[pos] += acc;
+      }
+      hits[pos]++;
+    }
+    let allCovered = true;
+    for (let n = 0; n < frameLen; n++) {
+      if (hits[n] === 0) {
+        allCovered = false;
+        break;
+      }
+      folded[n] /= hits[n];
+    }
+    if (allCovered) {
+      count = 1;
+    }
+  }
+
   return { folded, reps: count };
 }
 
@@ -42,10 +75,15 @@ function findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band) {
   if (searchLen <= 0) return [];
 
   const mono = new Float32Array(searchLen + syncLen);
+  const isSide = String(key).endsWith("|side");
   for (let i = 0; i < searchLen + syncLen; i++) {
-    let sum = 0;
-    for (let ch = 0; ch < channels; ch++) sum += pcm[i * channels + ch];
-    mono[i] = sum / channels;
+    if (isSide && channels >= 2) {
+      mono[i] = (pcm[i * channels] - pcm[i * channels + 1]) / 2;
+    } else {
+      let sum = 0;
+      for (let ch = 0; ch < channels; ch++) sum += pcm[i * channels + ch];
+      mono[i] = sum / channels;
+    }
   }
 
   const stride = 8;
@@ -118,17 +156,18 @@ function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
     if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped, isSyncPreamble: false });
   }
 
+  const isSide = String(key).endsWith("|side");
   let best = null;
   for (const { shift, isSyncPreamble } of candidates) {
-    const usable = perChannel - shift;
     const { folded, reps } = foldRepetitions(
       pcm,
       channels,
       frameLen,
       shift,
-      perChannel
+      perChannel,
+      isSide
     );
-    if (reps < 1 || usable < frameLen) continue;
+    if (reps < 1 || perChannel < frameLen) continue;
 
     const { template, slotNorms } = buildTemplate({
       key,
@@ -245,26 +284,35 @@ export function detectWatermark(pcm, fmt, opts = {}) {
     throw new TypeError(`bad payloadId ${opts.payloadId}`);
   }
 
+  const keysToTry = [key];
+  if (!key.endsWith("|side")) keysToTry.push(key + "|side");
+
   const bands = bandList(opts.band, validated.sampleRate);
   let winner = null;
   let winnerBand = null;
-  for (const band of bands) {
-    const r = scoreHypothesis(pcm, validated, {
-      key,
-      payloadId: opts.payloadId,
-      sampleRate: validated.sampleRate,
-      band,
-    });
-    if (r) {
-      const isBandWinner =
-        !winner ||
-        (r.decoded.crcOk && !winner.decoded.crcOk) ||
-        (r.decoded.crcOk === winner.decoded.crcOk && r.confidence > winner.confidence);
-      if (isBandWinner) {
-        winner = r;
-        winnerBand = band;
+  let winnerKey = key;
+
+  for (const currentKey of keysToTry) {
+    for (const band of bands) {
+      const r = scoreHypothesis(pcm, validated, {
+        key: currentKey,
+        payloadId: opts.payloadId,
+        sampleRate: validated.sampleRate,
+        band,
+      });
+      if (r) {
+        const isBandWinner =
+          !winner ||
+          (r.decoded.crcOk && !winner.decoded.crcOk) ||
+          (r.decoded.crcOk === winner.decoded.crcOk && r.confidence > winner.confidence);
+        if (isBandWinner) {
+          winner = r;
+          winnerBand = band;
+          winnerKey = currentKey;
+        }
       }
     }
+    if (winner && winner.decoded.crcOk && winner.confidence >= 0.5) break;
   }
 
   if (!winner) {
@@ -273,8 +321,9 @@ export function detectWatermark(pcm, fmt, opts = {}) {
 
   const idMatches =
     opts.payloadId === undefined || winner.decoded.id === opts.payloadId;
+  const minConfidence = winner.decoded.crcOk ? 0.35 : 0.5;
   const detected =
-    winner.decoded.crcOk && idMatches && winner.confidence >= 0.5 && winner.mu > 0;
+    winner.decoded.crcOk && idMatches && winner.confidence >= minConfidence && winner.mu > 0;
 
   // Resampling Invariance: If native detection fails, try canonical sample rates
   if (!detected && opts.resample !== false) {
@@ -293,6 +342,25 @@ export function detectWatermark(pcm, fmt, opts = {}) {
         subResult.details.resampled = true;
         subResult.details.originalSampleRate = validated.sampleRate;
         subResult.details.normalizedSampleRate = targetRate;
+        return subResult;
+      }
+    }
+  }
+
+  // Speed / Pitch Drift Invariance: If native detection fails, try micro-drift rake sweep
+  if (!detected && opts.drift !== false) {
+    const driftFactors = [1.002, 0.998, 1.005, 0.995, 1.01, 0.99];
+    for (const factor of driftFactors) {
+      const outRate = Math.round(validated.sampleRate * factor);
+      const resampledPcm = resamplePcm(pcm, validated.channels, validated.sampleRate, outRate);
+      const subResult = detectWatermark(
+        resampledPcm,
+        validated,
+        { ...opts, drift: false, resample: false }
+      );
+      if (subResult.detected) {
+        subResult.driftFactor = factor;
+        subResult.details.driftFactor = factor;
         return subResult;
       }
     }

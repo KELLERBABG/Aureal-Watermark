@@ -48,15 +48,30 @@ opts {payloadId(uint32), key, strength=0.5, band="high"|"mid"|"dual"|{lowHz,high
   │    frameSeconds 1.0 → slotLen ≈ rate/48 rounded to chip multiple
   │    chipLen = slotLen/24 ≥ 4, frameLen = slotLen×48, reps = ⌊len/frameLen⌋ ≥ 1
   ├─ codeword = packCodeword(payloadId)           // 32 data + 16 CRC bits
-  └─ for band in bands:
-       template = buildTemplate(...)               // keyed PN × Hann carrier bursts
-       wm[off+n] += amp × codeword[b] × template[off+n]
+  ├─ wmMid = synthesizeWatermarkFrame(key, ...)
+  ├─ wmSide = channels >= 2 ? synthesizeWatermarkFrame(key + "|side", ...) : null
+  ├─ Orthogonal Channel Mixing:
+  │    channels >= 2:
+  │      W_L = (wmMid + wmSide) / √2
+  │      W_R = (wmMid - wmSide) / √2
+  │    channels == 1:
+  │      W_Mono = wmMid
   ▼
-out = pcm ⊕ wm repeated `reps` times on every channel (identical frame →
-mono downmix of stereo keeps the mark)
+out = pcm ⊕ wm applied per-channel with psychoacoustic masking & headroom limiting
 + non-enumerable watermarkMeta {payloadId, key, strength, amplitude,
   peakWatermark, band(s), geometry}
 ```
+
+### Orthogonal Mid/Side Channel Mixing Matrix
+In stereo files (channels $\ge 2$), embedding identical in-phase watermarks on $L$ and $R$ creates a vulnerability to "vocal remover" processing ($L - R$ channel subtraction), which cancels $W_L - W_R = 0$.
+
+Aureal eliminates this with an orthogonal unitary mixing matrix:
+$$\begin{pmatrix} W_L \\ W_R \end{pmatrix} = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} \begin{pmatrix} W_{\text{mid}} \\ W_{\text{side}} \end{pmatrix}$$
+
+* **Mono Downmix ($L + R$):** Yields $\sqrt{2} W_{\text{mid}}$ (+3 dB processing gain).
+* **Vocal Remover ($L - R$):** Yields $\sqrt{2} W_{\text{side}}$ (+3 dB processing gain).
+* **Single-Channel Extraction ($L$ or $R$ only):** Contains both components at $1/\sqrt{2}$ amplitude.
+Both attack vectors and downmix modes are mathematically immune to cancellation.
 
 Carrier construction (`buildTemplate`): each slot's chips are Hann-windowed
 sine bursts at the band centre, sign-flipped by the keyed PN symbol → energy
@@ -68,23 +83,37 @@ templates from `(key, sampleRate, geometry, band)` alone.
 ```
 opts {key, payloadId?, band="high"|"mid"|"dual"|"auto"|{lowHz,highHz}}
   │
+  ├─ keysToTry = [key, key + "|side"]     // tests both Mid and Side channels
   ├─ bands = bandList(band); "auto"/"dual" try both presets
   │
-  │ for each band:
-  │   for shift in resync grid {0, ±1/16, ±2/16, ±4/16}·frameLen (clamped ≤ frameLen/4):
-  │     fold frames starting at `shift` over all channels → folded[frameLen]
+  │ for each key in keysToTry:
+  │   for each band:
+  │     detect sync preamble chirps via fine IQ-correlation
+  │     fold frames (sequential or circular modulo for short <2s crops)
   │     soft[b] = ⟨folded_b, template_b⟩ / (reps·channels·slotNorm_b)
   │     hard = sign(soft); decoded = unpackCodeword(hard)
-  │     if !CRC: flip bits in |soft| ascending order until CRC ok (1-bit correction)
+  │     if !CRC: 2-bit soft-decision permutation sweep (28 candidates)
   │     refBits = expected codeword (verify) or own decision (blind)
   │     mu = mean(soft·refBits); sd; z = mu/denom
   │     confidence = clamp((z−3)/27, 0, 1)
-  │   keep best-confidence hypothesis for the band
-  │ winner = max over bands
+  │     keep best-confidence hypothesis
+  │ winner = max over keys and bands
   ▼
-detected ⇔ crcOk ∧ idMatches ∧ confidence ≥ 0.5 ∧ mu > 0
-result.details {mode, z, bandUsed, bandsTried, resyncShiftSamples, …}
+detected ⇔ crcOk ∧ idMatches ∧ confidence ≥ (crcOk ? 0.35 : 0.5) ∧ mu > 0
+
+If undetected:
+  1. Polyphase Resampling Sweep (44.1k ↔ 48k)
+  2. Speed / Pitch Drift Rake Sweep: normalizes micro-drift factors
+     (±0.2%, ±0.5%, ±1.0%) to invert analog speed changes and recover chip phase.
+result.details {mode, z, bandUsed, bandsTried, driftFactor, resyncShiftSamples, …}
 ```
+
+### Circular Modulo Frame Folding
+For arbitrary unaligned crops between 1.0s and 2.0s, a cut can bisect a 1.0s frame boundary, leaving partial fragments before and after the preamble. Standard block segmentation would reject these clips with `reps < 1`.
+
+Aureal uses circular modulo folding:
+$$\text{slot\_index} = (i - \text{startOffset}) \pmod{\text{frameLen}}$$
+All available samples wrap into their exact respective symbol slots with uniform per-slot normalization, allowing complete 48-bit codewords to be reconstructed from sub-2-second crops.
 
 Scale invariance: soft values are normalized by the template norm, so gain
 changes cancel exactly.

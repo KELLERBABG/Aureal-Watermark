@@ -70,7 +70,8 @@ function bandOf(flags, dflt) {
 
 function die(msg, code = 2) {
   console.error(`error: ${msg}`);
-  exit(code);
+  process.exitCode = code;
+  process.exit(code);
 }
 
 function getStudioHtml() {
@@ -336,7 +337,8 @@ async function main() {
       }
       console.log(`  time:     ${ms} ms`);
     }
-    exit(res.detected ? 0 : 1);
+    process.exitCode = res.detected ? 0 : 1;
+    return;
   }
 
   die(`unknown command '${cmd}'`);
@@ -344,5 +346,5 @@ async function main() {
 
 main().catch((err) => {
   console.error("error:", err.message);
-  exit(2);
+  process.exitCode = 2;
 });

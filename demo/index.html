@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
-  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="256x256" href="../assets/icon.png">
-  <link rel="shortcut icon" href="../favicon.ico">
-  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aureal Watermark &mdash; Acoustic Psychoacoustic Watermarking &mdash; Keller Systems</title>
   <meta name="description" content="Aureal Watermark: Imperceptible acoustic spread-spectrum audio watermarking. Survives lossy MP3 compression, pitch shifts, and AI scraping with sub-second zero-dependency scanning.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -257,67 +257,46 @@
       letter-spacing: 0.02em;
     }
 
-    /* Executive Studio Specifications Bar */
-    .hero-specs-bar {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      align-items: center;
-      background: rgba(18, 9, 31, 0.7);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(139, 92, 246, 0.08);
-      max-width: 1060px;
-      margin: 2.75rem auto 3.5rem;
-      padding: 1.15rem 1.5rem;
-      gap: 1.25rem;
-    }
-    .spec-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      text-align: left;
-    }
-    .spec-icon-wrap {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+    /* Tasteful Studio Trust Ribbon */
+    .hero-trust-ribbon {
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      color: var(--cyan);
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      max-width: 960px;
+      margin: 2.25rem auto 3.25rem;
+      padding: 0.75rem 1.75rem;
+      background: rgba(18, 9, 31, 0.45);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 9999px;
+      backdrop-filter: blur(12px);
     }
-    .spec-text {
-      display: flex;
-      flex-direction: column;
-    }
-    .spec-title {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: #ffffff;
-      line-height: 1.25;
-      letter-spacing: -0.01em;
-    }
-    .spec-sub {
-      font-size: 0.72rem;
+    .trust-badge-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
       color: var(--text-muted);
-      line-height: 1.35;
-      margin-top: 0.15rem;
+      letter-spacing: 0.01em;
     }
-    @media (max-width: 960px) {
-      .hero-specs-bar {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
-        padding: 1.25rem;
+    .trust-badge-item svg {
+      color: var(--purple-bright);
+      flex-shrink: 0;
+    }
+    .trust-dot {
+      color: var(--border);
+      font-size: 0.85rem;
+    }
+    @media (max-width: 640px) {
+      .hero-trust-ribbon {
+        border-radius: 12px;
+        gap: 0.85rem;
+        padding: 1rem;
       }
-    }
-    @media (max-width: 540px) {
-      .hero-specs-bar {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+      .trust-dot {
+        display: none;
       }
     }
 
@@ -704,57 +683,52 @@
       border-color: var(--purple);
     }
 
-    /* HUD Bar */
-    .hud-bar {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2.25rem;
+    /* Studio Production Lifecycle Strip */
+    .studio-lifecycle-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
       margin-bottom: 5.5rem;
     }
-    .hud-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
-      margin-bottom: 1.75rem;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--purple);
-    }
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-    }
     @media (max-width: 850px) {
-      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .studio-lifecycle-strip {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
     }
-    .metric-card {
-      background: rgba(28, 16, 48, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 1.25rem;
+    .lifecycle-card {
+      background: rgba(18, 9, 31, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem 1.5rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      transition: border-color 0.2s;
     }
-    .metric-title {
+    .lifecycle-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+    .lifecycle-num {
       font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-    .metric-val {
-      font-family: var(--font-mono);
-      font-size: 1.8rem;
+      font-size: 1.25rem;
       font-weight: 700;
-      color: var(--text);
+      color: var(--purple-bright);
+      line-height: 1;
+      padding-top: 0.15rem;
+      flex-shrink: 0;
     }
-    .metric-sub {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--emerald);
-      margin-top: 0.25rem;
+    .lifecycle-body h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.45rem;
+    }
+    .lifecycle-body p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0;
     }
 
     /* Prose Section */
@@ -937,45 +911,25 @@
         </a>
       </div>
 
-      <div class="hero-specs-bar">
-        <div class="spec-item">
-          <div class="spec-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          </div>
-          <div class="spec-text">
-            <span class="spec-title">100% Air-Gapped DSP</span>
-            <span class="spec-sub">Zero network transmission</span>
-          </div>
+      <div class="hero-trust-ribbon">
+        <div class="trust-badge-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>100% Air-Gapped On-Premises</span>
         </div>
-
-        <div class="spec-item">
-          <div class="spec-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-          </div>
-          <div class="spec-text">
-            <span class="spec-title">Forensic Serialization</span>
-            <span class="spec-sub">Deterministic leak attribution</span>
-          </div>
+        <div class="trust-dot">&bull;</div>
+        <div class="trust-badge-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Real-Time Ingestion</span>
         </div>
-
-        <div class="spec-item">
-          <div class="spec-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"></path></svg>
-          </div>
-          <div class="spec-text">
-            <span class="spec-title">Bit-Transparent Audio</span>
-            <span class="spec-sub">Psychoacoustic masking &le; -60 dBFS</span>
-          </div>
+        <div class="trust-dot">&bull;</div>
+        <div class="trust-badge-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"></path></svg>
+          <span>Bit-Transparent Master Delivery</span>
         </div>
-
-        <div class="spec-item">
-          <div class="spec-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          </div>
-          <div class="spec-text">
-            <span class="spec-title">Cryptographic Integrity</span>
-            <span class="spec-sub">48-bit codeword &amp; CRC-16</span>
-          </div>
+        <div class="trust-dot">&bull;</div>
+        <div class="trust-badge-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>Cryptographic CRC-16</span>
         </div>
       </div>
     </section>
@@ -985,8 +939,8 @@
       <div class="demo-widget-card">
         <div class="demo-top-bar">
           <div class="demo-live-indicator">
-            <div class="demo-pulse-dot"></div>
-            <span>LIVE IN-BROWSER DSP ENGINE &bull; ZERO SERVER UPLOADS</span>
+            <div class="demo-pulse-dot" style="background: var(--purple-bright); box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);"></div>
+            <span style="font-family: var(--font-sans); font-weight: 600; font-size: 0.85rem; color: #ffffff; letter-spacing: -0.01em;">Interactive Studio Preview</span>
           </div>
           <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
             <button type="button" class="demo-btn primary" id="btn-demo-synth" style="padding: 0.45rem 0.95rem; font-size: 0.78rem;">
@@ -1058,7 +1012,6 @@
             <div class="demo-panel">
               <div class="demo-panel-title">
                 <span>2. Forensic Scanner &amp; Leak Attribution</span>
-                <span style="color: var(--emerald); font-size: 0.7rem;">Sub-second DSP</span>
               </div>
 
               <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
@@ -1081,30 +1034,26 @@
       </div>
     </section>
 
-    <section class="hud-bar">
-      <div class="hud-header">
-        <span>AUREAL PSYCHOACOUSTIC ENGINE</span>
+    <section class="studio-lifecycle-strip">
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">01</div>
+        <div class="lifecycle-body">
+          <h4>Seamless Studio Ingestion</h4>
+          <p>Embed invisible recipient signatures into master recordings, stems, and screeners during export with 0.0 dB perceptible coloration.</p>
+        </div>
       </div>
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-title">SCAN DETECTION TIME</div>
-          <div class="metric-val">&lt; 350 <span style="font-size:0.9rem; color:var(--text-muted)">MS</span></div>
-          <div class="metric-sub">SUB-SECOND WEB AUDIO DSP</div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">02</div>
+        <div class="lifecycle-body">
+          <h4>Distribution &amp; Attack Resilience</h4>
+          <p>Watermark survives MP3/AAC compression down to 64 kbps, pitch-shifting, YouTube/TikTok transcoding, and vocal-remover phase cancellation.</p>
         </div>
-        <div class="metric-card">
-          <div class="metric-title">AUDIO PERCEPTIBILITY</div>
-          <div class="metric-val">0.0 dB</div>
-          <div class="metric-sub">STRICTLY BELOW MASKING THRESHOLD</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">COMPRESSION SURVIVAL</div>
-          <div class="metric-val">64 kbps</div>
-          <div class="metric-sub">SURVIVES MP3 / AAC TRANSCODES</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">AIR-GAP SECURITY</div>
-          <div class="metric-val">100%</div>
-          <div class="metric-sub">ZERO CLOUD TELEMETRY / LEAK PROOF</div>
+      </div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">03</div>
+        <div class="lifecycle-body">
+          <h4>Deterministic Attribution</h4>
+          <p>Instantly extract the recipient ID and verify CRC-16 cryptographic integrity for unambiguous studio leak attribution.</p>
         </div>
       </div>
     </section>
