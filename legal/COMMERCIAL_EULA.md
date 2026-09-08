@@ -1,4 +1,4 @@
-﻿# Commercial End-User License Agreement (EULA)
+# Commercial End-User License Agreement (EULA)
 
 **Effective Date:** September 2026  
 **Licensor:** Lukas Negenborn, Aureal Watermark Software Development
@@ -12,7 +12,7 @@ This Commercial EULA governs the commercial use of Aureal Watermark. Non-commerc
 * **Solo Creator License ($249 perpetual):** Grants one individual artist, producer, or sole-proprietor mastering engineer non-exclusive rights to watermark and commercially distribute unlimited personal releases and client tracks.
 * **Label & A&R Desk License ($499 perpetual / seat):** Grants one seat within a record label or artist management firm the right to generate tagged promo copies and execute forensic leak audits across commercial artist rosters.
 * **B2B Audio Marketplace / Platform ($2,900+ / yr):** Grants rights for server-side headless integration, automated batch tagging in commercial export hooks, and platform-wide ingestion pipelines.
-* **Voice AI & Speech Enterprise ($12,500 / yr or usage-based):** Grants integration rights for synthetic speech engines, EU AI Act Article 50 provenance marking, and C2PA persistence bridges.
+* **Voice AI & Speech Enterprise (From $4,900 / yr or custom foundation model agreement):** Grants integration rights for synthetic speech engines, EU AI Act Article 50 provenance marking, and C2PA persistence bridges.
 
 ## 3. Air-Gapped & Offline Guarantee
 Aureal Watermark does not require online DRM activation, hardware dongles, or internet connectivity. Licensees are entitled to run the engine inside isolated, air-gapped studio workflows.
