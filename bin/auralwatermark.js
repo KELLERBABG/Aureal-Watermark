@@ -13,6 +13,7 @@ import { synthesizeSpeechLike } from "../src/synth.js";
 import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
+import { getLicenseStatus, activatePolarKey, clearLocalLicense, loadLocalLicense } from "../src/license.js";
 
 const HELP = `Aureal Watermark v0.2.4 — Audio watermarking for anti-theft and AI detection
 
@@ -30,6 +31,11 @@ Command Line Interface:
   auralwatermark detect in.wav [--id <uint32>] [--key secret]
       [--band auto|high|mid|dual|lowHz:highHz] [--json]
       Verify an expected id or run blind detection + CRC decode.
+
+  auralwatermark license [key]      View or activate Polar.sh commercial license
+      auralwatermark license                      Check current license status
+      auralwatermark license <POLAR_KEY>          Activate commercial license (offline ready)
+      auralwatermark license --remove             Deactivate / remove local license
 
 Exit codes: 0 success/detected · 1 not detected · 2 error`;
 
@@ -181,6 +187,14 @@ function launchDesktopApp() {
   const localStudioAlias = join(tmpdir(), "aureal-watermark-studio.html");
   const localPricingFile = join(tmpdir(), "pricing.html");
 
+  const storedLic = loadLocalLicense();
+  if (storedLic) {
+    html = html.replace(
+      '/*__AUREAL_PRESEEDED_LICENSE__*/',
+      `window.__AUREAL_PRESEEDED_LICENSE__ = ${JSON.stringify(storedLic)};`
+    );
+  }
+
   writeFileSync(localFile, html, "utf8");
   writeFileSync(localStudioAlias, html, "utf8");
   if (pricingHtml) writeFileSync(localPricingFile, pricingHtml, "utf8");
@@ -294,7 +308,9 @@ async function main() {
     const bandStr = Array.isArray(meta.bands)
       ? `dual (${meta.bands.map((b) => `${b.lowHz >= 14000 ? "high" : "mid"} ${b.lowHz / 1000}-${b.highHz / 1000} kHz`).join(" + ")})`
       : `${meta.band.lowHz / 1000}-${meta.band.highHz / 1000} kHz`;
-    console.log(`embed: id=${payloadId} key='${meta.key}' strength=${strength} -> ${out}`);
+    const lic = getLicenseStatus();
+    const licenseBadge = lic.isLicensed ? `[Commercial Pro: ${lic.customer}]` : `[Community Evaluation]`;
+    console.log(`embed: id=${payloadId} key='${meta.key}' strength=${strength} -> ${out} ${licenseBadge}`);
     console.log(`  band ${bandStr}, peak watermark ${peakDb} dBFS, ${meta.geometry.reps} repetition(s), ${(ms / 1000).toFixed(2)}s`);
     return;
   }
@@ -341,6 +357,54 @@ async function main() {
       console.log(`  time:     ${ms} ms`);
     }
     process.exitCode = res.detected ? 0 : 1;
+    return;
+  }
+
+  if (cmd === "license") {
+    if (flags.remove || flags.deactivate || flags.clear) {
+      const ok = clearLocalLicense();
+      if (ok) {
+        console.log("Local commercial license removed. Running in Community Evaluation mode.");
+      } else {
+        console.log("No active commercial license found to remove.");
+      }
+      return;
+    }
+
+    const inputKey = pos[0];
+    if (inputKey) {
+      console.log(`Activating commercial license with Polar.sh...`);
+      const res = await activatePolarKey(inputKey);
+      if (res.success && res.license) {
+        console.log(`\n✓ Polar Commercial License Activated Successfully!`);
+        console.log(`  Status:    ${res.license.status.toUpperCase()}`);
+        console.log(`  Key:       ${res.license.displayKey}`);
+        if (res.license.customerEmail) console.log(`  Customer:  ${res.license.customerEmail}`);
+        console.log(`  Activated: ${res.license.activatedAt}`);
+        console.log(`  Expires:   ${res.license.expiresAt || "Perpetual / No Expiry"}`);
+        console.log(`  Offline:   Credentials cached in ~/.aureal/license.json (No internet needed)`);
+      } else {
+        die(res.error || "Activation failed", 1);
+      }
+      return;
+    }
+
+    const st = getLicenseStatus();
+    console.log(`\n=== Aureal License Status ===`);
+    if (st.isLicensed) {
+      console.log(`  Status:    ACTIVE`);
+      console.log(`  Tier:      ${st.tierLabel}`);
+      console.log(`  Key:       ${st.displayKey}`);
+      console.log(`  Customer:  ${st.customer}`);
+      console.log(`  Activated: ${st.activatedAt}`);
+      console.log(`  Expires:   ${st.expiresAt}`);
+      console.log(`  Rights:    Unlimited commercial release & provenance verification`);
+    } else {
+      console.log(`  Status:    COMMUNITY EVALUATION`);
+      console.log(`  License:   PolyForm Noncommercial 1.0.0 (Personal/Academic)`);
+      console.log(`  Upgrade:   Purchase commercial master rights at https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq`);
+      console.log(`  Activate:  auralwatermark license <POLAR_KEY>`);
+    }
     return;
   }
 

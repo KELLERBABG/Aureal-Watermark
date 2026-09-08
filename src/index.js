@@ -6,3 +6,13 @@ export { parseWav, writeWav, readWavFile, writeWavFile, WavError } from "./wav.j
 export { synthesizeSpeechLike } from "./synth.js";
 export { crc16, packCodeword, unpackCodeword, isValidPayloadId } from "./payload.js";
 export { DEFAULT_BAND, BITS_PER_CODEWORD } from "./signal.js";
+export {
+  validatePolarKey,
+  activatePolarKey,
+  loadLocalLicense,
+  saveLocalLicense,
+  clearLocalLicense,
+  getLicenseStatus,
+  maskKey,
+  POLAR_ORGANIZATION_ID
+} from "./license.js";
