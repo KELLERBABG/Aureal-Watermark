@@ -1,7 +1,7 @@
 // scripts/publish-release-v024.js
 import fs from "node:fs";
 
-const token = "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";
+const token = process.env.GITHUB_TOKEN || process.env.TOKEN || "";
 const repo = "KELLERBABG/Aureal-Watermark";
 
 const body = `# Aureal Watermark v0.2.4 — Multi-Format Export, Transparent Inaudibility & Adversarial Hardening

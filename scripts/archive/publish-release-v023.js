@@ -1,7 +1,7 @@
 // scripts/publish-release-v023.js
 import fs from "node:fs";
 
-const token = "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";
+const token = process.env.GITHUB_TOKEN || process.env.TOKEN || "";
 const repo = "KELLERBABG/Aureal-Watermark";
 
 const body = `# Aureal Watermark v0.2.3 — Production Release

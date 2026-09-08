@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-const token = "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";
+const token = process.env.GITHUB_TOKEN || process.env.TOKEN || "";
 
 const updatedBody = `# Aureal Watermark v0.2.1 — Universal Release
 
