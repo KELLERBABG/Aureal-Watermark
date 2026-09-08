@@ -7,8 +7,9 @@ import {
 import { packCodeword } from "./payload.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
-const MAX_AMPLITUDE = 0.12;
+const MAX_AMPLITUDE = 0.024;
 const MULTI_BAND_SCALE = 0.7;
+const MID_BAND_PERCEPTUAL_WEIGHT = 0.65;
 
 export function embedWatermark(pcm, fmt, opts) {
   if (!opts || !Number.isInteger(opts.payloadId)) {
@@ -63,8 +64,11 @@ export function embedWatermark(pcm, fmt, opts) {
           sumSq += s * s;
         }
         const rms = Math.sqrt(sumSq / slotLen);
-        // Attenuate carrier in quiet sections; mute in near-silence (<= -60 dBFS)
-        const mask = rms <= 0.001 ? 0.0 : (rms >= 0.0316 ? 1.0 : (rms - 0.001) / 0.0306);
+        // Adaptive proportional masking:
+        // Mute in near-silence (<= -60 dBFS) to preserve clean pauses/breakdowns.
+        // In audible sections, scale watermark proportionally to local host RMS,
+        // keeping watermark >= 28-32 dB below the music, capped at 1.0.
+        const mask = rms <= 0.001 ? 0.0 : Math.min(1.0, (rms - 0.001) / 0.035);
         if (mask > 0) {
           const wmSlotBase = b * slotLen;
           let o = slotOffset;
@@ -126,18 +130,20 @@ function synthesizeWatermarkFrame({ key, sampleRate, geometry, bands, codeword, 
   const { slotLen, frameLen, bits } = geometry;
   const wm = new Float64Array(frameLen);
   for (const band of bands) {
+    const isMid = band.lowHz < 14000;
+    const bandAmp = amp * (isMid ? MID_BAND_PERCEPTUAL_WEIGHT : 1.0);
     const built = buildTemplate({ key, sampleRate, geometry, band });
     const { template } = built;
     for (let b = 0; b < bits; b++) {
       const s = codeword[b];
       const off = b * slotLen;
       for (let n = 0; n < slotLen; n++) {
-        wm[off + n] += amp * s * template[off + n];
+        wm[off + n] += bandAmp * s * template[off + n];
       }
     }
     const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
     for (let n = 0; n < syncLen; n++) {
-      wm[n] += amp * 0.5 * chirpQ[n];
+      wm[n] += bandAmp * 0.8 * chirpQ[n];
     }
   }
   return wm;
