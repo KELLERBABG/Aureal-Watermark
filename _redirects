@@ -1,0 +1,12 @@
+# Clean public routes for Cloudflare Pages
+/studio /demo/studio.html 200
+/docs /demo/docs.html 200
+/pricing /demo/pricing.html 200
+/verifier /demo/verifier.html 200
+
+# Redirect legacy extensioned/demo URLs to the clean routes
+/demo/index.html /
+/demo/studio.html /studio
+/demo/docs.html /docs
+/demo/pricing.html /pricing
+/demo/verifier.html /verifier
