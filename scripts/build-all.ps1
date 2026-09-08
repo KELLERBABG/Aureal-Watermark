@@ -8,10 +8,10 @@ Write-Host "2. Copying to dist/aureal-watermark.cjs..."
 Copy-Item "dist/cli.cjs" -Destination "dist/aureal-watermark.cjs" -Force
 
 Write-Host "3. Generating sea-config.json..."
-Set-Content -Path "sea-config.json" -Value '{"main":"dist/cli.cjs","output":"dist/sea-prep.blob","disableExperimentalSEAWarning":true}'
+Set-Content -Path "dist/sea-config.json" -Value '{"main":"dist/cli.cjs","output":"dist/sea-prep.blob","disableExperimentalSEAWarning":true}'
 
 Write-Host "4. Generating SEA blob..."
-node --experimental-sea-config sea-config.json
+node --experimental-sea-config dist/sea-config.json
 
 Write-Host "5. Copying node.exe to dist/aureal-watermark.exe..."
 $nodePath = (Get-Command node).Source

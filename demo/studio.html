@@ -10,8 +10,8 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.png">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
-  <link rel="shortcut icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="shortcut icon" href="assets/favicon.ico">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <script src="assets/lame.min.js"></script>
 <style>
   :root {
@@ -616,20 +616,28 @@
         </div>
         <audio id="embed-output-player" controls style="display: block; margin-bottom: 0.75rem;"></audio>
         
-        <div style="margin-bottom: 0.75rem; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem;">
-          <label for="export-format-select" style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem; font-weight: 600; letter-spacing: 0.02em;">
-            DOWNLOAD FORMAT
-          </label>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <select id="export-format-select" style="flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 0.55rem 0.75rem; font-size: 0.83rem; font-family: inherit; cursor: pointer;">
+        <div style="margin-bottom: 0.85rem; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label for="export-format-select" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+              Export Format
+            </label>
+            <span id="export-format-badge" style="font-size: 0.68rem; color: var(--cyan); background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 4px; padding: 1px 7px; font-weight: 600; font-family: ui-monospace, monospace;">
+              WAV 16-BIT PCM
+            </span>
+          </div>
+          <div style="position: relative; margin-bottom: 0.65rem;">
+            <select id="export-format-select" style="width: 100%; box-sizing: border-box; background: #0c1017; border: 1px solid var(--border); color: #f1f5f9; border-radius: 6px; padding: 0.6rem 2.2rem 0.6rem 0.75rem; font-size: 0.83rem; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%2394a3b8\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 0.65rem center;">
               <option value="wav-16" selected>WAV — 16-bit PCM (Lossless CD Master)</option>
               <option value="wav-24">WAV — 24-bit PCM (High-Res Studio Master)</option>
               <option value="mp3-320">MP3 — 320 kbps (Studio Quality / Highest)</option>
               <option value="mp3-192">MP3 — 192 kbps (Streaming / Standard)</option>
               <option value="mp3-128">MP3 — 128 kbps (Compact Web)</option>
             </select>
-            <button type="button" class="btn" id="btn-download" style="white-space: nowrap; padding: 0.55rem 1.25rem;">Download</button>
           </div>
+          <button type="button" class="btn" id="btn-download" style="width: 100%; box-sizing: border-box; justify-content: center; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.85rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="btn-download-label">Download Watermarked Audio (WAV)</span>
+          </button>
         </div>
 
         <button type="button" class="btn btn-subtle" id="btn-verify-now">Scan in Verifier &rarr;</button>
@@ -1828,10 +1836,38 @@
     }
   });
 
+  const exportFormatBadge = document.getElementById("export-format-badge");
+  const btnDownloadLabel = document.getElementById("btn-download-label");
+
+  function updateExportFormatUI() {
+    const fmt = exportFormatSelect ? exportFormatSelect.value : "wav-16";
+    if (fmt === "wav-16") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "WAV 16-BIT PCM";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (WAV)";
+    } else if (fmt === "wav-24") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "WAV 24-BIT HI-RES";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (24-bit WAV)";
+    } else if (fmt === "mp3-320") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "MP3 320 KBPS";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (MP3)";
+    } else if (fmt === "mp3-192") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "MP3 192 KBPS";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (192k MP3)";
+    } else if (fmt === "mp3-128") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "MP3 128 KBPS";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (128k MP3)";
+    }
+  }
+
+  if (exportFormatSelect) {
+    exportFormatSelect.addEventListener("change", updateExportFormatUI);
+  }
+
   btnDownload.addEventListener("click", async () => {
     const fmt = exportFormatSelect ? exportFormatSelect.value : "wav-16";
     let downloadBlob = null;
     let outFileName = `${lastBaseFileName}_watermarked.wav`;
+    const curLabel = btnDownloadLabel ? btnDownloadLabel.textContent : "Download Watermarked Audio";
 
     if (!lastWatermarkedPcm && lastWavBlob) {
       downloadBlob = lastWavBlob;
@@ -1846,21 +1882,20 @@
         outFileName = `${lastBaseFileName}_watermarked_24bit.wav`;
       } else if (fmt.startsWith("mp3-")) {
         const kbps = parseInt(fmt.split("-")[1], 10) || 320;
-        const origText = btnDownload.textContent;
         btnDownload.disabled = true;
-        btnDownload.textContent = `Encoding ${kbps}k MP3...`;
+        if (btnDownloadLabel) btnDownloadLabel.textContent = `Encoding ${kbps}k MP3...`;
         try {
-          await new Promise(r => setTimeout(r, 20));
+          await new Promise(r => setTimeout(r, 25));
           downloadBlob = encodeMp3Blob(lastWatermarkedPcm, lastSampleRate, lastChannels, kbps);
           outFileName = kbps === 320 ? `${lastBaseFileName}_watermarked.mp3` : `${lastBaseFileName}_watermarked_${kbps}k.mp3`;
         } catch (e) {
           alert("MP3 export error: " + (e.message || e));
           btnDownload.disabled = false;
-          btnDownload.textContent = origText;
+          if (btnDownloadLabel) btnDownloadLabel.textContent = curLabel;
           return;
         }
         btnDownload.disabled = false;
-        btnDownload.textContent = origText;
+        if (btnDownloadLabel) btnDownloadLabel.textContent = curLabel;
       }
     }
 

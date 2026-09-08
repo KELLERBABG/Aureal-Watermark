@@ -7,12 +7,18 @@
   <meta name="description" content="Aureal Watermark: Imperceptible acoustic spread-spectrum audio watermarking. Survives lossy MP3 compression, pitch shifts, and AI scraping with sub-second zero-dependency scanning.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
-  <link rel="shortcut icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="shortcut icon" href="assets/favicon.ico">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="assets/lame.min.js"></script>
+  <script>
+    if (typeof lamejs === "undefined") {
+      document.write('<script src="../assets/lame.min.js"><\/script>');
+    }
+  </script>
   <style>
     :root {
       --bg: #08040d;
@@ -997,14 +1003,34 @@
                   <span>A/B MASTER AUDITION</span>
                   <span style="color: var(--emerald);">0.0 dB DELTA</span>
                 </div>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.85rem;">
                   <button type="button" class="demo-btn secondary" id="btn-listen-orig" style="flex: 1; justify-content: center; font-size: 0.75rem;">Original Master</button>
                   <button type="button" class="demo-btn primary" id="btn-listen-marked" style="flex: 1; justify-content: center; font-size: 0.75rem;">Watermarked Copy</button>
                 </div>
-                <a id="btn-download-marked" class="demo-btn secondary" style="width: 100%; justify-content: center; font-size: 0.75rem; text-decoration: none;" download="aureal_watermarked.wav">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  Download Watermarked WAV
-                </a>
+
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                    <label for="demo-export-format" style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                      Export Format
+                    </label>
+                    <span id="demo-export-badge" style="font-size: 0.66rem; color: var(--cyan); background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 4px; padding: 1px 6px; font-weight: 600; font-family: var(--font-mono);">
+                      WAV 16-BIT PCM
+                    </span>
+                  </div>
+                  <div style="position: relative; margin-bottom: 0.6rem;">
+                    <select id="demo-export-format" style="width: 100%; box-sizing: border-box; background: #0c1017; border: 1px solid var(--border); color: #f1f5f9; border-radius: 6px; padding: 0.55rem 2rem 0.55rem 0.7rem; font-size: 0.8rem; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%2394a3b8\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 0.6rem center;">
+                      <option value="wav-16" selected>WAV — 16-bit PCM (Lossless CD Master)</option>
+                      <option value="wav-24">WAV — 24-bit PCM (High-Res Studio Master)</option>
+                      <option value="mp3-320">MP3 — 320 kbps (Studio Quality / Highest)</option>
+                      <option value="mp3-192">MP3 — 192 kbps (Streaming / Standard)</option>
+                      <option value="mp3-128">MP3 — 128 kbps (Compact Web)</option>
+                    </select>
+                  </div>
+                  <button type="button" class="demo-btn secondary" id="btn-demo-download" style="width: 100%; justify-content: center; font-size: 0.78rem; font-weight: 600; padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span id="btn-demo-download-label">Download Watermarked Master (WAV)</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1332,7 +1358,10 @@ assert.equal(detectedId.valid, true);
       const abSection = document.getElementById("demo-ab-section");
       const btnListenOrig = document.getElementById("btn-listen-orig");
       const btnListenMarked = document.getElementById("btn-listen-marked");
-      const btnDownloadMarked = document.getElementById("btn-download-marked");
+      const demoExportFormat = document.getElementById("demo-export-format");
+      const demoExportBadge = document.getElementById("demo-export-badge");
+      const btnDemoDownload = document.getElementById("btn-demo-download");
+      const btnDemoDownloadLabel = document.getElementById("btn-demo-download-label");
       const scanStatus = document.getElementById("demo-scan-status");
 
       let audioCtx = null;
@@ -1428,7 +1457,7 @@ assert.equal(detectedId.valid, true);
             const markedBlob = AurealDemo.encodeWavBlob(markedPcm, sampleRate, channels);
             if (markedBlobUrl) URL.revokeObjectURL(markedBlobUrl);
             markedBlobUrl = URL.createObjectURL(markedBlob);
-            btnDownloadMarked.href = markedBlobUrl;
+            updateDemoExportUI();
 
             abSection.style.display = "block";
             btnEmbed.innerText = "Watermark Embedded (Sub-Threshold)";
@@ -1461,6 +1490,74 @@ assert.equal(detectedId.valid, true);
         btnListenMarked.className = "demo-btn primary";
         btnListenOrig.className = "demo-btn secondary";
       });
+
+      // 4b. Studio Preview Multi-Format Export
+      function updateDemoExportUI() {
+        const fmt = demoExportFormat ? demoExportFormat.value : "wav-16";
+        if (fmt === "wav-16") {
+          if (demoExportBadge) demoExportBadge.textContent = "WAV 16-BIT PCM";
+          if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = "Download Watermarked Master (WAV)";
+        } else if (fmt === "wav-24") {
+          if (demoExportBadge) demoExportBadge.textContent = "WAV 24-BIT HI-RES";
+          if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = "Download Watermarked Master (24-bit WAV)";
+        } else if (fmt === "mp3-320") {
+          if (demoExportBadge) demoExportBadge.textContent = "MP3 320 KBPS";
+          if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = "Download Watermarked Master (MP3)";
+        } else if (fmt === "mp3-192") {
+          if (demoExportBadge) demoExportBadge.textContent = "MP3 192 KBPS";
+          if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = "Download Watermarked Master (192k MP3)";
+        } else if (fmt === "mp3-128") {
+          if (demoExportBadge) demoExportBadge.textContent = "MP3 128 KBPS";
+          if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = "Download Watermarked Master (128k MP3)";
+        }
+      }
+
+      if (demoExportFormat) {
+        demoExportFormat.addEventListener("change", updateDemoExportUI);
+      }
+
+      if (btnDemoDownload) {
+        btnDemoDownload.addEventListener("click", async () => {
+          if (!markedPcm) return;
+          const fmt = demoExportFormat ? demoExportFormat.value : "wav-16";
+          let downloadBlob = null;
+          let outFileName = "aureal_watermarked.wav";
+          const curLabel = btnDemoDownloadLabel ? btnDemoDownloadLabel.textContent : "Download Watermarked Master";
+
+          if (fmt === "wav-16") {
+            downloadBlob = AurealDemo.encodeWavBlob(markedPcm, sampleRate, channels, 16);
+            outFileName = "aureal_watermarked.wav";
+          } else if (fmt === "wav-24") {
+            downloadBlob = AurealDemo.encodeWavBlob(markedPcm, sampleRate, channels, 24);
+            outFileName = "aureal_watermarked_24bit.wav";
+          } else if (fmt.startsWith("mp3-")) {
+            const kbps = parseInt(fmt.split("-")[1], 10) || 320;
+            btnDemoDownload.disabled = true;
+            if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = `Encoding ${kbps}k MP3...`;
+            try {
+              await new Promise(r => setTimeout(r, 25));
+              downloadBlob = AurealDemo.encodeMp3Blob(markedPcm, sampleRate, channels, kbps);
+              outFileName = kbps === 320 ? "aureal_watermarked.mp3" : `aureal_watermarked_${kbps}k.mp3`;
+            } catch (e) {
+              alert("MP3 export error: " + (e.message || e));
+              btnDemoDownload.disabled = false;
+              if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = curLabel;
+              return;
+            }
+            btnDemoDownload.disabled = false;
+            if (btnDemoDownloadLabel) btnDemoDownloadLabel.textContent = curLabel;
+          }
+
+          if (downloadBlob) {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(downloadBlob);
+            a.download = outFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
+        });
+      }
 
       // 5. Scan & Recover Attribution
       btnScan.addEventListener("click", () => {

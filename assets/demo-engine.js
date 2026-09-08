@@ -486,7 +486,7 @@
     return out;
   }
 
-  function encodeWavBlob(samples, sampleRate, channels, bitDepth = 16) {
+  function encodeWavArray(samples, sampleRate, channels, bitDepth = 16) {
     const bytesPerSample = bitDepth / 8;
     const frames = Math.floor(samples.length / channels);
     const dataLen = frames * channels * bytesPerSample;
@@ -512,10 +512,57 @@
     let offset = 44;
     for (let i = 0; i < samples.length; i++) {
       const s = Math.round(Math.max(-1, Math.min(1, samples[i])) * peak);
-      view.setInt16(offset, s, true);
-      offset += 2;
+      if (bitDepth === 16) {
+        view.setInt16(offset, s, true);
+        offset += 2;
+      } else {
+        view.setUint8(offset, s & 0xff);
+        view.setUint8(offset + 1, (s >> 8) & 0xff);
+        view.setUint8(offset + 2, (s >> 16) & 0xff);
+        offset += 3;
+      }
     }
-    return new Blob([new Uint8Array(buffer)], { type: "audio/wav" });
+    return new Uint8Array(buffer);
+  }
+
+  function encodeWavBlob(samples, sampleRate, channels, bitDepth = 16) {
+    const arr = encodeWavArray(samples, sampleRate, channels, bitDepth);
+    return new Blob([arr], { type: "audio/wav" });
+  }
+
+  function encodeMp3Blob(samples, sampleRate, channels, kbps = 320) {
+    const lame = typeof lamejs !== "undefined" ? lamejs : (typeof window !== "undefined" ? window.lamejs : null);
+    if (!lame || !lame.Mp3Encoder) {
+      throw new Error("MP3 encoder (lamejs) is not available. Please choose WAV format.");
+    }
+    const enc = new lame.Mp3Encoder(channels, sampleRate, kbps);
+    const sampleCount = Math.floor(samples.length / channels);
+    const left = new Int16Array(sampleCount);
+    const right = channels >= 2 ? new Int16Array(sampleCount) : left;
+
+    if (channels >= 2) {
+      for (let i = 0; i < sampleCount; i++) {
+        left[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i * 2] * 32767)));
+        right[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i * 2 + 1] * 32767)));
+      }
+    } else {
+      for (let i = 0; i < sampleCount; i++) {
+        left[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i] * 32767)));
+      }
+    }
+
+    const chunks = [];
+    const chunkSize = 1152;
+    for (let i = 0; i < sampleCount; i += chunkSize) {
+      const l = left.subarray(i, i + chunkSize);
+      const r = channels >= 2 ? right.subarray(i, i + chunkSize) : l;
+      const buf = channels >= 2 ? enc.encodeBuffer(l, r) : enc.encodeBuffer(l);
+      if (buf && buf.length > 0) chunks.push(buf);
+    }
+    const end = enc.flush();
+    if (end && end.length > 0) chunks.push(end);
+
+    return new Blob(chunks, { type: "audio/mp3" });
   }
 
   // Synthesize rich acoustic harmonic track (speech/piano melody)
@@ -549,7 +596,9 @@
     synthesizeSample: synthesizeSampleAudio,
     embedWatermark: embedWatermarkCore,
     detectWatermark: detectWatermarkCore,
+    encodeWavArray: encodeWavArray,
     encodeWavBlob: encodeWavBlob,
+    encodeMp3Blob: encodeMp3Blob,
     defaultKey: DEFAULT_KEY
   };
 })(typeof window !== "undefined" ? window : globalThis);
