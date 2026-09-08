@@ -25,6 +25,7 @@ let embedCode = stripImportsAndExports(readFileSync("src/embed.js", "utf8"));
 let detectCode = stripImportsAndExports(readFileSync("src/detect.js", "utf8"));
 let wavCode = stripImportsAndExports(readFileSync("src/wav.js", "utf8"));
 let synthCode = stripImportsAndExports(readFileSync("src/synth.js", "utf8"));
+let licenseCode = stripImportsAndExports(readFileSync("src/license.js", "utf8"));
 let cliCode = stripImportsAndExports(readFileSync("bin/auralwatermark.js", "utf8"));
 
 embedCode = embedCode.replace(/const DEFAULT_KEY = [^;]+;/g, "");
@@ -101,6 +102,8 @@ ${detectCode}
 ${wavCode}
 
 ${synthCode}
+
+${licenseCode}
 
 ${cliCode}
 `;
