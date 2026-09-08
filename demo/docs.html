@@ -582,16 +582,16 @@
         <h2>Overview &amp; Architecture</h2>
         <p>
           Aureal Watermark is an acoustic spread-spectrum watermark engine written in pure, zero-dependency JavaScript and Node.js. 
-          It embeds an invisible, cryptographically verifiable provenance signature into master audio recordings, surviving lossy re-encoding, social media transcoding, pitch-shifting, and AI voice cloning scraper pipelines.
+          It embeds an invisible recipient ID into master audio recordings. Use the documented tests to evaluate detection after the transformations in your workflow.
         </p>
 
         <div class="docs-cards-grid">
           <div class="doc-card">
             <h4>Air-Gapped &amp; Supply-Chain Secure</h4>
-            <p>Runs cleanly with zero external runtime packages. Immune to supply-chain vulnerabilities and auditable for studio air-gap compliance.</p>
+            <p>The core engine has no runtime package dependency. Review the release contents and deployment environment for your own air-gap requirements.</p>
           </div>
           <div class="doc-card">
-            <h4>100% Offline Client-Side</h4>
+            <h4>Client-Side Processing (Demo)</h4>
             <p>Web Audio API implementation allows full in-browser verification and watermark extraction without sending audio bytes to any server.</p>
           </div>
           <div class="doc-card">
@@ -846,7 +846,7 @@ console.log(verification);
         <ul style="padding-left: 1.5rem; color: var(--text-muted); margin-bottom: 1.5rem;">
           <li style="margin-bottom: 0.5rem;">The energy per frequency bin is tens of decibels lower than ambient acoustic noise.</li>
           <li style="margin-bottom: 0.5rem;">Lossy audio compression algorithms (MP3, AAC, YouTube, TikTok) treat the watermark as natural harmonic texture and preserve it during encoding.</li>
-          <li style="margin-bottom: 0.5rem;">Only a decoder with the matching cryptographic seed key can de-spread and recover the embedded provenance payload.</li>
+          <li style="margin-bottom: 0.5rem;">A decoder with the matching key is required to recover the embedded payload in the current design.</li>
         </ul>
       </section>
 
@@ -871,7 +871,7 @@ console.log(verification);
                 <td><strong>Noncommercial / Academic</strong></td>
                 <td>Free ($0)</td>
                 <td>Evaluation, open-source research, non-monetized music production.</td>
-                <td>100% Offline / Zero Telemetry</td>
+                <td>Client-side demo; hosting requests may still generate standard server logs</td>
               </tr>
               <tr>
                 <td><strong>Commercial Indie Label</strong></td>
