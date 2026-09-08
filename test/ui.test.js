@@ -27,6 +27,6 @@ test("landing page keeps claims and navigation regression-safe", () => {
   assert.doesNotMatch(source, /�|â|â|ð/);
   assert.match(source, /nav-toggle/);
   assert.match(source, /scanDurationMs/);
-  assert.match(source, /Results are an interactive demo/);
+  assert.match(source, /Live In-Browser Demo/);
   assert.doesNotMatch(source, /WATERMARK VERIFIED/);
 });

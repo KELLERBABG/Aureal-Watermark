@@ -17,6 +17,15 @@ const KEY = "adversarial-key-77";
 
 const dir = mkdtempSync(join(tmpdir(), "aural-torture-"));
 
+function haveFfmpeg() {
+  try {
+    execFileSync("ffmpeg", ["-version"], { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function ffmpeg(args) {
   execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args], {
     stdio: ["ignore", "pipe", "pipe"],
@@ -233,7 +242,11 @@ async function runTortureSuite() {
   rmSync(dir, { recursive: true, force: true });
 }
 
-runTortureSuite().catch((err) => {
-  console.error("Suite failed:", err);
-  process.exit(1);
-});
+if (haveFfmpeg()) {
+  runTortureSuite().catch((err) => {
+    console.error("Suite failed:", err);
+    process.exit(1);
+  });
+} else {
+  console.log("ffmpeg not available - adversarial transcode tests skipped (like codec.test.js).");
+}
