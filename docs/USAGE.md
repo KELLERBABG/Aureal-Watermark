@@ -1,11 +1,21 @@
 # Aureal Watermark — Usage Guide
 
-**Version:** 0.2.1 &bull; Node.js &ge; 18 &bull; Zero external npm dependencies
+**Version:** 0.2.4 &bull; Node.js &ge; 18 &bull; Standalone Windows Executable & Universal Bundle
 
 ---
 
-## 1. CLI Quick Start
+## 1. Desktop Studio App & CLI Quick Start
 
+### Standalone Desktop Studio GUI
+```powershell
+# Launch the offline Desktop Studio application (Default)
+auralwatermark
+# or explicitly:
+auralwatermark gui
+```
+Features interactive waveform visualization, recipient collision pre-checks, secure cryptographic ID generators, and multi-format audio export (WAV 16/24-bit and MP3 320/192/128k).
+
+### CLI Usage
 ```powershell
 # 1. Generate synthetic speech-like material for quick testing (no source audio needed)
 node bin/auralwatermark.js gen podcast.wav --seconds 30 --rate 44100
@@ -15,7 +25,7 @@ node bin/auralwatermark.js embed podcast.wav podcast_marked.wav --id 1234567 --k
 
 # 3. Verify an expected ID (Verify Mode: matched filter against expected ID)
 node bin/auralwatermark.js detect podcast_marked.wav --id 1234567 --key secret
-#   detected: YES / confidence: 1.000 / ber: 0.0% / band hit: high/mid (16500-19500 Hz)
+#   detected: YES / confidence: 1.000 / ber: 0.0% / band hit: high/mid (17000-19500 Hz)
 
 # 4. Blind Detection (Auto-extracts and verifies any embedded watermark without passing an ID)
 node bin/auralwatermark.js detect unknown.wav --key secret --json
@@ -36,8 +46,8 @@ Synthesizes speech-like audio with harmonic formants and amplitude envelope for 
 |---|---|---|
 | `--id` | **Required** | Unsigned 32-bit tracking ID (`0` to `4294967295`). |
 | `--key` | `aural-watermark-default-key` | Secret salt used for PRNG sequence generation. Must match at detection time. |
-| `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Peak amplitude $\approx -18\text{ dBFS}$ at `1.0`. |
-| `--band` | `dual` | `high` (16.5–19.5 kHz), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
+| `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Inaudible and buried $\ge 32\text{--}36\text{ dB}$ below host audio. |
+| `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
 
 ### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json]`
 
@@ -105,9 +115,9 @@ const res = detectWatermark(watermarked, fmt, {
 
 | Scenario | Recommended Band | Rationale |
 | :--- | :--- | :--- |
-| **Archival Masters / Lossless Distribution** | `high` | Complete inaudibility in near-ultrasound (16.5–19.5 kHz). |
+| **Archival Masters / Lossless Distribution** | `high` | Complete inaudibility in near-ultrasound (17.0–19.5 kHz). |
 | **Podcasts, Streaming, Social Media (MP3/AAC)** | `dual` (embed) + `auto` (detect) | Redundant encoding across mid and high bands survives encoder low-passes. |
-| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (8–13 kHz) masked under speech sibilants. |
+| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (8–13 kHz) masked under speech sibilants and music transients. |
 
 ---
 

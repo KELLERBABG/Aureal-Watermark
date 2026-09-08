@@ -83,7 +83,7 @@ Aureal-Watermark/
   * `makeSymbolStream(key, label)`: Returns a deterministic stream of $\pm 1$ pseudorandom symbols seeded by `key + "|" + label`.
   * `hannWindow(n)`: Computes and caches a Hann window ($w[i] = 0.5 - 0.5 \cos(2\pi i / n)$) of length $n$ to guarantee smooth burst boundaries with zero transients.
   * `BAND_PRESETS`:
-    * `high`: $16.5\text{ kHz} - 19.5\text{ kHz}$ (Center: $18.0\text{ kHz}$)
+    * `high`: $17.0\text{ kHz} - 19.5\text{ kHz}$ (Center: $18.25\text{ kHz}$)
     * `mid`: $8.0\text{ kHz} - 13.0\text{ kHz}$ (Center: $10.5\text{ kHz}$)
   * `deriveGeometry(sampleRate, perChannelSamples, opts)`:
     * Calculates slot length, chip length, frame length (~1.0s), and repetition count ($reps = \lfloor N / frameLen \rfloor$).

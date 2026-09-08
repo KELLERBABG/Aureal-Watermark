@@ -9,12 +9,12 @@ This document contains low-level digital signal processing (DSP) specifications,
 ```
 Frequency (Hz)
 22.05 kHz ─────────────────────────────────────────────────────────────
-          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- High Band DSSS (16.5–19.5 kHz)
-16.00 kHz ─────────────────────────────────────────────────────────────      (48-symbol BPSK, Hann windowed)
-          [ High-frequency transients, air, percussion sizzle ]
+          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- High Band DSSS (17.0–19.5 kHz)
+17.00 kHz ─────────────────────────────────────────────────────────────      (Near-ultrasonic, strictly inaudible)
+          [ High-frequency air, harmonics, percussion sizzle ]
 13.00 kHz ─────────────────────────────────────────────────────────────
           ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- Mid Band DSSS (8.0–13.0 kHz)
- 8.00 kHz ─────────────────────────────────────────────────────────────      (Heavy codec resilience band)
+ 8.00 kHz ─────────────────────────────────────────────────────────────      (A-weighted equal-loudness resilience)
           [ Speech Formants, Vocals, Bass, Fundamentals: 20 Hz - 8 kHz ]   (Completely untouched)
  0.00 kHz ─────────────────────────────────────────────────────────────
 ```
@@ -25,11 +25,11 @@ Frequency (Hz)
 | :--- | :--- | :--- |
 | **Modulation Scheme** | Direct-Sequence Spread Spectrum (DSSS) | 48 BPSK symbols per repetition |
 | **Codeword Structure** | 32 data bits + 16-bit CRC-16/CCITT-FALSE | $2^{32} = 4,294,967,296$ unique IDs |
-| **Carrier Bands** | `High` (16.5–19.5 kHz)<br>`Mid` (8.0–13.0 kHz)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
+| **Carrier Bands** | `High` (17.0–19.5 kHz, Ultrasonic)<br>`Mid` (8.0–13.0 kHz, A-Weighted)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
 | **Window Shaping** | Continuous periodic Hann window | Zero DC offset, continuous phase transitions across chip boundaries |
-| **Dynamic Psychoacoustic Masking** | Slot-level RMS energy tracking | Carrier is attenuated below $-30\text{ dBFS}$; muted on digital silence ($\le -60\text{ dBFS}$) |
+| **Dynamic Psychoacoustic Masking** | Continuous proportional RMS tracking | Carrier tracks local energy, guaranteed $\ge 32\text{--}36\text{ dB}$ below audio; muted on silence ($\le -54\text{ dBFS}$) |
 | **Headroom Protection** | True-Peak Limiter ($\le 0.995$) | Guarantees superposition never clips on maximized $0\text{ dBFS}$ masters |
-| **Embedding Level** | $-24\text{ dB}$ to $-30\text{ dBFS}$ (nominal) | Scaled by `strength` parameter ($0.01 \le s \le 1.0$) |
+| **Embedding Level** | $-48.5\text{ dB}$ to $-55\text{ dBFS}$ (nominal) | Scaled by `strength` parameter ($0.01 \le s \le 1.0$) |
 | **Repetition Period** | ~1.0 second per frame | Integrates coherently over time ($S/N \propto \sqrt{N}$) |
 | **Stream Sync Preamble** | In-Phase / Quadrature (IQ) Chirp | Key-derived Linear Frequency Chirp at each frame boundary; fast single-pass lock on arbitrary crop offsets |
 | **Resampling Invariance** | 64-phase, 32-tap Windowed-Sinc Polyphase Resampler | Automatically normalizes between 44.1 kHz, 48 kHz, and 96 kHz without external dependencies |

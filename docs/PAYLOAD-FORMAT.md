@@ -47,7 +47,7 @@ Given sample rate `R`, per-channel length `N`:
 
 | Preset | lowHz–highHz | center used for carrier |
 |---|---|---|
-| high | 16500–19500 | 18000 |
+| high | 17000–19500 | 18250 |
 | mid | 8000–13000 | 10500 |
 
 Custom `{lowHz, highHz}` is clamped to `[1000, R/2−100]`. The carrier sits
@@ -62,10 +62,11 @@ wm[b·S + c·C + j] = amp · symbol_b · hann[j] · sin(2π·f_center·j/R)
 symbol_b          = ±1 from keyed PN stream "bit"+b
 ```
 
-Embedding adds this frame repeatedly (`reps`) on every channel at identical
-positions; multi-band modes sum independently scaled copies
-(each ×0.7). Peak amplitude bound: `amp = strength × 0.12`,
-multi-band ×0.7 each.
+Embedding adds this frame repeatedly (`reps`) across channels with Mid/Side
+decorrelation. Adaptive proportional masking tracks slot RMS, burying the signal
+≥32–36 dB below host audio and muting completely on silence (≤ -54 dBFS). Peak
+amplitude bound: `amp = strength × 0.0075` (linear amplitude ~0.00375 at strength 0.5),
+multi-band ×0.7 each with A-weighted mid scaling (×0.22).
 
 ## 6. Detection statistics
 

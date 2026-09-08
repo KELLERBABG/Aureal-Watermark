@@ -122,8 +122,8 @@ changes cancel exactly.
 
 | Preset | lowHz–highHz | center | Rationale |
 |---|---|---|---|
-| `high` | 16500–19500 | 18000 | least audible; may hit codec low-pass at ≤128 kbps |
-| `mid` | 8000–13000 | 10500 | survives lossy low-pass filters; still above speech fundamentals |
+| `high` | 17000–19500 | 18250 | strictly near-ultrasonic and inaudible to human ears; survives lossless/high-bitrate |
+| `mid` | 8000–13000 | 10500 | survives aggressive lossy low-pass filters; A-weighted for transparent masking |
 
 Custom bands via `{lowHz, highHz}` are clamped to Nyquist−100 Hz.
 

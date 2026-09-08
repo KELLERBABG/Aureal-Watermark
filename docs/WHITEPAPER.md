@@ -1,6 +1,6 @@
 # Aureal Watermark Whitepaper
 
-**Version:** 0.2.1 &bull; **Status:** Working Implementation & Production-Ready DSP Core
+**Version:** 0.2.4 &bull; **Status:** Production-Ready DSP Core & Universal Application Bundle
 
 > An inaudible spread-spectrum steganographic audio watermark proving that an audio recording originates from a verified human creator or official source. Verifiable in seconds, client-side in the browser, with zero server infrastructure.
 
@@ -10,7 +10,7 @@
 
 With the proliferation of realistic voice-cloning models, deepfake audio and unauthorized voice scraping have become significant legal and commercial liabilities. High-profile podcast hosts, voice actors, musicians, and executives frequently find their voices cloned or leaked without consent. While regulatory frameworks like the EU AI Act mandate provenance transparency for synthetic media, the industry lacks an accessible, client-side verification tool to prove the inverse: **This audio is an authentic, registered human production.**
 
-Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across near-ultrasonic bands (16.5–19.5 kHz) and speech-masked mid-bands (8–13 kHz). The payload is protected by a CRC-16 checksum, supports 1-bit reliability-ordered error correction, repeats coherently across the full track duration, and remains invariant to volume/gain shifts.
+Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across strictly near-ultrasonic bands (17.0–19.5 kHz) and A-weighted speech-masked mid-bands (8–13 kHz). The payload is protected by a CRC-16 checksum, supports 2-bit reliability-ordered error correction, repeats coherently across the full track duration, and remains invariant to volume/gain shifts.
 
 Tested across multi-generation `ffmpeg` encoding round-trips, the watermark survives MP3 (128 kbps / 320 kbps) and AAC (128 kbps) re-encoding while correctly rejecting unregistered or mismatched IDs.
 
@@ -48,11 +48,11 @@ For each symbol slot (24 chips), a Hann-windowed sinusoidal carrier burst at the
 
 | Mode | Carrier Band | Characteristics |
 | :--- | :--- | :--- |
-| `high` | 16.5–19.5 kHz | Maximum psychoacoustic stealth; susceptible to aggressive codec low-passes $\le 128\text{ kbps}$. |
-| `mid` | 8.0–13.0 kHz | Survives lossy compression low-pass filters; masked under speech formants and music percussion. |
-| `dual` | Both bands | Redundant embedding across both bands; detector selects the highest-confidence match. |
+| `high` | 17.0–19.5 kHz | Maximum psychoacoustic stealth; strictly inaudible near-ultrasound; high-bitrate & lossless. |
+| `mid` | 8.0–13.0 kHz | Survives lossy compression low-pass filters; A-weighted for transparent masking. |
+| `dual` | Both bands | Redundant simultaneous embedding across both bands; detector automatically falls back to best band. |
 
-In `dual` mode, the embedder scales each copy by $\times 0.7$ to maintain consistent combined peak amplitude ($-22.5\text{ dBFS}$ peak at default strength 0.5).
+In `dual` mode, the embedder scales each copy by $\times 0.7$ with A-weighted attenuation on the mid band to maintain complete psychoacoustic transparency ($-51\text{--}-55\text{ dBFS}$ nominal level).
 
 ### 3.3 Detection Pipeline
 

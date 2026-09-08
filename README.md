@@ -59,9 +59,30 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
 
 ---
 
-## 3 Easy Ways to Use It
+## Easy Ways to Use It
 
-### Option 1: Web Studio (Easiest — In Your Browser)
+### Option 1: Standalone Desktop Studio & Windows Executable (Recommended)
+
+1. Download **[`aureal-watermark.exe`](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest/download/aureal-watermark.exe)** from the Releases page.
+2. Double-click to launch the offline **Desktop Studio Application**:
+   * **Multi-Format Audio Export:** Download masters in WAV 16-bit, WAV 24-bit, or MP3 (320k, 192k, 128k) with built-in offline LAME encoding.
+   * **Collision Detector:** Automatic pre-check prevents accidentally over-tagging an already watermarked master.
+   * **Cryptographic Auto-ID:** 1-click generation of secure, non-repeating tracking IDs and studio namespace keys.
+   * **100% Offline & Air-Gapped:** Zero external network calls. Complete on-premises privacy.
+
+You can also run it directly via CLI or command prompt:
+```bash
+# Launch GUI Studio (Default)
+./aureal-watermark.exe
+
+# Or run headless CLI operations
+./aureal-watermark.exe embed master.wav protected.wav --id 883921
+./aureal-watermark.exe detect protected.wav --id 883921
+```
+
+---
+
+### Option 2: Web Studio (In Your Browser)
 
 No installation or technical setup needed:
 
@@ -71,7 +92,7 @@ No installation or technical setup needed:
 
 ---
 
-### Option 2: Standalone Command Line Tool (Universal CLI)
+### Option 3: Standalone Universal Script (Cross-Platform CLI)
 
 A single, zero-dependency file that runs on **Windows, macOS, and Linux** using standard Node.js (&ge; 18):
 
@@ -88,8 +109,8 @@ node aureal-watermark.cjs detect protected.wav --id 883921
 # 3. Blind scan (automatically extracts any embedded ID from an unknown file)
 node aureal-watermark.cjs detect mystery_audio.wav --json
 
-# 4. Launch your local offline Web Studio
-node aureal-watermark.cjs studio
+# 4. Launch your local offline Desktop Studio
+node aureal-watermark.cjs gui
 ```
 
 ---
