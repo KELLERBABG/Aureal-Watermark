@@ -2123,7 +2123,10 @@
         licenseFeedback.style.display = "none";
         licenseFeedback.textContent = "";
       }
-      if (licenseModal) licenseModal.style.display = "flex";
+      if (licenseModal) {
+        licenseModal.style.display = "flex";
+        btnCloseLicense?.focus();
+      }
     });
   }
 
@@ -2136,6 +2139,13 @@
 
   if (licenseModal) {
     licenseModal.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        const focusable = licenseModal.querySelectorAll("button, input, a[href]");
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (first && e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (last && !e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
       if (e.key === "Escape") {
         licenseModal.style.display = "none";
         lastLicenseTrigger?.focus();
