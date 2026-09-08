@@ -1180,7 +1180,7 @@
       <div class="deep-grid">
         <div class="concept-card">
           <h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13M9 9l12-2"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h2m2-3v6m3-8v10m3-6v4m3-8v12m3-9v6m2-3h1"/></svg>
             Frequency Masking Thresholds
           </h3>
           <p>
@@ -1201,10 +1201,10 @@ const output = fftBuffer.injectSubThreshold(spreadSignal, maskLevel);
             Direct Sequence Spread Spectrum (DSSS)
           </h3>
           <p>
-            The watermark payload is spread across thousands of frequency bins using an orthogonal cryptographic key sequence.
+            The watermark payload is distributed across a keyed spread-spectrum signal. The demo lets you inspect detection behavior on your own audio.
           </p>
           <p>
-            Because the signal energy in any single bin is orders of magnitude below ambient acoustic noise, lossy audio codecs cannot compress or filter it away without destroying the underlying music.
+            Detection depends on the audio, carrier band, and transformation applied. Validate results with the files and delivery pipeline you plan to use.
           </p>
           <div class="code-box">
 const detectedId = AurealScanner.correlate(audioStream, clientKey);
@@ -1603,12 +1603,12 @@ assert.equal(detectedId.valid, true);
                     <strong style="color:#ffffff; font-size:1.2rem; font-family:var(--font-mono); letter-spacing:0.04em;">#${res.recoveredPayloadId}</strong>
                   </div>
                   <div class="demo-metric-row">
-                    <span style="color:var(--text-muted);">Audio Integrity:</span>
-                    <span style="color:var(--emerald); font-weight:500;">Measured in this demo run</span>
+                    <span style="color:var(--text-muted);">Detection result:</span>
+                    <span style="color:var(--emerald); font-weight:500;">Demo result</span>
                   </div>
                   <div class="demo-metric-row">
-                    <span style="color:var(--text-muted);">Detection Speed:</span>
-                    <span style="color:var(--text);">Measured locally in this demo run</span>
+                    <span style="color:var(--text-muted);">Processing:</span>
+                    <span style="color:var(--text);">Client-side demo</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Carrier Profile:</span>
