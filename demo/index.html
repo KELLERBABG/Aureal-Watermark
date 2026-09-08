@@ -1067,7 +1067,7 @@
                 <span>Scan Audio for Recipient ID</span>
               </button>
 
-              <div id="demo-scan-status" style="margin-top: 1.25rem;">
+              <div id="demo-scan-status" role="status" aria-live="polite" style="margin-top: 1.25rem;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--text-dim); font-size: 0.82rem; font-family: var(--font-mono);">
                   Generate the built-in test track or select your own audio to try the workflow.
                 </div>
@@ -1590,7 +1590,7 @@ assert.equal(detectedId.valid, true);
         if (!targetPcm) return;
 
         btnScan.disabled = true;
-        btnScan.innerText = "Scanning Carrier Bins (<350ms)...";
+        btnScan.innerText = "Scanning...";
 
         setTimeout(() => {
           try {
@@ -1598,6 +1598,7 @@ assert.equal(detectedId.valid, true);
               key: AurealDemo.defaultKey,
               band: bandSelect.value
             });
+            const scanDurationMs = performance.now() - scanStartedAt;
 
             if (res.detected) {
               const bandLabel = res.bandUsed === 'mid' 
@@ -1624,7 +1625,7 @@ assert.equal(detectedId.valid, true);
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Processing:</span>
-                    <span style="color:var(--text);">Client-side demo</span>
+                    <span style="color:var(--text);">${Math.round(scanDurationMs)} ms (local)</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Carrier Profile:</span>
