@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -8,11 +8,11 @@
 <meta property="og:title" content="Aureal Watermark">
 <meta property="og:description" content="Audio watermarking for anti-theft and AI detection">
 <meta property="og:image" content="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.png">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
-  <link rel="shortcut icon" href="assets/favicon.ico">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <script src="assets/lame.min.js"></script>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="../assets/icon.png">
+  <link rel="shortcut icon" href="../assets/favicon.ico">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <script src="../assets/lame.min.js"></script>
 <style>
   :root {
     --bg: #13151c;
@@ -580,7 +580,7 @@
       <div class="form-group">
         <label for="embed-id">
           <span>Payload ID</span>
-          <span class="action-link" id="btn-rand-id" title="Generate Cryptographically Secure Random ID">🎲 Roll Secure ID</span>
+          <span class="action-link" id="btn-rand-id" title="Generate Cryptographically Secure Random ID">ðŸŽ² Roll Secure ID</span>
         </label>
         <input type="number" id="embed-id" placeholder="e.g. 883921" min="0" max="4294967295">
         <div class="field-hint">32-bit tracking ID (over 4.29 billion combinations). Unique per recipient.</div>
@@ -589,7 +589,7 @@
       <div class="form-group">
         <label for="embed-key">
           <span>Secret Studio Key (Optional)</span>
-          <span class="action-link" id="btn-rand-key" title="Generate Random Private Studio Key">🔑 Generate Key</span>
+          <span class="action-link" id="btn-rand-key" title="Generate Random Private Studio Key">ðŸ”‘ Generate Key</span>
         </label>
         <input type="text" id="embed-key" placeholder="Default public key (Shared)">
         <div class="field-hint">Private Studio Namespace. When set, only entities possessing this exact key can detect or extract your IDs.</div>
@@ -598,9 +598,9 @@
       <div class="form-group">
         <label for="embed-band">Carrier Band</label>
         <select id="embed-band">
-          <option value="dual" selected>Dual Band (8–13 kHz & 16.5–19.5 kHz) — Codec resilient</option>
-          <option value="high">High Band (16.5–19.5 kHz) — Archival / Lossless</option>
-          <option value="mid">Mid Band (8–13 kHz) — Heavy compression survival</option>
+          <option value="dual" selected>Dual Band (8â€“13 kHz & 16.5â€“19.5 kHz) â€” Codec resilient</option>
+          <option value="high">High Band (16.5â€“19.5 kHz) â€” Archival / Lossless</option>
+          <option value="mid">Mid Band (8â€“13 kHz) â€” Heavy compression survival</option>
         </select>
       </div>
 
@@ -616,7 +616,7 @@
       <div id="embed-result" class="status-box pass">
         <div class="box-header">
           <span>WATERMARK EMBEDDED</span>
-          <span id="embed-badge-id" style="font-family: ui-monospace, monospace;">ID #—</span>
+          <span id="embed-badge-id" style="font-family: ui-monospace, monospace;">ID #â€”</span>
         </div>
         <audio id="embed-output-player" controls style="display: block; margin-bottom: 0.75rem;"></audio>
         
@@ -631,11 +631,11 @@
           </div>
           <div style="position: relative; margin-bottom: 0.65rem;">
             <select id="export-format-select" style="width: 100%; box-sizing: border-box; background: #0c1017; border: 1px solid var(--border); color: #f1f5f9; border-radius: 6px; padding: 0.6rem 2.2rem 0.6rem 0.75rem; font-size: 0.83rem; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%2394a3b8\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 0.65rem center;">
-              <option value="wav-16" selected>WAV — 16-bit PCM (Lossless CD Master)</option>
-              <option value="wav-24">WAV — 24-bit PCM (High-Res Studio Master)</option>
-              <option value="mp3-320">MP3 — 320 kbps (Studio Quality / Highest)</option>
-              <option value="mp3-192">MP3 — 192 kbps (Streaming / Standard)</option>
-              <option value="mp3-128">MP3 — 128 kbps (Compact Web)</option>
+              <option value="wav-16" selected>WAV â€” 16-bit PCM (Lossless CD Master)</option>
+              <option value="wav-24">WAV â€” 24-bit PCM (High-Res Studio Master)</option>
+              <option value="mp3-320">MP3 â€” 320 kbps (Studio Quality / Highest)</option>
+              <option value="mp3-192">MP3 â€” 192 kbps (Streaming / Standard)</option>
+              <option value="mp3-128">MP3 â€” 128 kbps (Compact Web)</option>
             </select>
           </div>
           <button type="button" class="btn" id="btn-download" style="width: 100%; box-sizing: border-box; justify-content: center; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.85rem;">
@@ -1155,7 +1155,7 @@
       recoveredPayloadId: winner.decoded.crcOk ? winner.decoded.id : null,
       crcOk: winner.decoded.crcOk,
       reps: winner.reps,
-      bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}–${Math.round(winnerBand.highHz)} Hz)` : null,
+      bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}â€“${Math.round(winnerBand.highHz)} Hz)` : null,
       syncMethod: winner.isSyncPreamble ? "preamble" : "fractional_grid",
     };
   }
@@ -1710,11 +1710,11 @@
 
     const ebn0Display = r.ebN0Db != null
       ? (r.ebN0Db > -30 ? (r.ebN0Db > 0 ? "+" : "") + r.ebN0Db + " dB" : "< -30 dB")
-      : "—";
+      : "â€”";
 
     const sqnrDisplay = r.sqnrDb != null
       ? (r.sqnrDb > -30 ? (r.sqnrDb > 0 ? "+" : "") + r.sqnrDb + " dB" : "< -30 dB")
-      : "—";
+      : "â€”";
 
     detectResultBox.innerHTML = `
       <div class="box-header">
@@ -1811,7 +1811,7 @@
     embedPrecheckBox.style.display = "block";
     embedPrecheckBox.innerHTML = `
       <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); color: #7dd3fc; padding: 0.55rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
-        <span>🔍 Scanning audio for existing watermarks...</span>
+        <span>ðŸ” Scanning audio for existing watermarks...</span>
       </div>`;
     lastBaseFileName = file.name.replace(/\.[^/.]+$/, "");
     lastWavFileName = `${lastBaseFileName}_watermarked.wav`;
@@ -1834,7 +1834,7 @@
         embedPrecheckBox.innerHTML = `
           <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem; line-height: 1.45;">
             <div style="font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
-              <span>⚠️ Existing Watermark Detected</span>
+              <span>âš ï¸ Existing Watermark Detected</span>
               <span style="font-family: ui-monospace, monospace; background: rgba(0,0,0,0.3); padding: 2px 7px; border-radius: 4px; color: #ffffff;">ID #${precheck.recoveredPayloadId} (${Math.round(precheck.confidence * 100)}% Match)</span>
             </div>
             <div>This audio already contains an active watermark! Stacking consecutive watermarks creates acoustic cross-talk and will corrupt recovery. We recommend using the original pristine master.</div>
@@ -1842,7 +1842,7 @@
       } else {
         embedPrecheckBox.innerHTML = `
           <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6ee7b7; padding: 0.5rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
-            <span>✓ Pristine Master</span>
+            <span>âœ“ Pristine Master</span>
             <span style="color: var(--text-muted); font-size: 0.76rem;">No prior watermark detected. Ready for secure tagging.</span>
           </div>`;
       }
@@ -2175,3 +2175,4 @@
 
 </body>
 </html>
+

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -8,10 +8,10 @@
 <meta property="og:title" content="Aureal Watermark">
 <meta property="og:description" content="Audio watermarking for anti-theft and AI detection">
 <meta property="og:image" content="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.png">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
-  <link rel="shortcut icon" href="assets/favicon.ico">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="../assets/icon.png">
+  <link rel="shortcut icon" href="../assets/favicon.ico">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <style>
   :root {
     --bg: #13151c;
@@ -564,9 +564,9 @@
       <div class="form-group">
         <label for="embed-band">Carrier Band</label>
         <select id="embed-band">
-          <option value="dual" selected>Dual Band (8–13 kHz & 16.5–19.5 kHz) — Codec resilient</option>
-          <option value="high">High Band (16.5–19.5 kHz) — Archival / Lossless</option>
-          <option value="mid">Mid Band (8–13 kHz) — Heavy compression survival</option>
+          <option value="dual" selected>Dual Band (8â€“13 kHz & 16.5â€“19.5 kHz) â€” Codec resilient</option>
+          <option value="high">High Band (16.5â€“19.5 kHz) â€” Archival / Lossless</option>
+          <option value="mid">Mid Band (8â€“13 kHz) â€” Heavy compression survival</option>
         </select>
       </div>
 
@@ -582,7 +582,7 @@
       <div id="embed-result" class="status-box pass">
         <div class="box-header">
           <span>WATERMARK EMBEDDED</span>
-          <span id="embed-badge-id" style="font-family: ui-monospace, monospace;">ID #—</span>
+          <span id="embed-badge-id" style="font-family: ui-monospace, monospace;">ID #â€”</span>
         </div>
         <audio id="embed-output-player" controls style="display: block; margin-bottom: 0.75rem;"></audio>
         <button type="button" class="btn" id="btn-download">Download Watermarked WAV</button>
@@ -1038,7 +1038,7 @@
       recoveredPayloadId: winner.decoded.crcOk ? winner.decoded.id : null,
       crcOk: winner.decoded.crcOk,
       reps: winner.reps,
-      bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}–${Math.round(winnerBand.highHz)} Hz)` : null,
+      bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}â€“${Math.round(winnerBand.highHz)} Hz)` : null,
       syncMethod: winner.isSyncPreamble ? "preamble" : "fractional_grid",
     };
   }
@@ -1548,11 +1548,11 @@
 
     const ebn0Display = r.ebN0Db != null
       ? (r.ebN0Db > -30 ? (r.ebN0Db > 0 ? "+" : "") + r.ebN0Db + " dB" : "< -30 dB")
-      : "—";
+      : "â€”";
 
     const sqnrDisplay = r.sqnrDb != null
       ? (r.sqnrDb > -30 ? (r.sqnrDb > 0 ? "+" : "") + r.sqnrDb + " dB" : "< -30 dB")
-      : "—";
+      : "â€”";
 
     detectResultBox.innerHTML = `
       <div class="box-header">
@@ -1706,3 +1706,4 @@
 
 </body>
 </html>
+
