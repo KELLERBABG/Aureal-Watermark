@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aureal Watermark &mdash; Acoustic Psychoacoustic Watermarking &mdash; Keller Systems</title>
-  <meta name="description" content="Aureal Watermark: Imperceptible acoustic spread-spectrum audio watermarking. Survives lossy MP3 compression, pitch shifts, and AI scraping with sub-second zero-dependency scanning.">
+  <meta name="description" content="Aureal Watermark: Acoustic spread-spectrum watermarking for testing provenance workflows against common audio transformations.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
   <link rel="shortcut icon" href="assets/favicon.ico">
@@ -892,9 +892,9 @@
         <div style="position: absolute; inset: -14px; border-radius: 28px; background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(6, 182, 212, 0.15) 50%, transparent 75%); filter: blur(10px); pointer-events: none;"></div>
         <img src="assets/icon.svg" alt="Aureal Watermark Logo" width="76" height="76" style="position: relative; border-radius: 18px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(139, 92, 246, 0.25); border: 1px solid rgba(139, 92, 246, 0.3);" />
       </div>
-      <h1 style="max-width: 960px; margin: 0 auto 1.5rem;">Forensic Audio Watermarking &amp; Leak Attribution for Major Studios</h1>
+      <h1 style="max-width: 960px; margin: 0 auto 1.5rem;">Invisible Watermarks for Audio Leak Attribution</h1>
       <p class="lead" style="max-width: 860px;">
-        Aureal Watermark embeds invisible, cryptographically verifiable recipient signatures into master recordings, stems, and screeners. Survives 64 kbps MP3/AAC compression, pitch-shifting, social media transcoding, and AI voice cloning scraper pipelines &mdash; with 100% on-premise air-gapped security.
+        Embed a unique recipient ID into a master, stem, or screener. Then scan a copy to see whether that ID can be recovered after your workflow changes the audio.
       </p>
 
       <div class="hero-actions">
@@ -915,22 +915,22 @@
       <div class="hero-trust-ribbon">
         <div class="trust-badge-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <span>100% Air-Gapped On-Premises</span>
+          <span>Client-Side Processing</span>
         </div>
         <div class="trust-dot">&bull;</div>
         <div class="trust-badge-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <span>Real-Time Ingestion</span>
+          <span>Interactive Detection</span>
         </div>
         <div class="trust-dot">&bull;</div>
         <div class="trust-badge-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"></path></svg>
-          <span>Bit-Transparent Master Delivery</span>
+          <span>Unique Recipient IDs</span>
         </div>
         <div class="trust-dot">&bull;</div>
         <div class="trust-badge-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          <span>Cryptographic CRC-16</span>
+          <span>Recoverable Watermarks</span>
         </div>
       </div>
     </section>
@@ -1036,7 +1036,7 @@
               </div>
 
               <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
-                Simulate leak discovery: Scan any audio file or compressed stream to instantly identify the source recipient and verify master integrity.
+                Simulate leak discovery: scan the marked copy and check whether the recipient ID is recovered.
               </p>
 
               <button type="button" class="demo-btn secondary" id="btn-demo-scan" style="width: 100%; justify-content: center;" disabled>
@@ -1044,9 +1044,9 @@
                 <span>Scan Audio for Recipient ID</span>
               </button>
 
-              <div id="demo-scan-status" style="margin-top: 1.25rem;">
+              <div id="demo-scan-status" role="status" aria-live="polite" style="margin-top: 1.25rem;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--text-dim); font-size: 0.82rem; font-family: var(--font-mono);">
-                  Click "Load Reference Track" above to test watermark embedding and leak extraction...
+                  Generate the built-in test track or select your own audio to try the workflow.
                 </div>
               </div>
             </div>
@@ -1067,14 +1067,14 @@
         <div class="lifecycle-num">02</div>
         <div class="lifecycle-body">
           <h4>Distribution &amp; Attack Resilience</h4>
-          <p>Watermark survives MP3/AAC compression down to 64 kbps, pitch-shifting, YouTube/TikTok transcoding, and vocal-remover phase cancellation.</p>
+          <p>Use the demo to evaluate detection after the transformations that matter to your distribution workflow.</p>
         </div>
       </div>
       <div class="lifecycle-card">
         <div class="lifecycle-num">03</div>
         <div class="lifecycle-body">
           <h4>Deterministic Attribution</h4>
-          <p>Instantly extract the recipient ID and verify CRC-16 cryptographic integrity for unambiguous studio leak attribution.</p>
+          <p>Scan a suspected copy and compare the recovered ID with your distribution record.</p>
         </div>
       </div>
     </section>
@@ -1141,7 +1141,7 @@
           </div>
           <h3>AI Voice Model &amp; Training Set Ingestion Audit</h3>
           <p>
-            Generative AI platforms (voice cloners, synthetic music generators) scrape web audio without attribution. Aureal's cryptographic signature survives voice cloning training pipelines, providing mathematical proof of unauthorized catalog ingestion for DMCA statutory damages.
+            Forensic watermarks can help you audit distributed audio. Validate results against your own files and keep the original master and distribution record as evidence.
           </p>
         </div>
 
@@ -1160,7 +1160,7 @@
     <section class="prose-section" id="psychoacoustics">
       <h2 class="section-title">Human Auditory System (HAS) Masking Curves</h2>
       <p class="section-lead">
-        Traditional audio watermarking (e.g. metadata tags or ultrasonic chirps) is instantly wiped by MP3 compression or frequency low-pass filters. Aureal embeds within the audible spectrum under psychoacoustic thresholds.
+        Metadata can be stripped during export or re-encoding. Aureal explores spread-spectrum embedding under a perceptual threshold; test the result with your own delivery pipeline.
       </p>
 
       <div class="deep-grid">
@@ -1222,7 +1222,7 @@ assert.equal(detectedId.valid, true);
               <td><strong>Lossy Compression Resistance</strong></td>
               <td>Stripped immediately on YouTube/TikTok re-encode</td>
               <td>Database matching only</td>
-              <td><span class="badge-adv">Survives 64kbps MP3 / AAC</span> transcoding</td>
+              <td><span class="badge-adv">Tested in selected scenarios</span> transcoding</td>
             </tr>
             <tr>
               <td><strong>Individual Recipient Tagging</strong></td>
@@ -1240,7 +1240,7 @@ assert.equal(detectedId.valid, true);
               <td><strong>Offline Private Scanning</strong></td>
               <td>Trivial text inspection</td>
               <td>Requires central corporate database</td>
-              <td><span class="badge-adv">100% Offline Sub-second Scanner</span> in browser</td>
+              <td><span class="badge-adv">Client-Side Demo Scanner</span> in browser</td>
             </tr>
           </tbody>
         </table>
@@ -1580,9 +1580,9 @@ assert.equal(detectedId.valid, true);
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.85rem;">
                     <div style="display:flex; align-items:center; gap:0.45rem;">
                       <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px var(--emerald);"></span>
-                      <span style="color:var(--emerald); font-weight:700; font-size:0.85rem; letter-spacing:0.03em;">WATERMARK VERIFIED</span>
+                      <span style="color:var(--emerald); font-weight:700; font-size:0.85rem; letter-spacing:0.03em;">WATERMARK DETECTED</span>
                     </div>
-                    <span style="font-size:0.75rem; background:rgba(16,185,129,0.18); color:var(--emerald); padding:0.2rem 0.55rem; border-radius:4px; font-weight:600; font-family:var(--font-mono);">${Math.round(res.confidence * 100)}% Match</span>
+                    <span style="font-size:0.75rem; background:rgba(16,185,129,0.18); color:var(--emerald); padding:0.2rem 0.55rem; border-radius:4px; font-weight:600; font-family:var(--font-mono);">${Math.round(res.confidence * 100)}% Confidence</span>
                   </div>
                   <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(16,185,129,0.2); border-radius:6px; padding:0.75rem 1rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center;">
                     <span style="color:var(--text-muted); font-size:0.82rem;">Source Recipient ID</span>
@@ -1590,11 +1590,11 @@ assert.equal(detectedId.valid, true);
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Audio Integrity:</span>
-                    <span style="color:var(--emerald); font-weight:500;">Pristine (Zero Bit Corruption)</span>
+                    <span style="color:var(--emerald); font-weight:500;">Demo result</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Detection Speed:</span>
-                    <span style="color:var(--text);">&lt; 350ms (Real-time)</span>
+                    <span style="color:var(--text);">Processing result</span>
                   </div>
                   <div class="demo-metric-row">
                     <span style="color:var(--text-muted);">Carrier Profile:</span>
