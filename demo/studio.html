@@ -2174,8 +2174,16 @@
 
         const data = await res.json().catch(() => null);
         if (!res.ok || !data || (data.status !== "granted" && data.status !== "active")) {
-          const detail = data && (data.detail || data.error) ? (data.detail || data.error) : `HTTP ${res.status}`;
-          throw new Error(`License invalid: ${detail}`);
+          const statusMessages = {
+            400: "The license key format is not valid.",
+            401: "The license key could not be verified.",
+            403: "This license is not authorized for this product.",
+            404: "This license key was not found.",
+            409: "This license is already in use or cannot be activated.",
+            429: "Too many attempts. Please wait a moment and try again.",
+          };
+          const detail = data && (data.detail || data.error);
+          throw new Error(statusMessages[res.status] || (detail ? `License could not be verified: ${detail}` : "License could not be verified. Please check the key and try again."));
         }
 
         const record = {
@@ -2195,7 +2203,10 @@
         if (licenseFeedback) {
           licenseFeedback.style.display = "block";
           licenseFeedback.style.color = "#f87171";
-          licenseFeedback.textContent = err.message || "License validation failed.";
+          const message = String(err.message || "");
+          licenseFeedback.textContent = message.startsWith("Failed to fetch")
+            ? "Could not reach the license service. Check your connection and try again."
+            : (message || "License could not be verified. Please try again.");
         }
       } finally {
         btnSubmitLicense.disabled = false;
