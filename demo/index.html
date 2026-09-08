@@ -145,6 +145,8 @@
       font-size: 0.85rem;
       transition: color 0.15s;
     }
+.nav-toggle { display: none; background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 0.35rem 0.55rem; font-size: 1.05rem; cursor: pointer; }
+    .nav-toggle:focus-visible, .nav-link:focus-visible, .btn-repo:focus-visible, .btn-cta-nav:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
     .nav-link:hover { color: var(--purple); }
     .btn-repo {
       display: inline-flex;
@@ -297,6 +299,9 @@
     }
     @media (max-width: 640px) {
       .nav-inner { height: auto; padding-top: 0.75rem; padding-bottom: 0.75rem; gap: 0.75rem; flex-wrap: wrap; }
+      .nav-toggle { display: inline-flex; margin-left: auto; }
+      .nav-links { display: none; }
+      .nav-links.is-open { display: flex; }
       .nav-links { width: 100%; justify-content: flex-start; gap: 0.75rem 1rem; flex-wrap: wrap; }
       .nav-link, .btn-repo, .btn-cta-nav { font-size: 0.76rem; }
       .btn-cta-nav { margin-left: auto; }
@@ -887,7 +892,11 @@
           <div class="brand-company">Keller Systems</div>
         </div>
       </a>
-      <div class="nav-links">
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span aria-hidden="true">☰</span>
+      </button>
+      <div class="nav-links" id="primary-nav">
         <a href="studio.html" class="nav-link">Studio</a>
         <a href="pricing.html" class="nav-link">Pricing</a>
         <a href="docs.html" class="nav-link">Documentation</a>
@@ -1294,6 +1303,13 @@ assert.equal(detectedId.valid, true);
   </footer>
 
   <script>
+    const navToggle = document.querySelector('.nav-toggle');
+    const primaryNav = document.getElementById('primary-nav');
+    navToggle?.addEventListener('click', () => {
+      const open = primaryNav.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', String(open));
+    });
+
     const canvas = document.getElementById('audio-canvas');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
