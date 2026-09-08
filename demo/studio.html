@@ -702,7 +702,7 @@
 </div>
 
 <!-- License Modal -->
-<div id="license-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
+<div id="license-modal" aria-labelledby="license-modal-title" aria-modal="true" role="dialog" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
   <div class="license-modal-card" role="dialog" aria-modal="true" aria-labelledby="license-modal-title" style="background: #0d0914; border: 1px solid var(--border); border-radius: 12px; width: 92%; max-width: 500px; padding: 1.75rem; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; color: var(--text);">
     <button type="button" aria-label="Close license dialog" id="btn-close-license" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; line-height: 1;">&times;</button>
     
@@ -2026,6 +2026,7 @@
 
   const POLAR_ORG_ID = "6898f4c5-7bc8-4ec5-bc97-a16b69b0498c";
   const LICENSE_STORAGE_KEY = "aureal_commercial_license";
+  let lastLicenseTrigger = null;
   let lastLicenseTrigger = null;
 
   const btnOpenLicense = document.getElementById("btn-open-license");
