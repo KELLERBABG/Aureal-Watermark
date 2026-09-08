@@ -862,6 +862,17 @@ console.log(verification);
         </ul>
       </section>
 
+      <!-- SECTION: CODEWORD FORMAT -->
+      <section class="doc-section" id="codeword-format">
+        <h2>Payload &amp; Error Correction</h2>
+        <p>
+          Each watermark carries a 32-bit recipient ID plus a 16-bit CRC-16/CCITT-FALSE check, transmitted as 48 BPSK symbols. Every symbol is spread with its own key-derived pseudorandom chip sequence and repeated once per frame (~1 second) across the whole track; the detector folds all repetitions together, so detection confidence grows with track length.
+        </p>
+        <p>
+          Before CRC validation, the detector attempts reliability-ordered single-bit correction. This recovers one flipped bit per codeword; heavier damage after aggressive transcoding is reported as a failed detection rather than a false match. The practical false-positive rate per trial is roughly 2&#8315;&sup1;&#8310; thanks to the CRC gate.
+        </p>
+      </section>
+
       <!-- SECTION: LICENSING -->
       <section class="doc-section" id="licensing-sla">
         <h2>Commercial Licensing &amp; Enterprise SLAs</h2>
@@ -919,17 +930,6 @@ console.log(verification);
           <h4>Enterprise deployments</h4>
           <p>For on-premise rollouts, custom carrier bands, or volume licensing, contact <a href="mailto:enterprise@kellersystems.dev" style="color: var(--purple);">enterprise@kellersystems.dev</a>.</p>
         </div>
-      </section>
-
-      <!-- SECTION: CODEWORD FORMAT -->
-      <section class="doc-section" id="codeword-format">
-        <h2>Payload &amp; Error Correction</h2>
-        <p>
-          Each watermark carries a 32-bit recipient ID plus a 16-bit CRC-16/CCITT-FALSE check, transmitted as 48 BPSK symbols. Every symbol is spread with its own key-derived pseudorandom chip sequence and repeated once per frame (~1 second) across the whole track; the detector folds all repetitions together, so detection confidence grows with track length.
-        </p>
-        <p>
-          Before CRC validation, the detector attempts reliability-ordered single-bit correction. This recovers one flipped bit per codeword; heavier damage after aggressive transcoding is reported as a failed detection rather than a false match. The practical false-positive rate per trial is roughly 2&#8315;&sup1;&#8310; thanks to the CRC gate.
-        </p>
       </section>
 
       <!-- SECTION: BENCHMARKS -->
