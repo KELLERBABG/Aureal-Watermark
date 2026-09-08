@@ -1,0 +1,2181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aureal Watermark Studio</title>
+<meta name="description" content="Audio watermarking for anti-theft and AI detection">
+<meta property="og:title" content="Aureal Watermark">
+<meta property="og:description" content="Audio watermarking for anti-theft and AI detection">
+<meta property="og:image" content="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="/assets/icon.png">
+  <link rel="shortcut icon" href="/assets/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <script src="/assets/lame.min.js"></script>
+<style>
+  :root {
+    --bg: #13151c;
+    --card: #1a1d26;
+    --border: #282d3a;
+    --border-hover: #363d50;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --success: #10b981;
+    --error: #ef4444;
+    --warn: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 90% 50% at 50% -5%, rgba(37, 99, 235, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 30% at 50% -2%, rgba(56, 189, 248, 0.10) 0%, transparent 55%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 540px;
+  }
+
+  .app-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  .app-header p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .workspace-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top-color: rgba(37, 99, 235, 0.35);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.04), 0 4px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(56, 189, 248, 0.05);
+  }
+
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+    gap: 0.25rem;
+  }
+
+  .tab-item {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .tab-item:hover {
+    color: var(--text);
+  }
+
+  .tab-item.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  .form-group {
+    margin-bottom: 1.15rem;
+  }
+
+  label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+  }
+
+  label .action-link {
+    font-size: 0.72rem;
+    color: var(--accent);
+    cursor: pointer;
+    text-transform: none;
+    font-weight: normal;
+  }
+
+  label .action-link:hover {
+    text-decoration: underline;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    width: 100%;
+    background: #090a0d;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .drop-zone {
+    position: relative;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    background: #090a0d;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(37, 99, 235, 0.04);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-label {
+    font-size: 0.85rem;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  .file-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  audio {
+    width: 100%;
+    height: 36px;
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  button.btn {
+    width: 100%;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  button.btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  button.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  button.btn-subtle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    margin-top: 0.5rem;
+  }
+
+  button.btn-subtle:hover:not(:disabled) {
+    background: #1c202a;
+    border-color: var(--border-hover);
+  }
+
+  .status-box {
+    margin-top: 1.25rem;
+    padding: 1rem 1.15rem;
+    border-radius: 6px;
+    display: none;
+    font-size: 0.85rem;
+  }
+
+  .status-box.pass {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .status-box.fail {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .status-box.error {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .pass .box-header { color: var(--success); }
+  .fail .box-header { color: var(--error); }
+  .error .box-header { color: var(--warn); }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+  }
+
+  .data-table td {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .data-table td:first-child {
+    color: var(--text-muted);
+    width: 48%;
+  }
+
+  .data-table td:last-child {
+    text-align: right;
+    color: var(--text);
+  }
+
+  .commercial-callout {
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .callout-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .callout-title {
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.2rem;
+  }
+
+  .callout-desc {
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .callout-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .callout-link:hover {
+    text-decoration: underline;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .pricing-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .pricing-card {
+    background: rgba(18, 24, 38, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .pricing-card.featured {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(14, 30, 56, 0.6);
+  }
+
+  .pricing-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .featured-badge {
+    color: var(--cyan);
+  }
+
+  .pricing-price {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 0.2rem;
+  }
+
+  .pricing-price span {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .pricing-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.35rem;
+  }
+
+  .pricing-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.85rem;
+    line-height: 1.35;
+  }
+
+  .pricing-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem 0;
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    flex-grow: 1;
+  }
+
+  .pricing-features li {
+    margin-bottom: 0.25rem;
+  }
+
+  .studio-step-note {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: -0.7rem 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+  }
+
+  .studio-step-note strong {
+    color: var(--cyan);
+    font-family: ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 640px) {
+    .app-container { padding: 0 0.75rem; }
+    .app-container > header {
+      align-items: flex-start !important;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .app-container > header > div {
+      width: 100%;
+      justify-content: space-between;
+      gap: 0.45rem !important;
+      flex-wrap: wrap;
+    }
+    .app-container > header > div a { font-size: 0.76rem; }
+    .workspace-card { padding: 1rem; }
+    .license-modal-card { max-height: calc(100vh - 1.5rem); overflow-y: auto; }
+  }
+
+  .btn-pricing {
+    margin-top: auto;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border);">
+    <a href="/" style="text-decoration: none; color: var(--text); font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem;">
+      <span style="color: var(--cyan);">&larr;</span> Back to Home
+    </a>
+    <div style="display: flex; gap: 1rem; align-items: center; font-size: 0.84rem;">
+      <button type="button" id="btn-open-license" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.35); color: #c084fc; border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.74rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.45rem; transition: all 0.2s ease;">
+        <span id="header-license-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #c084fc;"></span>
+        <span id="header-license-text">Community Edition</span>
+      </button>
+      <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Docs</a>
+      <a href="/pricing" style="color: var(--text-muted); text-decoration: none;">Pricing &amp; Licenses</a>
+      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" style="color: var(--text-muted); text-decoration: none;">GitHub</a>
+    </div>
+  </header>
+
+  <div class="app-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 2rem;">
+    <div style="width: 48px; height: 48px; margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: center; position: relative;">
+      <!-- Glow halo behind the icon -->
+      <div style="position: absolute; inset: -8px; border-radius: 20px; background: radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 70%); pointer-events: none;"></div>
+      <img src="/assets/icon.svg" alt="Aureal Watermark Logo" width="48" height="48" style="position:relative; border-radius:11px; flex-shrink:0; box-shadow: 0 0 16px rgba(139, 92, 246, 0.22);" />
+    </div>
+    <h1 style="margin-bottom: 0.25rem; font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em;">Aureal Watermark</h1>
+    <p style="font-size: 0.84rem; color: var(--text-muted);">Forensic acoustic watermarking for pre-release leak attribution &amp; anti-theft.</p>
+  </div>
+
+  <div class="workspace-card">
+    <div class="studio-step-note"><strong>WORKFLOW</strong><span>1. Choose a tab &rarr; 2. Load audio &rarr; 3. Process &rarr; 4. Review the result</span></div>
+    <div class="tab-bar">
+      <button type="button" class="tab-item active" id="tab-detect">Verify Audio</button>
+      <button type="button" class="tab-item" id="tab-embed">Embed Watermark</button>
+    </div>
+
+    <!-- VERIFY TAB -->
+    <div class="tab-pane active" id="pane-detect">
+      <div class="form-group">
+        <label>Audio File</label>
+        <div class="drop-zone" id="detect-drop-zone">
+          <input type="file" id="detect-file" accept=".wav,.mp3,.m4a,.aac,.ogg,.flac,audio/*">
+          <div class="file-label" id="detect-file-label">Click to select or drag audio file</div>
+          <div class="file-sub">MP3, WAV, AAC, M4A, OGG, FLAC</div>
+        </div>
+        <audio id="detect-preview" controls></audio>
+      </div>
+
+      <div class="form-group">
+        <label for="detect-id">Expected ID (Optional)</label>
+        <input type="number" id="detect-id" placeholder="e.g. 883921" min="0">
+        <div class="field-hint">Leave blank to auto-detect and extract any embedded ID.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="detect-key">Secret Studio Key (Optional)</label>
+        <input type="text" id="detect-key" placeholder="Default public key (Shared)">
+        <div class="field-hint">Leave blank to scan using the default public key, or enter your private studio key.</div>
+      </div>
+
+      <button type="button" class="btn" id="detect-btn" disabled>Scan Audio</button>
+      <div id="detect-result" class="status-box"></div>
+    </div>
+
+    <!-- EMBED TAB -->
+    <div class="tab-pane" id="pane-embed">
+      <div class="form-group">
+        <label>Source Audio</label>
+        <div class="drop-zone" id="embed-drop-zone">
+          <input type="file" id="embed-file" accept=".wav,.mp3,.m4a,.aac,.ogg,.flac,audio/*">
+          <div class="file-label" id="embed-file-label">Click to select or drag source master</div>
+          <div class="file-sub">WAV, MP3, FLAC, M4A</div>
+        </div>
+        <audio id="embed-preview" controls></audio>
+        <div id="embed-precheck-box" style="display:none; margin-top: 0.75rem;"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="embed-id">
+          <span>Payload ID</span>
+          <span class="action-link" id="btn-rand-id" title="Generate Cryptographically Secure Random ID">ðŸŽ² Roll Secure ID</span>
+        </label>
+        <input type="number" id="embed-id" placeholder="e.g. 883921" min="0" max="4294967295">
+        <div class="field-hint">32-bit tracking ID (over 4.29 billion combinations). Unique per recipient.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="embed-key">
+          <span>Secret Studio Key (Optional)</span>
+          <span class="action-link" id="btn-rand-key" title="Generate Random Private Studio Key">ðŸ”‘ Generate Key</span>
+        </label>
+        <input type="text" id="embed-key" placeholder="Default public key (Shared)">
+        <div class="field-hint">Private Studio Namespace. When set, only entities possessing this exact key can detect or extract your IDs.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="embed-band">Carrier Band</label>
+        <select id="embed-band">
+          <option value="dual" selected>Dual Band (8â€“13 kHz & 16.5â€“19.5 kHz) â€” Codec resilient</option>
+          <option value="high">High Band (16.5â€“19.5 kHz) â€” Archival / Lossless</option>
+          <option value="mid">Mid Band (8â€“13 kHz) â€” Heavy compression survival</option>
+        </select>
+      </div>
+
+      <div class="commercial-callout">
+        <div class="callout-tag">Commercial Production</div>
+        <div class="callout-title">Commercial release, label distribution, or AI platform?</div>
+        <div class="callout-desc">Aureal is free for personal & research use. Commercial releases, SaaS platforms, and leak distribution require a commercial license.</div>
+        <a href="/pricing" target="_blank" class="callout-link">View Commercial Tiers & Pricing &rarr;</a>
+      </div>
+
+      <button type="button" class="btn" id="embed-btn" disabled>Embed Watermark & Export</button>
+
+      <div id="embed-result" class="status-box pass">
+        <div class="box-header">
+          <span>WATERMARK EMBEDDED</span>
+          <span id="embed-badge-id" style="font-family: ui-monospace, monospace;">ID #â€”</span>
+        </div>
+        <audio id="embed-output-player" controls style="display: block; margin-bottom: 0.75rem;"></audio>
+        
+        <div style="margin-bottom: 0.85rem; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label for="export-format-select" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+              Export Format
+            </label>
+            <span id="export-format-badge" style="font-size: 0.68rem; color: var(--cyan); background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 4px; padding: 1px 7px; font-weight: 600; font-family: ui-monospace, monospace;">
+              WAV 16-BIT PCM
+            </span>
+          </div>
+          <div style="position: relative; margin-bottom: 0.65rem;">
+            <select id="export-format-select" style="width: 100%; box-sizing: border-box; background: #0c1017; border: 1px solid var(--border); color: #f1f5f9; border-radius: 6px; padding: 0.6rem 2.2rem 0.6rem 0.75rem; font-size: 0.83rem; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%2394a3b8\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 0.65rem center;">
+              <option value="wav-16" selected>WAV â€” 16-bit PCM (Lossless CD Master)</option>
+              <option value="wav-24">WAV â€” 24-bit PCM (High-Res Studio Master)</option>
+              <option value="mp3-320">MP3 â€” 320 kbps (Studio Quality / Highest)</option>
+              <option value="mp3-192">MP3 â€” 192 kbps (Streaming / Standard)</option>
+              <option value="mp3-128">MP3 â€” 128 kbps (Compact Web)</option>
+            </select>
+          </div>
+          <button type="button" class="btn" id="btn-download" style="width: 100%; box-sizing: border-box; justify-content: center; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.85rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="btn-download-label">Download Watermarked Audio (WAV)</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-subtle" id="btn-verify-now">Scan in Verifier &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer" style="margin-top: 1.75rem; padding: 1.25rem 0; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center; font-size: 0.76rem; color: var(--text-muted); line-height: 1.6;">
+    <div>Free & open-source for personal use under PolyForm Noncommercial 1.0.0.</div>
+    <div style="margin-top: 0.25rem;">
+      Commercial music release, label leak distribution, or AI platform?
+      <a href="/pricing" style="color: var(--cyan); text-decoration: none; font-weight: 600; margin-left: 0.25rem;">
+        Commercial Licenses & Pricing &rarr;
+      </a>
+    </div>
+    <div style="margin-top: 0.5rem; font-size: 0.72rem;">
+      <a href="//legal/impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &bull;
+      <a href="//legal/privacy.html" style="color: var(--text-muted); text-decoration: none; margin: 0 0.25rem;">Datenschutz</a> &bull;
+      <a href="//legal/terms.html" style="color: var(--text-muted); text-decoration: none; margin: 0 0.25rem;">Commercial EULA</a> &bull;
+      <a href="mailto:support@kellersystems.dev" style="color: var(--text-muted); text-decoration: none;">Support &amp; Contact</a>
+    </div>
+  </footer>
+</div>
+
+<!-- License Modal -->
+<div id="license-modal" aria-labelledby="license-modal-title" aria-modal="true" role="dialog" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="license-modal-card" role="dialog" aria-modal="true" aria-labelledby="license-modal-title" style="background: #0d0914; border: 1px solid var(--border); border-radius: 12px; width: 92%; max-width: 500px; padding: 1.75rem; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; color: var(--text);">
+    <button type="button" aria-label="Close license dialog" id="btn-close-license" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; line-height: 1;">&times;</button>
+    
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+      <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); display: flex; align-items: center; justify-content: center; color: #c084fc; flex-shrink: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <div>
+        <h3 id="license-modal-title" style="margin: 0; font-size: 1.1rem; font-weight: 700;">Commercial License</h3>
+        <p style="margin: 0; font-size: 0.74rem; color: var(--text-muted);">Polar.sh instant license validation</p>
+      </div>
+    </div>
+
+    <!-- Active License View -->
+    <div id="license-active-view" style="display: none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+        <span style="font-size: 0.74rem; font-weight: 700; color: #34d399; letter-spacing: 0.05em; text-transform: uppercase;">STATUS: GRANTED</span>
+        <span style="font-size: 0.68rem; color: var(--emerald); background: rgba(16, 185, 129, 0.2); border-radius: 4px; padding: 1px 6px; font-weight: 600;">Commercial Pro</span>
+      </div>
+      <div style="font-family: ui-monospace, monospace; font-size: 0.88rem; color: #f1f5f9; margin-bottom: 0.5rem; letter-spacing: 0.04em;" id="modal-display-key">
+        ****-E976D5
+      </div>
+      <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.6;">
+        <div>Customer: <strong id="modal-customer" style="color: var(--text);">papababg02@gmail.com</strong></div>
+        <div>Offline Status: <span style="color: var(--cyan);">Credentials cached locally (No server required for audio)</span></div>
+      </div>
+      <div style="margin-top: 0.85rem; display: flex; gap: 0.5rem;">
+        <button type="button" id="btn-deactivate-license" class="btn btn-subtle" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;">Deactivate License</button>
+      </div>
+    </div>
+
+    <!-- Unactivated Form View -->
+    <div id="license-form-view">
+      <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem;">
+        Paste your license key from your Polar order confirmation to unlock commercial release rights and unbranded master tags. Audio processing remains strictly 100% on your device.
+      </p>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label for="input-polar-key" style="font-size: 0.76rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">Polar.sh License Key</label>
+        <input type="text" id="input-polar-key" placeholder="Enter your Polar license key" style="width: 100%; box-sizing: border-box; background: #07040a; border: 1px solid var(--border); color: #fff; border-radius: 6px; padding: 0.65rem 0.75rem; font-family: ui-monospace, monospace; font-size: 0.84rem;">
+        <div id="license-feedback" role="status" aria-live="polite" style="font-size: 0.75rem; margin-top: 0.4rem; display: none;"></div>
+      </div>
+
+      <button type="button" class="btn" id="btn-submit-license" style="width: 100%; box-sizing: border-box; justify-content: center; padding: 0.65rem; font-weight: 600; font-size: 0.85rem;">
+        Activate License
+      </button>
+
+      <div style="margin-top: 1.25rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.85rem; font-size: 0.78rem; color: var(--text-muted);">
+        Don't have a commercial license?
+        <a href="https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq" target="_blank" style="color: var(--cyan); text-decoration: none; font-weight: 600; margin-left: 0.25rem;">
+          Get Indie Studio on Polar ($249) &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Inlined Zero-Dependency DSP Engine
+
+  const DEFAULT_KEY = "aural-watermark-default-key";
+  const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
+  const BITS_PER_CODEWORD = 48;
+  const CHIPS_PER_SLOT = 24;
+  const PAYLOAD_BITS = 32;
+  const CRC_BITS = 16;
+  const Z_FLOOR = 3.0;
+  const Z_FULL = 30.0;
+  const MAX_AMPLITUDE = 0.0075;
+  const MULTI_BAND_SCALE = 0.7;
+  const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
+  const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
+
+  const BAND_PRESETS = Object.freeze({
+    high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
+    mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
+  });
+
+  function hashSeed(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  }
+
+  function mix(v) {
+    v >>>= 0;
+    v = Math.imul(v ^ (v >>> 16), 0x7feb352d);
+    v = Math.imul(v ^ (v >>> 15), 0x846ca68b);
+    return (v ^ (v >>> 16)) >>> 0;
+  }
+
+  function makeRng(seed) {
+    const s = typeof seed === "string" ? hashSeed(seed) : seed >>> 0;
+    let x = mix(s ^ 0x9e3779b9);
+    let y = mix(s ^ 0x85ebca6b);
+    let z = mix(s ^ 0xc2b2ae35);
+    let w = mix(s ^ 0x27d4eb2f);
+    if ((x | y | z | w) === 0) w = 1;
+    return function next() {
+      const t = x ^ (x << 11);
+      x = y;
+      y = z;
+      z = w;
+      w = (w ^ (w >>> 19) ^ t ^ (t >>> 8)) >>> 0;
+      return w / 4294967296;
+    };
+  }
+
+  function makeSymbolStream(key, label) {
+    const rng = makeRng(key + "|" + label);
+    return () => (rng() < 0.5 ? -1 : 1);
+  }
+
+  const hannCache = new Map();
+  function hannWindow(n) {
+    let w = hannCache.get(n);
+    if (!w) {
+      w = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        w[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n);
+      }
+      hannCache.set(n, w);
+    }
+    return w;
+  }
+
+  function clampInt(v, lo, hi) {
+    const n = Number(v);
+    return Math.min(hi, Math.max(lo, Math.round(n)));
+  }
+
+  function resolveBand(band, sampleRate) {
+    const preset = band === "high" || band === "mid" ? BAND_PRESETS[band] : null;
+    const b = { ...DEFAULT_BAND, ...(preset || band || {}) };
+    let { lowHz, highHz } = b;
+    lowHz = clampInt(lowHz, 1000, sampleRate / 2 - 100);
+    highHz = clampInt(highHz, lowHz + 100, sampleRate / 2 - 100);
+    return { lowHz, highHz, centerHz: (lowHz + highHz) / 2 };
+  }
+
+  function bandList(spec, sampleRate) {
+    if (spec === "dual" || spec === "auto") {
+      return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
+    }
+    return [resolveBand(spec || undefined, sampleRate)];
+  }
+
+  function deriveGeometry(sampleRate, perChannelSamples) {
+    let slotLen = Math.max(1, Math.round((1.0 * sampleRate) / BITS_PER_CODEWORD));
+    const maxSlot = Math.floor(perChannelSamples / BITS_PER_CODEWORD);
+    if (slotLen > maxSlot) slotLen = maxSlot;
+    let chipLen = Math.max(4, Math.floor(slotLen / CHIPS_PER_SLOT));
+    slotLen = chipLen * CHIPS_PER_SLOT;
+    const frameLen = slotLen * BITS_PER_CODEWORD;
+    const reps = Math.floor(perChannelSamples / frameLen);
+    if (reps < 1) {
+      throw new RangeError(`Audio too short: need >= ${frameLen} samples (~${(frameLen / sampleRate).toFixed(2)}s), received ${perChannelSamples}`);
+    }
+    return { slotLen, chipLen, frameLen, reps, bits: BITS_PER_CODEWORD };
+  }
+
+  function buildTemplate({ key, sampleRate, geometry, band }) {
+    const { slotLen, chipLen, frameLen } = geometry;
+    const { centerHz } = resolveBand(band, sampleRate);
+    const carrier = new Float64Array(chipLen);
+    const win = hannWindow(chipLen);
+    const w0 = (2 * Math.PI * centerHz) / sampleRate;
+    for (let i = 0; i < chipLen; i++) carrier[i] = win[i] * Math.sin(w0 * i);
+
+    const template = new Float64Array(frameLen);
+    const slotNorms = new Float64Array(BITS_PER_CODEWORD);
+    for (let b = 0; b < BITS_PER_CODEWORD; b++) {
+      const sym = makeSymbolStream(key, "bit" + b);
+      let norm = 0;
+      const base = b * slotLen;
+      for (let c = 0; c < CHIPS_PER_SLOT; c++) {
+        const s = sym();
+        const off = base + c * chipLen;
+        for (let j = 0; j < chipLen; j++) {
+          const v = s * carrier[j];
+          template[off + j] = v;
+          norm += v * v;
+        }
+      }
+      slotNorms[b] = norm;
+    }
+    return { template, slotNorms };
+  }
+
+  function crc16(bytes) {
+    let crc = 0xffff;
+    for (let i = 0; i < bytes.length; i++) {
+      crc ^= bytes[i] << 8;
+      for (let b = 0; b < 8; b++) {
+        crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+      }
+    }
+    return crc >>> 0;
+  }
+
+  function packCodeword(payloadId) {
+    const out = new Int8Array(BITS_PER_CODEWORD);
+    for (let i = 0; i < PAYLOAD_BITS; i++) {
+      out[i] = (payloadId >>> (PAYLOAD_BITS - 1 - i)) & 1 ? 1 : -1;
+    }
+    const bytes = [
+      (payloadId >>> 24) & 0xff,
+      (payloadId >>> 16) & 0xff,
+      (payloadId >>> 8) & 0xff,
+      payloadId & 0xff,
+    ];
+    const crc = crc16(bytes);
+    for (let i = 0; i < CRC_BITS; i++) {
+      out[PAYLOAD_BITS + i] = (crc >>> (CRC_BITS - 1 - i)) & 1 ? 1 : -1;
+    }
+    return out;
+  }
+
+  function unpackCodeword(cw) {
+    let id = 0;
+    for (let i = 0; i < PAYLOAD_BITS; i++) {
+      id = Math.imul(id, 2) + (cw[i] > 0 ? 1 : 0);
+    }
+    let crcRx = 0;
+    for (let i = 0; i < CRC_BITS; i++) {
+      crcRx = Math.imul(crcRx, 2) + (cw[PAYLOAD_BITS + i] > 0 ? 1 : 0);
+    }
+    const crcCalc = crc16([(id >>> 24) & 255, (id >>> 16) & 255, (id >>> 8) & 255, id & 255]);
+    return { id: id >>> 0, crcOk: crcCalc === crcRx };
+  }
+
+  function buildSyncPreamble({ key, sampleRate, geometry, band }) {
+    const { slotLen } = geometry;
+    const syncLen = slotLen;
+    const { lowHz, highHz } = resolveBand(band, sampleRate);
+    const chirpI = new Float64Array(syncLen);
+    const chirpQ = new Float64Array(syncLen);
+    const T = syncLen / sampleRate;
+    const phi0 = ((hashSeed(key + "|sync_chirp") % 1000) / 1000) * 2 * Math.PI;
+
+    for (let n = 0; n < syncLen; n++) {
+      const t = n / sampleRate;
+      const phase = phi0 + 2 * Math.PI * (lowHz * t + ((highHz - lowHz) / (2 * T)) * t * t);
+      const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / syncLen);
+      chirpI[n] = win * Math.cos(phase);
+      chirpQ[n] = win * Math.sin(phase);
+    }
+
+    let normSq = 0;
+    for (let n = 0; n < syncLen; n++) normSq += chirpQ[n] * chirpQ[n];
+    const norm = Math.sqrt(normSq) || 1.0;
+
+    return { chirpI, chirpQ, syncLen, norm };
+  }
+
+  function findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band) {
+    const { frameLen } = geometry;
+    const { chirpI, chirpQ, syncLen, norm } = buildSyncPreamble({ key, sampleRate, geometry, band });
+    const perChannel = Math.floor(pcm.length / channels);
+    const searchLen = Math.min(frameLen, perChannel - syncLen);
+    if (searchLen <= 0) return [];
+
+    const mono = new Float32Array(searchLen + syncLen);
+    for (let i = 0; i < searchLen + syncLen; i++) {
+      let sum = 0;
+      for (let ch = 0; ch < channels; ch++) sum += pcm[i * channels + ch];
+      mono[i] = sum / channels;
+    }
+
+    const stride = 8;
+    let maxEnvSq = -Infinity;
+    let coarseIdx = 0;
+
+    for (let i = 0; i < searchLen; i += stride) {
+      let dotI = 0, dotQ = 0;
+      for (let k = 0; k < syncLen; k++) {
+        const s = mono[i + k];
+        dotI += s * chirpI[k];
+        dotQ += s * chirpQ[k];
+      }
+      const envSq = dotI * dotI + dotQ * dotQ;
+      if (envSq > maxEnvSq) {
+        maxEnvSq = envSq;
+        coarseIdx = i;
+      }
+    }
+
+    let fineIdx = coarseIdx;
+    let fineMaxEnvSq = maxEnvSq;
+    const fineStart = Math.max(0, coarseIdx - stride * 2);
+    const fineEnd = Math.min(searchLen - 1, coarseIdx + stride * 2);
+
+    for (let i = fineStart; i <= fineEnd; i++) {
+      let dotI = 0, dotQ = 0;
+      for (let k = 0; k < syncLen; k++) {
+        const s = mono[i + k];
+        dotI += s * chirpI[k];
+        dotQ += s * chirpQ[k];
+      }
+      const envSq = dotI * dotI + dotQ * dotQ;
+      if (envSq > fineMaxEnvSq) {
+        fineMaxEnvSq = envSq;
+        fineIdx = i;
+      }
+    }
+
+    const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
+    const isMid = band && band.lowHz < 14000;
+    const minEnv = isMid ? 0.005 : 0.015;
+    if (envNorm > minEnv) {
+      const offsets = [];
+      for (let delta = -2; delta <= 2; delta++) {
+        const candidate = fineIdx + delta;
+        if (candidate >= 0 && candidate < frameLen) {
+          offsets.push({ shift: candidate, isSyncPreamble: true });
+        }
+      }
+      return offsets;
+    }
+    return [];
+  }
+
+  function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
+    const folded = new Float64Array(frameLen);
+    let count = 0;
+    for (let base = startOffset; base + frameLen <= usableSamples; base += frameLen) {
+      let idx = base * channels;
+      for (let n = 0; n < frameLen; n++) {
+        let acc = 0;
+        for (let ch = 0; ch < channels; ch++) acc += pcm[idx + ch];
+        folded[n] += acc;
+        idx += channels;
+      }
+      count++;
+    }
+    return { folded, reps: count };
+  }
+
+  function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
+    const { channels } = fmt;
+    const perChannel = Math.floor(pcm.length / channels);
+    const geometry = deriveGeometry(sampleRate, perChannel);
+    const { slotLen, frameLen } = geometry;
+
+    const candidates = [];
+    const preambleOffsets = findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band);
+    for (const c of preambleOffsets) {
+      candidates.push(c);
+    }
+
+    const maxShift = Math.floor(frameLen / 4);
+    for (const f of RESYNC_FRACTIONS) {
+      const shift = Math.round(f * frameLen);
+      const clamped = Math.max(0, Math.min(maxShift, shift));
+      if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped, isSyncPreamble: false });
+    }
+
+    let best = null;
+    for (const { shift, isSyncPreamble } of candidates) {
+      const usable = perChannel - shift;
+      const { folded, reps } = foldRepetitions(pcm, channels, frameLen, shift, perChannel);
+      if (reps < 1 || usable < frameLen) continue;
+
+      const { template, slotNorms } = buildTemplate({ key, sampleRate, geometry, band });
+      const soft = new Float64Array(BITS_PER_CODEWORD);
+      for (let b = 0; b < BITS_PER_CODEWORD; b++) {
+        let dot = 0;
+        const off = b * slotLen;
+        for (let n = 0; n < slotLen; n++) dot += folded[off + n] * template[off + n];
+        soft[b] = dot / (reps * channels * slotNorms[b]);
+      }
+
+      let hard = new Int8Array(BITS_PER_CODEWORD);
+      for (let b = 0; b < BITS_PER_CODEWORD; b++) hard[b] = soft[b] >= 0 ? 1 : -1;
+
+      const absSorted = [...soft].map((v, i) => [Math.abs(v), i]).sort((a, b) => a[0] - b[0]);
+      let decoded = unpackCodeword(hard);
+      let correctedBits = [];
+      if (!decoded.crcOk) {
+        for (const [, i] of absSorted) {
+          const trial = Int8Array.from(hard);
+          trial[i] = -trial[i];
+          const t = unpackCodeword(trial);
+          if (t.crcOk) {
+            hard = trial;
+            decoded = t;
+            correctedBits = [i];
+            break;
+          }
+        }
+        if (!decoded.crcOk) {
+          const topCandidates = absSorted.slice(0, 8);
+          outer2Bit: for (let p = 0; p < topCandidates.length; p++) {
+            for (let q = p + 1; q < topCandidates.length; q++) {
+              const i1 = topCandidates[p][1];
+              const i2 = topCandidates[q][1];
+              const trial = Int8Array.from(hard);
+              trial[i1] = -trial[i1];
+              trial[i2] = -trial[i2];
+              const t = unpackCodeword(trial);
+              if (t.crcOk) {
+                hard = trial;
+                decoded = t;
+                correctedBits = [i1, i2];
+                break outer2Bit;
+              }
+            }
+          }
+        }
+      }
+
+      const refBits = payloadId !== undefined ? packCodeword(payloadId) : hard;
+      let mu = 0;
+      let berCount = 0;
+      for (let b = 0; b < BITS_PER_CODEWORD; b++) {
+        mu += soft[b] * refBits[b];
+        if ((hard[b] > 0) !== (refBits[b] > 0)) berCount++;
+      }
+      mu /= BITS_PER_CODEWORD;
+      let varAcc = 0;
+      let maxAbs = 0;
+      for (let b = 0; b < BITS_PER_CODEWORD; b++) {
+        const a = soft[b] * refBits[b] - mu;
+        varAcc += a * a;
+        maxAbs = Math.max(maxAbs, Math.abs(soft[b]));
+      }
+      const sd = Math.sqrt(varAcc / BITS_PER_CODEWORD);
+      const denom = sd / Math.sqrt(BITS_PER_CODEWORD) + 1e-3 * maxAbs + 1e-12;
+      const z = mu / denom;
+      const confidence = Math.min(1, Math.max(0, (z - Z_FLOOR) / (Z_FULL - Z_FLOOR)));
+      const ebN0 = mu > 0 && sd > 0 ? (mu / sd) ** 2 : 1e-4;
+      const ebN0Db = Number((10 * Math.log10(Math.max(1e-4, ebN0))).toFixed(2));
+      const sqnrDb = Number((10 * Math.log10(Math.max(1e-4, ebN0 * reps))).toFixed(2));
+
+      const isWinner =
+        !best ||
+        (decoded.crcOk && !best.decoded.crcOk) ||
+        (decoded.crcOk === best.decoded.crcOk && confidence > best.confidence);
+
+      if (isWinner) {
+        best = { soft, hard, decoded, correctedBits, mu, sd, z, confidence, ebN0Db, sqnrDb, ber: berCount / BITS_PER_CODEWORD, reps, shiftUsed: shift, isSyncPreamble: isSyncPreamble || false };
+      }
+    }
+    return best;
+  }
+
+  function detectWatermarkCore(pcm, fmt, opts = {}) {
+    const sampleRate = fmt.sampleRate;
+    const channels = fmt.channels;
+    const key = typeof opts.key === "string" && opts.key.length ? opts.key : DEFAULT_KEY;
+    const bands = bandList(opts.band || "auto", sampleRate);
+    let winner = null;
+    let winnerBand = null;
+
+    for (const band of bands) {
+      const r = scoreHypothesis(pcm, fmt, { key, payloadId: opts.payloadId, sampleRate, band });
+      if (r) {
+        const isBandWinner =
+          !winner ||
+          (r.decoded.crcOk && !winner.decoded.crcOk) ||
+          (r.decoded.crcOk === winner.decoded.crcOk && r.confidence > winner.confidence);
+        if (isBandWinner) {
+          winner = r;
+          winnerBand = band;
+        }
+      }
+    }
+
+    if (!winner) {
+      throw new RangeError("Audio is too short for watermark detection at this sample rate");
+    }
+
+    const idMatches = opts.payloadId === undefined || winner.decoded.id === opts.payloadId;
+    const detected = winner.decoded.crcOk && idMatches && winner.confidence >= 0.5 && winner.mu > 0;
+
+    return {
+      detected,
+      confidence: winner.confidence,
+      ber: winner.ber,
+      ebN0Db: winner.ebN0Db,
+      sqnrDb: winner.sqnrDb,
+      recoveredPayloadId: winner.decoded.crcOk ? winner.decoded.id : null,
+      crcOk: winner.decoded.crcOk,
+      reps: winner.reps,
+      bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}â€“${Math.round(winnerBand.highHz)} Hz)` : null,
+      syncMethod: winner.isSyncPreamble ? "preamble" : "fractional_grid",
+    };
+  }
+
+  function embedWatermarkCore(pcm, fmt, opts) {
+    const { sampleRate, channels } = fmt;
+    const key = typeof opts.key === "string" && opts.key.length ? opts.key : DEFAULT_KEY;
+    const bands = bandList(opts.band || "dual", sampleRate);
+
+    let strength = Number.isFinite(opts.strength) ? Math.min(1, Math.max(0.01, opts.strength)) : 0.5;
+    const amp = Math.min(MAX_AMPLITUDE, Math.max(0.001, strength) * MAX_AMPLITUDE) * (bands.length > 1 ? MULTI_BAND_SCALE : 1);
+
+    const perChannel = Math.floor(pcm.length / channels);
+    const geometry = deriveGeometry(sampleRate, perChannel);
+    const codeword = packCodeword(opts.payloadId);
+    const { slotLen, frameLen, reps, bits } = geometry;
+
+    const wm = new Float64Array(frameLen);
+    for (const band of bands) {
+      const isMid = band.lowHz < 14000;
+      const bandAmp = amp * (isMid ? MID_BAND_PERCEPTUAL_WEIGHT : 1.0);
+      const built = buildTemplate({ key, sampleRate, geometry, band });
+      const { template } = built;
+
+      for (let b = 0; b < bits; b++) {
+        const s = codeword[b];
+        const off = b * slotLen;
+        for (let n = 0; n < slotLen; n++) {
+          wm[off + n] += bandAmp * s * template[off + n];
+        }
+      }
+
+      // Embed deterministic stream synchronization preamble at frame boundary
+      const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+      const chirpScale = isMid ? 0.25 : 0.75;
+      for (let n = 0; n < syncLen; n++) {
+        wm[n] += bandAmp * chirpScale * chirpQ[n];
+      }
+    }
+
+    const out = new Float32Array(pcm.length);
+    out.set(pcm);
+
+    for (let r = 0; r < reps; r++) {
+      const base = r * frameLen * channels;
+      for (let ch = 0; ch < channels; ch++) {
+        for (let b = 0; b < bits; b++) {
+          const slotOffset = base + ch + b * slotLen * channels;
+          let sumSq = 0;
+          for (let n = 0; n < slotLen; n++) {
+            const s = pcm[slotOffset + n * channels];
+            sumSq += s * s;
+          }
+          const rms = Math.sqrt(sumSq / slotLen);
+          const mask = rms <= 0.002 ? 0.0 : Math.min(1.0, (rms - 0.002) / 0.08);
+          if (mask > 0) {
+            const wmSlotBase = b * slotLen;
+            let o = slotOffset;
+            for (let n = 0; n < slotLen; n++) {
+              out[o] += wm[wmSlotBase + n] * mask;
+              o += channels;
+            }
+          }
+        }
+      }
+    }
+
+    let maxPeak = 0;
+    for (let i = 0; i < out.length; i++) {
+      const abs = Math.abs(out[i]);
+      if (abs > maxPeak) maxPeak = abs;
+    }
+    if (maxPeak > 0.999) {
+      const headroomScale = 0.995 / maxPeak;
+      for (let i = 0; i < out.length; i++) {
+        out[i] *= headroomScale;
+      }
+    }
+
+    return out;
+  }
+
+  function encodeWavArray(samples, sampleRate, channels, bitDepth = 16) {
+    const bytesPerSample = bitDepth / 8;
+    const frames = Math.floor(samples.length / channels);
+    const dataLen = frames * channels * bytesPerSample;
+    const padded = dataLen + (dataLen & 1);
+    const buffer = new ArrayBuffer(44 + padded);
+    const view = new DataView(buffer);
+
+    view.setUint32(0, 0x52494646, false); // "RIFF"
+    view.setUint32(4, 36 + padded, true);
+    view.setUint32(8, 0x57415645, false); // "WAVE"
+    view.setUint32(12, 0x666d7420, false); // "fmt "
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, channels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * channels * bytesPerSample, true);
+    view.setUint16(32, channels * bytesPerSample, true);
+    view.setUint16(34, bitDepth, true);
+    view.setUint32(36, 0x64617461, false); // "data"
+    view.setUint32(40, dataLen, true);
+
+    const peak = bitDepth === 16 ? 32767 : 8388607;
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++) {
+      const s = Math.round(Math.max(-1, Math.min(1, samples[i])) * peak);
+      if (bitDepth === 16) {
+        view.setInt16(offset, s, true);
+        offset += 2;
+      } else {
+        view.setUint8(offset, s & 0xff);
+        view.setUint8(offset + 1, (s >> 8) & 0xff);
+        view.setUint8(offset + 2, (s >> 16) & 0xff);
+        offset += 3;
+      }
+    }
+    return new Uint8Array(buffer);
+  }
+
+  function encodeWavBlob(samples, sampleRate, channels, bitDepth = 16) {
+    const arr = encodeWavArray(samples, sampleRate, channels, bitDepth);
+    return new Blob([arr], { type: "audio/wav" });
+  }
+
+  function encodeMp3Blob(samples, sampleRate, channels, kbps = 320) {
+    const lame = typeof lamejs !== "undefined" ? lamejs : (window.lamejs || null);
+    if (!lame || !lame.Mp3Encoder) {
+      throw new Error("MP3 encoder (lamejs) is not available. Please choose WAV format.");
+    }
+    const enc = new lame.Mp3Encoder(channels, sampleRate, kbps);
+    const sampleCount = Math.floor(samples.length / channels);
+    const left = new Int16Array(sampleCount);
+    const right = channels >= 2 ? new Int16Array(sampleCount) : left;
+
+    if (channels >= 2) {
+      for (let i = 0; i < sampleCount; i++) {
+        left[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i * 2] * 32767)));
+        right[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i * 2 + 1] * 32767)));
+      }
+    } else {
+      for (let i = 0; i < sampleCount; i++) {
+        left[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i] * 32767)));
+      }
+    }
+
+    const chunks = [];
+    const chunkSize = 1152;
+    for (let i = 0; i < sampleCount; i += chunkSize) {
+      const l = left.subarray(i, i + chunkSize);
+      const r = channels >= 2 ? right.subarray(i, i + chunkSize) : l;
+      const buf = channels >= 2 ? enc.encodeBuffer(l, r) : enc.encodeBuffer(l);
+      if (buf && buf.length > 0) chunks.push(buf);
+    }
+    const end = enc.flush();
+    if (end && end.length > 0) chunks.push(end);
+
+    return new Blob(chunks, { type: "audio/mp3" });
+  }
+
+  // --- DEDICATED WEB WORKER ENGINE (ZERO UI BLOCKING) ---
+  let dspWorkerInstance = null;
+  let dspReqCounter = 0;
+  const dspPendingReqs = new Map();
+
+  function getDspWorker() {
+    if (typeof window !== "undefined" && window.location && window.location.protocol === "file:") {
+      return null;
+    }
+    if (!dspWorkerInstance && typeof Worker !== "undefined") {
+      try {
+        const workerScript = `
+          ${hashSeed.toString()}
+          ${mix.toString()}
+          ${makeRng.toString()}
+          ${makeSymbolStream.toString()}
+          const hannCache = new Map();
+          ${hannWindow.toString()}
+          ${clampInt.toString()}
+          ${resolveBand.toString()}
+          ${bandList.toString()}
+          ${deriveGeometry.toString()}
+          ${buildTemplate.toString()}
+          ${crc16.toString()}
+          ${packCodeword.toString()}
+          ${unpackCodeword.toString()}
+          ${buildSyncPreamble.toString()}
+          ${findPreambleOffsets.toString()}
+          ${foldRepetitions.toString()}
+          ${scoreHypothesis.toString()}
+          ${detectWatermarkCore.toString()}
+          ${embedWatermarkCore.toString()}
+          ${encodeWavArray.toString()}
+
+          const DEFAULT_KEY = "aural-watermark-default-key";
+          const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
+          const BITS_PER_CODEWORD = 48;
+          const CHIPS_PER_SLOT = 24;
+          const PAYLOAD_BITS = 32;
+          const CRC_BITS = 16;
+          const Z_FLOOR = 3.0;
+          const Z_FULL = 30.0;
+          const MAX_AMPLITUDE = 0.0075;
+          const MULTI_BAND_SCALE = 0.7;
+          const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
+          const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
+          const BAND_PRESETS = Object.freeze({
+            high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
+            mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
+          });
+
+          self.onmessage = function(e) {
+            const { id, action, pcm, fmt, opts } = e.data;
+            try {
+              if (action === "detect") {
+                const res = detectWatermarkCore(pcm, fmt, opts);
+                self.postMessage({ id, success: true, res });
+              } else if (action === "embed") {
+                const watermarked = embedWatermarkCore(pcm, fmt, opts);
+                const wavArr = encodeWavArray(watermarked, fmt.sampleRate, fmt.channels, 16);
+                self.postMessage({ id, success: true, wavArr, watermarked }, [wavArr.buffer, watermarked.buffer]);
+              }
+            } catch (err) {
+              self.postMessage({ id, success: false, error: err.message || String(err) });
+            }
+          };
+        `;
+        const blob = new Blob([workerScript], { type: "application/javascript" });
+        dspWorkerInstance = new Worker(URL.createObjectURL(blob));
+        dspWorkerInstance.onmessage = function(e) {
+          const { id, success, res, wavArr, error } = e.data;
+          const pending = dspPendingReqs.get(id);
+          if (pending) {
+            dspPendingReqs.delete(id);
+            if (success) pending.resolve({ res, wavArr });
+            else pending.reject(new Error(error));
+          }
+        };
+        dspWorkerInstance.onerror = function(err) {
+          console.warn("DSP Web Worker encountered an error, falling back to main thread:", err);
+          for (const req of dspPendingReqs.values()) {
+            req.reject(new Error(err?.message || "Web Worker error"));
+          }
+          dspPendingReqs.clear();
+          try { dspWorkerInstance.terminate(); } catch {}
+          dspWorkerInstance = null;
+        };
+      } catch (err) {
+        console.warn("Web Worker creation blocked, falling back to main thread:", err);
+        dspWorkerInstance = null;
+      }
+    }
+    return dspWorkerInstance;
+  }
+
+  async function asyncDetect(pcm, fmt, opts) {
+    const worker = getDspWorker();
+    if (worker) {
+      try {
+        return await new Promise((resolve, reject) => {
+          const id = ++dspReqCounter;
+          const timer = setTimeout(() => {
+            dspPendingReqs.delete(id);
+            reject(new Error("Worker timed out"));
+          }, 8000);
+          dspPendingReqs.set(id, {
+            resolve: (val) => { clearTimeout(timer); resolve(val.res); },
+            reject: (err) => { clearTimeout(timer); reject(err); }
+          });
+          const pcmCopy = new Float32Array(pcm);
+          worker.postMessage({ id, action: "detect", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
+        });
+      } catch (workerErr) {
+        console.warn("DSP Web Worker detect failed, falling back to main thread:", workerErr);
+        try { dspWorkerInstance?.terminate(); } catch {}
+        dspWorkerInstance = null;
+      }
+    }
+    return detectWatermarkCore(pcm, fmt, opts);
+  }
+
+  async function asyncEmbed(pcm, fmt, opts) {
+    const worker = getDspWorker();
+    if (worker) {
+      try {
+        return await new Promise((resolve, reject) => {
+          const id = ++dspReqCounter;
+          const timer = setTimeout(() => {
+            dspPendingReqs.delete(id);
+            reject(new Error("Worker timed out"));
+          }, 8000);
+          const pcmCopy = new Float32Array(pcm);
+          dspPendingReqs.set(id, {
+            resolve: (val) => {
+              clearTimeout(timer);
+              resolve({
+                blob: new Blob([val.wavArr], { type: "audio/wav" }),
+                watermarked: val.watermarked || pcmCopy,
+              });
+            },
+            reject: (err) => { clearTimeout(timer); reject(err); }
+          });
+          worker.postMessage({ id, action: "embed", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
+        });
+      } catch (workerErr) {
+        console.warn("DSP Web Worker embed failed, falling back to main thread:", workerErr);
+        try { dspWorkerInstance?.terminate(); } catch {}
+        dspWorkerInstance = null;
+      }
+    }
+    const watermarked = embedWatermarkCore(pcm, fmt, opts);
+    return {
+      blob: encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16),
+      watermarked,
+    };
+  }
+
+  function parseWav(arrayBuffer) {
+    const view = new DataView(arrayBuffer);
+    if (arrayBuffer.byteLength < 12) throw new Error("WAV header is too small.");
+    if (view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) {
+      throw new Error("Invalid RIFF/WAVE container.");
+    }
+    let offset = 12;
+    let fmt = null;
+    let data = null;
+    while (offset + 8 <= arrayBuffer.byteLength) {
+      const id = view.getUint32(offset, false);
+      const size = view.getUint32(offset + 4, true);
+      const body = offset + 8;
+      if (body + size > arrayBuffer.byteLength && id !== 0x64617461) break;
+      if (id === 0x666d7420) {
+        const audioFormat = view.getUint16(body, true);
+        const channels = view.getUint16(body + 2, true);
+        const sampleRate = view.getUint32(body + 4, true);
+        const bitsPerSample = view.getUint16(body + 14, true);
+        const extFormat = audioFormat === 0xfffe && body + 26 <= arrayBuffer.byteLength ? view.getUint16(body + 24, true) : audioFormat;
+        fmt = { audioFormat: extFormat, channels, sampleRate, bitsPerSample };
+      } else if (id === 0x64617461) {
+        data = new Uint8Array(arrayBuffer, body, Math.min(size, arrayBuffer.byteLength - body));
+      }
+      offset = body + size + (size % 2);
+    }
+    if (!fmt || !data) throw new Error("Incomplete WAV header (missing fmt/data chunks).");
+    return { fmt, data };
+  }
+
+  function pcmToFloat32(u8, fmt) {
+    const bytesPer = fmt.bitsPerSample / 8;
+    const isFloat = fmt.audioFormat === 3;
+    const frames = Math.floor(u8.length / (bytesPer * fmt.channels));
+    const out = new Float32Array(frames * fmt.channels);
+    for (let f = 0; f < frames; f++) {
+      for (let c = 0; c < fmt.channels; c++) {
+        const i = (f * fmt.channels + c) * bytesPer;
+        let v = 0;
+        if (fmt.bitsPerSample === 16) {
+          v = ((u8[i] | (u8[i + 1] << 8)) << 16 >> 16) / 32768;
+        } else if (fmt.bitsPerSample === 24) {
+          v = ((u8[i] | (u8[i + 1] << 8) | (u8[i + 2] << 16)) << 8 >> 8) / 8388608;
+        } else if (fmt.bitsPerSample === 32 && isFloat) {
+          const b = new ArrayBuffer(4);
+          new Uint8Array(b).set(u8.subarray(i, i + 4));
+          v = new Float32Array(b)[0];
+        } else {
+          v = (u8[i] - 128) / 128;
+        }
+        out[f * fmt.channels + c] = v;
+      }
+    }
+    return out;
+  }
+
+  function audioBufferToPcm(audioBuffer) {
+    const channels = audioBuffer.numberOfChannels;
+    const length = audioBuffer.length;
+    const pcm = new Float32Array(length * channels);
+    const chData = [];
+    for (let c = 0; c < channels; c++) chData.push(audioBuffer.getChannelData(c));
+    for (let i = 0; i < length; i++) {
+      for (let c = 0; c < channels; c++) {
+        pcm[i * channels + c] = chData[c][i];
+      }
+    }
+    return { pcm, sampleRate: audioBuffer.sampleRate, channels };
+  }
+
+  let sharedAudioCtx = null;
+  function getAudioContext() {
+    if (!sharedAudioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      sharedAudioCtx = new AudioCtx();
+    }
+    if (sharedAudioCtx.state === "suspended") {
+      sharedAudioCtx.resume();
+    }
+    return sharedAudioCtx;
+  }
+
+  function isWav(buffer) {
+    if (buffer.byteLength < 12) return false;
+    const v = new DataView(buffer);
+    return v.getUint32(0, false) === 0x52494646 && v.getUint32(8, false) === 0x57415645;
+  }
+
+  async function decodeAudio(buffer) {
+    if (isWav(buffer)) {
+      const { fmt, data } = parseWav(buffer);
+      return { pcm: pcmToFloat32(data, fmt), sampleRate: fmt.sampleRate, channels: fmt.channels };
+    }
+    const ctx = getAudioContext();
+    const copy = buffer.slice(0);
+    const audioBuffer = await new Promise((resolve, reject) => {
+      let settled = false;
+      const ok = (b) => { if (!settled) { settled = true; resolve(b); } };
+      const err = (e) => { if (!settled) { settled = true; reject(e); } };
+      try {
+        const p = ctx.decodeAudioData(copy, ok, err);
+        if (p && typeof p.then === "function") p.then(ok).catch(err);
+      } catch (e) { err(e); }
+    });
+    return audioBufferToPcm(audioBuffer);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // --- Tab Interactivity ---
+  const tabDetect = document.getElementById("tab-detect");
+  const tabEmbed = document.getElementById("tab-embed");
+  const paneDetect = document.getElementById("pane-detect");
+  const paneEmbed = document.getElementById("pane-embed");
+
+  tabDetect.addEventListener("click", () => {
+    tabDetect.classList.add("active");
+    tabEmbed.classList.remove("active");
+    paneDetect.classList.add("active");
+    paneEmbed.classList.remove("active");
+  });
+
+  tabEmbed.addEventListener("click", () => {
+    tabEmbed.classList.add("active");
+    tabDetect.classList.remove("active");
+    paneEmbed.classList.add("active");
+    paneDetect.classList.remove("active");
+  });
+
+  function setupDragDrop(zone, input, onFile) {
+    zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("dragover"); });
+    zone.addEventListener("dragleave", () => zone.classList.remove("dragover"));
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]);
+    });
+    input.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) onFile(e.target.files[0]);
+    });
+  }
+
+  // --- VERIFY TAB LOGIC ---
+  const detectFileInput = document.getElementById("detect-file");
+  const detectFileLabel = document.getElementById("detect-file-label");
+  const detectDropZone = document.getElementById("detect-drop-zone");
+  const detectPreview = document.getElementById("detect-preview");
+  const detectBtn = document.getElementById("detect-btn");
+  const detectResultBox = document.getElementById("detect-result");
+  const detectIdInput = document.getElementById("detect-id");
+  const detectKeyInput = document.getElementById("detect-key");
+
+  let detectBuffer = null;
+
+  setupDragDrop(detectDropZone, detectFileInput, async (file) => {
+    detectFileLabel.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    detectPreview.src = URL.createObjectURL(file);
+    detectPreview.style.display = "block";
+    detectResultBox.style.display = "none";
+    detectBtn.disabled = true;
+    detectBtn.textContent = "Loading file...";
+
+    try {
+      detectBuffer = await file.arrayBuffer();
+      detectBtn.disabled = false;
+      detectBtn.textContent = "Scan Audio";
+    } catch (err) {
+      detectBtn.textContent = "Scan Audio";
+      showDetectError(`File read error: ${err.message || err}`);
+    }
+  });
+
+  detectBtn.addEventListener("click", async () => {
+    if (!detectBuffer) return;
+    detectBtn.disabled = true;
+    detectBtn.textContent = "Scanning...";
+    detectResultBox.style.display = "none";
+
+    let expectedId = undefined;
+    const rawId = detectIdInput.value.trim();
+    if (rawId !== "") {
+      const parsed = Number(rawId);
+      if (!Number.isInteger(parsed) || parsed < 0) {
+        showDetectError("Expected ID must be a non-negative integer or left empty.");
+        detectBtn.disabled = false;
+        detectBtn.textContent = "Scan Audio";
+        return;
+      }
+      expectedId = parsed;
+    }
+
+    const key = detectKeyInput.value.trim() || undefined;
+
+    try {
+      detectBtn.textContent = "Decoding audio...";
+      const { pcm, sampleRate, channels } = await decodeAudio(detectBuffer);
+      detectBtn.textContent = getDspWorker() ? "Scanning frames (Worker)..." : "Scanning frames (DSP)...";
+      const result = await asyncDetect(pcm, { sampleRate, channels }, {
+        payloadId: expectedId,
+        key,
+        band: "auto",
+      });
+      renderDetectResult(result, expectedId);
+    } catch (err) {
+      showDetectError(`Scan failed: ${err.message || err}`);
+    } finally {
+      detectBtn.disabled = false;
+      detectBtn.textContent = "Scan Audio";
+    }
+  });
+
+  function showDetectError(msg) {
+    detectResultBox.className = "status-box error";
+    detectResultBox.innerHTML = `
+      <div class="box-header">SCAN ERROR</div>
+      <div>${escapeHtml(msg)}</div>
+    `;
+    detectResultBox.style.display = "block";
+  }
+
+  function renderDetectResult(r, expectedId) {
+    const passed = r.detected;
+    detectResultBox.className = `status-box ${passed ? "pass" : "fail"}`;
+
+    let statusText = passed
+      ? (expectedId !== undefined ? "AUTHENTICITY VERIFIED" : "WATERMARK DETECTED")
+      : (expectedId !== undefined ? "VERIFICATION FAILED" : "NO WATERMARK DETECTED");
+
+    const idVal = r.recoveredPayloadId != null
+      ? `#${r.recoveredPayloadId}`
+      : (passed && expectedId !== undefined ? `#${expectedId}` : "None");
+
+    const ebn0Display = r.ebN0Db != null
+      ? (r.ebN0Db > -30 ? (r.ebN0Db > 0 ? "+" : "") + r.ebN0Db + " dB" : "< -30 dB")
+      : "â€”";
+
+    const sqnrDisplay = r.sqnrDb != null
+      ? (r.sqnrDb > -30 ? (r.sqnrDb > 0 ? "+" : "") + r.sqnrDb + " dB" : "< -30 dB")
+      : "â€”";
+
+    detectResultBox.innerHTML = `
+      <div class="box-header">
+        <span>${statusText}</span>
+        <span>${(r.confidence * 100).toFixed(1)}% confidence</span>
+      </div>
+      <table class="data-table">
+        <tbody>
+          <tr>
+            <td>Payload ID</td>
+            <td style="font-weight: 600;">${idVal}</td>
+          </tr>
+          <tr>
+            <td>Signal-to-Noise (Eb/N0)</td>
+            <td style="font-weight: 600; color: ${passed ? 'var(--cyan)' : 'inherit'};">${ebn0Display}</td>
+          </tr>
+          <tr>
+            <td>Quantization SNR (SQNR)</td>
+            <td>${sqnrDisplay}</td>
+          </tr>
+          <tr>
+            <td>Bit Error Rate</td>
+            <td>${(r.ber * 100).toFixed(1)}%</td>
+          </tr>
+          <tr>
+            <td>Carrier Band</td>
+            <td>${r.bandUsed ? escapeHtml(r.bandUsed) : "Noise floor"}</td>
+          </tr>
+          <tr>
+            <td>Integrated Frames</td>
+            <td>${r.reps || 0} repetition(s)</td>
+          </tr>
+          <tr>
+            <td>CRC-16 Integrity</td>
+            <td>${r.crcOk ? "Valid Checksum" : "Failed Checksum"}</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+    detectResultBox.style.display = "block";
+  }
+
+  // --- EMBED TAB LOGIC ---
+  const embedFileInput = document.getElementById("embed-file");
+  const embedFileLabel = document.getElementById("embed-file-label");
+  const embedDropZone = document.getElementById("embed-drop-zone");
+  const embedPreview = document.getElementById("embed-preview");
+  const embedBtn = document.getElementById("embed-btn");
+  const embedResultBox = document.getElementById("embed-result");
+  const embedIdInput = document.getElementById("embed-id");
+  const embedKeyInput = document.getElementById("embed-key");
+  const embedBandSelect = document.getElementById("embed-band");
+  const embedOutputPlayer = document.getElementById("embed-output-player");
+  const exportFormatSelect = document.getElementById("export-format-select");
+  const btnDownload = document.getElementById("btn-download");
+  const btnVerifyNow = document.getElementById("btn-verify-now");
+  const btnRandId = document.getElementById("btn-rand-id");
+  const btnRandKey = document.getElementById("btn-rand-key");
+  const embedPrecheckBox = document.getElementById("embed-precheck-box");
+  const embedBadgeId = document.getElementById("embed-badge-id");
+
+  let embedBuffer = null;
+  let lastWavBlob = null;
+  let lastWatermarkedPcm = null;
+  let lastSampleRate = 44100;
+  let lastChannels = 2;
+  let lastBaseFileName = "audio";
+  let lastWavFileName = "watermarked.wav";
+
+  function rollSecureId() {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    embedIdInput.value = (arr[0] % 900000) + 100000;
+  }
+
+  btnRandId.addEventListener("click", rollSecureId);
+
+  if (btnRandKey) {
+    btnRandKey.addEventListener("click", () => {
+      const arr = new Uint8Array(8);
+      crypto.getRandomValues(arr);
+      embedKeyInput.value = "studio_" + Array.from(arr).map(b => b.toString(16).padStart(2, "0")).join("");
+    });
+  }
+
+  // Automatically initialize with a secure random ID
+  rollSecureId();
+
+  setupDragDrop(embedDropZone, embedFileInput, async (file) => {
+    embedFileLabel.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    embedPreview.src = URL.createObjectURL(file);
+    embedPreview.style.display = "block";
+    embedResultBox.style.display = "none";
+    embedPrecheckBox.style.display = "block";
+    embedPrecheckBox.innerHTML = `
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); color: #7dd3fc; padding: 0.55rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
+        <span>ðŸ” Scanning audio for existing watermarks...</span>
+      </div>`;
+    lastBaseFileName = file.name.replace(/\.[^/.]+$/, "");
+    lastWavFileName = `${lastBaseFileName}_watermarked.wav`;
+    embedBtn.disabled = true;
+    embedBtn.textContent = "Analyzing audio...";
+
+    try {
+      embedBuffer = await file.arrayBuffer();
+      embedBtn.disabled = false;
+      embedBtn.textContent = "Embed Watermark & Export";
+
+      // Non-blocking pre-check to detect if file is already watermarked
+      const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
+      const precheck = await asyncDetect(pcm, { sampleRate, channels }, {
+        key: embedKeyInput.value.trim() || undefined,
+        band: "auto"
+      });
+
+      if (precheck && precheck.detected && precheck.confidence >= 0.75) {
+        embedPrecheckBox.innerHTML = `
+          <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem; line-height: 1.45;">
+            <div style="font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
+              <span>âš ï¸ Existing Watermark Detected</span>
+              <span style="font-family: ui-monospace, monospace; background: rgba(0,0,0,0.3); padding: 2px 7px; border-radius: 4px; color: #ffffff;">ID #${precheck.recoveredPayloadId} (${Math.round(precheck.confidence * 100)}% Match)</span>
+            </div>
+            <div>This audio already contains an active watermark! Stacking consecutive watermarks creates acoustic cross-talk and will corrupt recovery. We recommend using the original pristine master.</div>
+          </div>`;
+      } else {
+        embedPrecheckBox.innerHTML = `
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #6ee7b7; padding: 0.5rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
+            <span>âœ“ Pristine Master</span>
+            <span style="color: var(--text-muted); font-size: 0.76rem;">No prior watermark detected. Ready for secure tagging.</span>
+          </div>`;
+      }
+    } catch (err) {
+      embedBtn.disabled = false;
+      embedBtn.textContent = "Embed Watermark & Export";
+      embedPrecheckBox.style.display = "none";
+    }
+  });
+
+  embedBtn.addEventListener("click", async () => {
+    if (!embedBuffer) return;
+    const rawId = embedIdInput.value.trim();
+    if (rawId === "") {
+      alert("Please enter a numeric Payload ID to embed.");
+      embedIdInput.focus();
+      return;
+    }
+    const payloadId = Number(rawId);
+    if (!Number.isInteger(payloadId) || payloadId < 0 || payloadId > 4294967295) {
+      alert("Payload ID must be an integer between 0 and 4,294,967,295.");
+      return;
+    }
+
+    const key = embedKeyInput.value.trim() || undefined;
+    const band = embedBandSelect.value;
+
+    embedBtn.disabled = true;
+    embedBtn.textContent = getDspWorker() ? "Embedding watermark (Worker)..." : "Embedding watermark (DSP)...";
+
+    try {
+      const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
+      const resEmbed = await asyncEmbed(pcm, { sampleRate, channels }, {
+        payloadId,
+        key,
+        band,
+        strength: 0.5,
+      });
+
+      lastWavBlob = resEmbed.blob;
+      lastWatermarkedPcm = resEmbed.watermarked;
+      lastSampleRate = sampleRate;
+      lastChannels = channels;
+
+      const url = URL.createObjectURL(lastWavBlob);
+      embedOutputPlayer.src = url;
+      embedBadgeId.textContent = `ID #${payloadId}`;
+      embedResultBox.style.display = "block";
+    } catch (err) {
+      alert(`Embedding failed: ${err.message || err}`);
+    } finally {
+      embedBtn.disabled = false;
+      embedBtn.textContent = "Embed Watermark & Export";
+    }
+  });
+
+  const exportFormatBadge = document.getElementById("export-format-badge");
+  const btnDownloadLabel = document.getElementById("btn-download-label");
+
+  function updateExportFormatUI() {
+    const fmt = exportFormatSelect ? exportFormatSelect.value : "wav-16";
+    if (fmt === "wav-16") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "WAV 16-BIT PCM";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (WAV)";
+    } else if (fmt === "wav-24") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "WAV 24-BIT HI-RES";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (24-bit WAV)";
+    } else if (fmt === "mp3-320") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "MP3 320 KBPS";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (MP3)";
+    } else if (fmt === "mp3-192") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "MP3 192 KBPS";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (192k MP3)";
+    } else if (fmt === "mp3-128") {
+      if (exportFormatBadge) exportFormatBadge.textContent = "MP3 128 KBPS";
+      if (btnDownloadLabel) btnDownloadLabel.textContent = "Download Watermarked Audio (128k MP3)";
+    }
+  }
+
+  if (exportFormatSelect) {
+    exportFormatSelect.addEventListener("change", updateExportFormatUI);
+  }
+
+  btnDownload.addEventListener("click", async () => {
+    const fmt = exportFormatSelect ? exportFormatSelect.value : "wav-16";
+    let downloadBlob = null;
+    let outFileName = `${lastBaseFileName}_watermarked.wav`;
+    const curLabel = btnDownloadLabel ? btnDownloadLabel.textContent : "Download Watermarked Audio";
+
+    if (!lastWatermarkedPcm && lastWavBlob) {
+      downloadBlob = lastWavBlob;
+    } else if (lastWatermarkedPcm) {
+      if (fmt === "wav-16") {
+        const arr = encodeWavArray(lastWatermarkedPcm, lastSampleRate, lastChannels, 16);
+        downloadBlob = new Blob([arr], { type: "audio/wav" });
+        outFileName = `${lastBaseFileName}_watermarked.wav`;
+      } else if (fmt === "wav-24") {
+        const arr = encodeWavArray(lastWatermarkedPcm, lastSampleRate, lastChannels, 24);
+        downloadBlob = new Blob([arr], { type: "audio/wav" });
+        outFileName = `${lastBaseFileName}_watermarked_24bit.wav`;
+      } else if (fmt.startsWith("mp3-")) {
+        const kbps = parseInt(fmt.split("-")[1], 10) || 320;
+        btnDownload.disabled = true;
+        if (btnDownloadLabel) btnDownloadLabel.textContent = `Encoding ${kbps}k MP3...`;
+        try {
+          await new Promise(r => setTimeout(r, 25));
+          downloadBlob = encodeMp3Blob(lastWatermarkedPcm, lastSampleRate, lastChannels, kbps);
+          outFileName = kbps === 320 ? `${lastBaseFileName}_watermarked.mp3` : `${lastBaseFileName}_watermarked_${kbps}k.mp3`;
+        } catch (e) {
+          alert("MP3 export error: " + (e.message || e));
+          btnDownload.disabled = false;
+          if (btnDownloadLabel) btnDownloadLabel.textContent = curLabel;
+          return;
+        }
+        btnDownload.disabled = false;
+        if (btnDownloadLabel) btnDownloadLabel.textContent = curLabel;
+      }
+    }
+
+    if (downloadBlob) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(downloadBlob);
+      a.download = outFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  });
+
+  btnVerifyNow.addEventListener("click", async () => {
+    if (!lastWavBlob) return;
+    detectBuffer = await lastWavBlob.arrayBuffer();
+    detectFileLabel.textContent = `${lastWavFileName} (${(lastWavBlob.size / (1024 * 1024)).toFixed(2)} MB)`;
+    detectPreview.src = URL.createObjectURL(lastWavBlob);
+    detectPreview.style.display = "block";
+    detectBtn.disabled = false;
+    detectIdInput.value = embedIdInput.value;
+    detectKeyInput.value = embedKeyInput.value;
+
+    tabDetect.click();
+    detectBtn.click();
+  });
+
+  // --- POLAR.SH COMMERCIAL LICENSE MANAGER (100% OFFLINE AUDIO) ---
+  /*__AUREAL_PRESEEDED_LICENSE__*/
+
+  const POLAR_ORG_ID = "6898f4c5-7bc8-4ec5-bc97-a16b69b0498c";
+  const LICENSE_STORAGE_KEY = "aureal_commercial_license";
+  let lastLicenseTrigger = null;
+
+  const btnOpenLicense = document.getElementById("btn-open-license");
+  const licenseModal = document.getElementById("license-modal");
+  const btnCloseLicense = document.getElementById("btn-close-license");
+  const headerLicenseDot = document.getElementById("header-license-dot");
+  const headerLicenseText = document.getElementById("header-license-text");
+  const licenseActiveView = document.getElementById("license-active-view");
+  const licenseFormView = document.getElementById("license-form-view");
+  const modalDisplayKey = document.getElementById("modal-display-key");
+  const modalCustomer = document.getElementById("modal-customer");
+  const btnDeactivateLicense = document.getElementById("btn-deactivate-license");
+  const inputPolarKey = document.getElementById("input-polar-key");
+  const btnSubmitLicense = document.getElementById("btn-submit-license");
+  const licenseFeedback = document.getElementById("license-feedback");
+
+  function getClientLicense() {
+    if (window.__AUREAL_PRESEEDED_LICENSE__ && window.__AUREAL_PRESEEDED_LICENSE__.key) {
+      return window.__AUREAL_PRESEEDED_LICENSE__;
+    }
+    try {
+      const raw = localStorage.getItem(LICENSE_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.status === "granted" || parsed.status === "active") && parsed.displayKey) {
+        return parsed;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  function setClientLicense(record) {
+    try {
+      const safeRecord = { ...record };
+      delete safeRecord.key;
+      localStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(safeRecord));
+    } catch {}
+  }
+
+  function removeClientLicense() {
+    try {
+      localStorage.removeItem(LICENSE_STORAGE_KEY);
+    } catch {}
+    if (window.__AUREAL_PRESEEDED_LICENSE__) {
+      window.__AUREAL_PRESEEDED_LICENSE__ = null;
+    }
+  }
+
+  function refreshLicenseUI() {
+    const lic = getClientLicense();
+    if (lic) {
+      if (headerLicenseDot) {
+        headerLicenseDot.style.background = "#10b981";
+        headerLicenseDot.style.boxShadow = "0 0 8px rgba(16, 185, 129, 0.6)";
+      }
+      if (headerLicenseText) {
+        headerLicenseText.textContent = "Commercial Pro Active";
+      }
+      if (btnOpenLicense) {
+        btnOpenLicense.style.background = "rgba(16, 185, 129, 0.12)";
+        btnOpenLicense.style.borderColor = "rgba(16, 185, 129, 0.35)";
+        btnOpenLicense.style.color = "#34d399";
+      }
+
+      if (licenseActiveView) licenseActiveView.style.display = "block";
+      if (licenseFormView) licenseFormView.style.display = "none";
+      if (modalDisplayKey) modalDisplayKey.textContent = lic.displayKey || "Active commercial license";
+      if (modalCustomer) modalCustomer.textContent = lic.customerEmail || lic.customerName || "Verified Studio Customer";
+    } else {
+      if (headerLicenseDot) {
+        headerLicenseDot.style.background = "#c084fc";
+        headerLicenseDot.style.boxShadow = "none";
+      }
+      if (headerLicenseText) {
+        headerLicenseText.textContent = "Community Edition";
+      }
+      if (btnOpenLicense) {
+        btnOpenLicense.style.background = "rgba(139, 92, 246, 0.1)";
+        btnOpenLicense.style.borderColor = "rgba(139, 92, 246, 0.35)";
+        btnOpenLicense.style.color = "#c084fc";
+      }
+
+      if (licenseActiveView) licenseActiveView.style.display = "none";
+      if (licenseFormView) licenseFormView.style.display = "block";
+    }
+  }
+
+  if (btnOpenLicense) {
+    btnOpenLicense.addEventListener("click", () => {
+      lastLicenseTrigger = document.activeElement;
+      refreshLicenseUI();
+      if (licenseFeedback) {
+        licenseFeedback.style.display = "none";
+        licenseFeedback.textContent = "";
+      }
+      if (licenseModal) {
+        licenseModal.style.display = "flex";
+        btnCloseLicense?.focus();
+      }
+    });
+  }
+
+  if (btnCloseLicense) {
+    btnCloseLicense.addEventListener("click", () => {
+      if (licenseModal) licenseModal.style.display = "none";
+      lastLicenseTrigger?.focus();
+    });
+  }
+
+  if (licenseModal) {
+    licenseModal.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        const focusable = licenseModal.querySelectorAll("button, input, a[href]");
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (first && e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (last && !e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+      if (e.key === "Escape") {
+        licenseModal.style.display = "none";
+        lastLicenseTrigger?.focus();
+      }
+    });
+    licenseModal.addEventListener("click", (e) => {
+      if (e.target === licenseModal) {
+        licenseModal.style.display = "none";
+        lastLicenseTrigger?.focus();
+      }
+    });
+  }
+
+  if (btnDeactivateLicense) {
+    btnDeactivateLicense.addEventListener("click", () => {
+      if (confirm("Are you sure you want to deactivate this commercial license from this machine?")) {
+        removeClientLicense();
+        refreshLicenseUI();
+      }
+    });
+  }
+
+  if (btnSubmitLicense) {
+    btnSubmitLicense.addEventListener("click", async () => {
+      const key = inputPolarKey ? inputPolarKey.value.trim().toUpperCase() : "";
+      if (!key) {
+        if (licenseFeedback) {
+          licenseFeedback.style.display = "block";
+          licenseFeedback.style.color = "#f87171";
+          licenseFeedback.textContent = "Please enter your Polar license key.";
+        }
+        return;
+      }
+
+      btnSubmitLicense.disabled = true;
+      btnSubmitLicense.textContent = "Validating with Polar.sh...";
+      if (licenseFeedback) licenseFeedback.style.display = "none";
+
+      try {
+        const res = await fetch("https://api.polar.sh/v1/customer-portal/license-keys/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: key,
+            organization_id: POLAR_ORG_ID
+          })
+        });
+
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || (data.status !== "granted" && data.status !== "active")) {
+          const statusMessages = {
+            400: "The license key format is not valid.",
+            401: "The license key could not be verified.",
+            403: "This license is not authorized for this product.",
+            404: "This license key was not found.",
+            409: "This license is already in use or cannot be activated.",
+            429: "Too many attempts. Please wait a moment and try again.",
+          };
+          const detail = data && (data.detail || data.error);
+          throw new Error(statusMessages[res.status] || (detail ? `License could not be verified: ${detail}` : "License could not be verified. Please check the key and try again."));
+        }
+
+        const record = {
+          displayKey: data.display_key || ("****-" + key.slice(-8)),
+          status: data.status,
+          customerEmail: data.customer?.email || data.user?.email || null,
+          customerName: data.customer?.name || data.user?.public_name || null,
+          benefitId: data.benefit_id || null,
+          activatedAt: new Date().toISOString()
+        };
+
+        setClientLicense(record);
+        refreshLicenseUI();
+        if (inputPolarKey) inputPolarKey.value = "";
+      } catch (err) {
+        if (licenseFeedback) {
+          licenseFeedback.style.display = "block";
+          licenseFeedback.style.color = "#f87171";
+          const message = String(err.message || "");
+          licenseFeedback.textContent = message.startsWith("Failed to fetch")
+            ? "Could not reach the license service. Check your connection and try again."
+            : (message || "License could not be verified. Please try again.");
+        }
+      } finally {
+        btnSubmitLicense.disabled = false;
+        btnSubmitLicense.textContent = "Activate License";
+      }
+    });
+  }
+
+  // Initialize license state on load
+  refreshLicenseUI();
+</script>
+
+</body>
+</html>
+
