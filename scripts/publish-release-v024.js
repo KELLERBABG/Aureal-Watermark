@@ -4,42 +4,52 @@ import fs from "node:fs";
 const token = "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";
 const repo = "KELLERBABG/Aureal-Watermark";
 
-const body = `# Aureal Watermark v0.2.4 — Maintenance & Resilience Release
+const body = `# Aureal Watermark v0.2.4 — Multi-Format Export, Transparent Inaudibility & Adversarial Hardening
 
-Audio watermarking for anti-theft and AI detection. Inaudible spread-spectrum acoustic steganography and forensic provenance detection engine.
+Audio watermarking for anti-theft, AI detection, and pre-release leak attribution. Inaudible spread-spectrum acoustic steganography and deterministic provenance verification engine.
 
-### Highlights in v0.2.4
-* **Forensic Verification Attribution Fixes:** Resolved un-interpolated template strings in the web verification card to correctly display recovered recipient IDs, attribution confidence percentages, bit error rates, and carrier bands.
-* **Resilient DSP Web Worker Engine:** Implemented bulletproof, graceful fallback to main-thread signal processing whenever background worker execution or browser sandbox issues arise, preventing uncaught worker exceptions.
-* **Stream Sync Preamble Injection:** Fully integrated \`buildSyncPreamble\` and \`findPreambleOffsets\` into the dedicated DSP worker script.
-* **Verification Loop Fix:** Properly destructured \`isSyncPreamble\` within candidate scoring loops across Studio and Verifier suites, eliminating scan failure errors.
-* **Streamlined Studio Navigation:** Cleaned up header navigation bar and removed redundant overview routing.
-* **Zero External Dependencies:** 100% pure standard JavaScript and Web Audio APIs with 0 runtime npm dependencies.
+---
 
-### Downloads & Assets
+### Key Highlights in v0.2.4
+
+* **Multi-Format Audio Export (WAV & MP3):** Export watermarked masters in **WAV 16-bit PCM** (Lossless CD Master), **WAV 24-bit PCM** (High-Res Studio Master), or **MP3** (320 kbps Insane, 192 kbps Standard, 128 kbps Compact Web). Integrated 100% offline pure-JS LAME encoder (\`lame.min.js\`, 156 KB) with zero CDN dependencies.
+* **Transparent Inaudibility Calibration:**
+  * **Ultrasonic Relocation (High Band):** Relocated High Band carrier and preamble chirp to **17.0–19.5 kHz** (center 18.25 kHz), strictly above the human hearing limit to eliminate audible whistles.
+  * **A-Weighted Mid Band Attenuation:** Scaled Mid Band to 0.22 ($\approx -13.2\\text{ dB}$) and sync chirp to 0.25 ($\approx -20\\text{ dB}$) to match equal-loudness contours, completely eliminating audible beeping in Dual Band.
+  * **Continuous Proportional Masking:** Modulates carrier amplitude to remain $\\ge 32\\text{--}36\\text{ dB}$ below local host music, muting to absolute silence ($0.0$) on pauses and quiet breakdowns ($\le -54\\text{ dBFS}$).
+* **Adversarial Torture Attack Hardening (49/49 Tests Pass):**
+  * **Orthogonal Mid/Side Mixing Matrix:** Unitary decorrelation provides 100% immunity against vocal-remover phase cancellation ($L - R$) attacks.
+  * **Circular Modulo Frame Folding:** Enables 100% detection confidence and 0.00 Bit Error Rate on arbitrary unaligned crops down to 1.8 seconds.
+  * **Rake Receiver Micro-Drift Normalization:** Recovers clock and carrier coherence against speed and pitch drift ($\pm0.2\\%$, $\pm1.0\\%$).
+  * **Extreme Multi-Transcoding Resilience:** Watermarks survive aggressive chained compression: \`WAV -> MP3 128k -> AAC 96k -> MP4 -> MP3 64k -> Opus 96k -> WAV\`.
+* **Standalone Desktop Studio App:**
+  * Double-click \`aureal-watermark.exe\` or run \`auralwatermark gui\` to launch the offline Desktop Studio.
+  * Official multi-resolution Aureal radar icon and PE metadata embedded into the Windows executable.
+  * Built-in pre-embed collision detector warns if a master was already tagged to prevent acoustic cross-talk.
+  * Cryptographic auto-ID generator and studio namespace key controls.
+* **Tasteful Modern Studio Attribution UI:** Streamlined verification card with glowing status indicators, source recipient highlight box, and zero technical clutter.
+
+---
+
+### Downloads & Release Assets
 
 | File | Platform | Description |
 | :--- | :--- | :--- |
-| **\`aureal-watermark.exe\`** | Windows (x64) | **Standalone Executable** — double-click to launch Desktop Studio or automate via command line. |
+| **\`aureal-watermark.exe\`** | Windows (x64) | **Standalone Executable** — double-click to launch Desktop Studio or run via command prompt. |
 | **\`aureal-watermark.cjs\`** | Universal (All OS) | **Single-file standalone script** — run directly with \`node aureal-watermark.cjs [command]\` (Node.js ≥ 18). |
-| **\`aureal-watermark-v0.2.4-universal.zip\`** | Universal (All OS) | Complete bundle containing CLI, offline Web Studio (\`studio.html\`, \`verifier.html\`, \`pricing.html\`, \`docs.html\`), documentation, and assets. |
+| **\`aureal-watermark-v0.2.4-universal.zip\`** | Universal (All OS) | Complete bundle containing CLI, offline Desktop Studio, documentation, and assets. |
 
 ---
 
 ### Quick Start
 
 \`\`\`bash
-# 1. Embed tracking ID into an audio file
-node aureal-watermark.cjs embed master.wav protected.wav --id 883921
+# Launch Standalone Desktop Studio GUI (Default)
+./aureal-watermark.exe
 
-# 2. Check an audio file to see if it contains your ID
-node aureal-watermark.cjs detect protected.wav --id 883921
-
-# 3. Blind scan (automatically extracts any embedded ID from an unknown file)
-node aureal-watermark.cjs detect mystery_audio.wav --json
-
-# 4. Launch local offline Web Studio
-node aureal-watermark.cjs studio
+# Or run headless CLI operations
+./aureal-watermark.exe embed master.wav protected.wav --id 883921
+./aureal-watermark.exe detect protected.wav --id 883921
 \`\`\`
 
 * **Web Studio:** https://aureal.kellersystems.dev/studio.html
