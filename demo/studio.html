@@ -2026,6 +2026,7 @@
 
   const POLAR_ORG_ID = "6898f4c5-7bc8-4ec5-bc97-a16b69b0498c";
   const LICENSE_STORAGE_KEY = "aureal_commercial_license";
+  let lastLicenseTrigger = null;
 
   const btnOpenLicense = document.getElementById("btn-open-license");
   const licenseModal = document.getElementById("license-modal");
@@ -2049,7 +2050,7 @@
       const raw = localStorage.getItem(LICENSE_STORAGE_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      if (parsed && (parsed.status === "granted" || parsed.status === "active") && (parsed.displayKey || parsed.customerEmail || parsed.customerName)) {
+      if (parsed && (parsed.status === "granted" || parsed.status === "active") && parsed.displayKey) {
         return parsed;
       }
       return null;
