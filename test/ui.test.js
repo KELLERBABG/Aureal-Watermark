@@ -24,7 +24,7 @@ test("studio license modal exposes accessible dialog semantics", () => {
 
 test("landing page keeps claims and navigation regression-safe", () => {
   const source = read("demo/index.html");
-  assert.doesNotMatch(source, /�|â€“|â€”|ðŸ/);
+  assert.doesNotMatch(source, /�|â|â|ð/);
   assert.match(source, /nav-toggle/);
   assert.match(source, /scanDurationMs/);
   assert.match(source, /Results are an interactive demo/);
