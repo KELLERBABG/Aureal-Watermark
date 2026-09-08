@@ -428,6 +428,40 @@
     margin-bottom: 0.25rem;
   }
 
+  .studio-step-note {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: -0.7rem 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+  }
+
+  .studio-step-note strong {
+    color: var(--cyan);
+    font-family: ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 640px) {
+    .app-container { padding: 0 0.75rem; }
+    .app-container > header {
+      align-items: flex-start !important;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .app-container > header > div {
+      width: 100%;
+      justify-content: space-between;
+      gap: 0.45rem !important;
+      flex-wrap: wrap;
+    }
+    .app-container > header > div a { font-size: 0.76rem; }
+    .workspace-card { padding: 1rem; }
+    .license-modal-card { max-height: calc(100vh - 1.5rem); overflow-y: auto; }
+  }
+
   .btn-pricing {
     margin-top: auto;
     text-align: center;
@@ -531,6 +565,7 @@
   </div>
 
   <div class="workspace-card">
+    <div class="studio-step-note"><strong>WORKFLOW</strong><span>1. Choose a tab &rarr; 2. Load audio &rarr; 3. Process &rarr; 4. Review the result</span></div>
     <div class="tab-bar">
       <button type="button" class="tab-item active" id="tab-detect">Verify Audio</button>
       <button type="button" class="tab-item" id="tab-embed">Embed Watermark</button>
@@ -668,7 +703,7 @@
 
 <!-- License Modal -->
 <div id="license-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
-  <div style="background: #0d0914; border: 1px solid var(--border); border-radius: 12px; width: 92%; max-width: 500px; padding: 1.75rem; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; color: var(--text);">
+  <div class="license-modal-card" style="background: #0d0914; border: 1px solid var(--border); border-radius: 12px; width: 92%; max-width: 500px; padding: 1.75rem; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; color: var(--text);">
     <button type="button" id="btn-close-license" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; line-height: 1;">&times;</button>
     
     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
