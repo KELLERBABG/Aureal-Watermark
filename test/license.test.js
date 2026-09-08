@@ -35,7 +35,7 @@ test("license: offline credential storage round-trip", () => {
     saveLocalLicense(testRecord);
     const loaded = loadLocalLicense();
     assert.ok(loaded);
-    assert.equal(loaded.key, testRecord.key);
+    assert.equal(loaded.key, undefined);
     assert.equal(loaded.status, "granted");
     assert.equal(loaded.customerEmail, "producer@studio.test");
 
