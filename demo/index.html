@@ -12,7 +12,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="../assets/lame.min.js"></script>
   <script>
     if (typeof lamejs === "undefined") {
@@ -54,6 +53,7 @@
     }
 
     #audio-canvas {
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -1302,64 +1302,7 @@ assert.equal(detectedId.valid, true);
     </div>
   </footer>
 
-  <script>
-    const navToggle = document.querySelector('.nav-toggle');
-    const primaryNav = document.getElementById('primary-nav');
-    navToggle?.addEventListener('click', () => {
-      const open = primaryNav.classList.toggle('is-open');
-      navToggle.setAttribute('aria-expanded', String(open));
-    });
-
-    const canvas = document.getElementById('audio-canvas');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const barCount = 48;
-    const group = new THREE.Group();
-    const barGeo = new THREE.BoxGeometry(0.8, 1, 0.8);
-    const bars = [];
-
-    for (let i = 0; i < barCount; i++) {
-      const mat = new THREE.MeshBasicMaterial({
-        color: i % 2 === 0 ? 0x8b5cf6 : 0xec4899,
-        transparent: true,
-        opacity: 0.6
-      });
-      const bar = new THREE.Mesh(barGeo, mat);
-      const angle = (i / barCount) * Math.PI * 2;
-      const radius = 18;
-      bar.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
-      bar.rotation.z = angle + Math.PI / 2;
-      group.add(bar);
-      bars.push(bar);
-    }
-
-    scene.add(group);
-    camera.position.set(0, 0, 55);
-
-    let t = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-      t += 0.05;
-      group.rotation.z += 0.002;
-      bars.forEach((bar, idx) => {
-        const h = 2 + Math.sin(t + idx * 0.4) * 6 + Math.cos(t * 0.5 + idx * 0.2) * 3;
-        bar.scale.set(1, Math.max(0.5, h), 1);
-      });
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+  
 
   <!-- Live In-Browser DSP Engine Integration -->
   <script src="../assets/demo-engine.js"></script>
