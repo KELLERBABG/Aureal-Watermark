@@ -296,6 +296,15 @@
       font-size: 0.85rem;
     }
     @media (max-width: 640px) {
+      .nav-inner { height: auto; padding-top: 0.75rem; padding-bottom: 0.75rem; gap: 0.75rem; flex-wrap: wrap; }
+      .nav-links { width: 100%; justify-content: flex-start; gap: 0.75rem 1rem; flex-wrap: wrap; }
+      .nav-link, .btn-repo, .btn-cta-nav { font-size: 0.76rem; }
+      .btn-cta-nav { margin-left: auto; }
+      .hero { padding-top: 4rem; }
+      .hero h1 { font-size: clamp(2rem, 9vw, 3rem) !important; line-height: 1.08; }
+      .hero .lead { font-size: 0.98rem; }
+      .hero-actions { gap: 0.65rem; }
+      .hero-actions a { width: 100%; justify-content: center; }
       .hero-trust-ribbon {
         border-radius: 12px;
         gap: 0.85rem;
@@ -897,9 +906,9 @@
         <div style="position: absolute; inset: -14px; border-radius: 28px; background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(6, 182, 212, 0.15) 50%, transparent 75%); filter: blur(10px); pointer-events: none;"></div>
         <img src="../assets/icon.svg" alt="Aureal Watermark Logo" width="76" height="76" style="position: relative; border-radius: 18px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(139, 92, 246, 0.25); border: 1px solid rgba(139, 92, 246, 0.3);" />
       </div>
-      <h1 style="max-width: 960px; margin: 0 auto 1.5rem;">Forensic Audio Watermarking &amp; Leak Attribution for Major Studios</h1>
+      <h1 style="max-width: 960px; margin: 0 auto 1.5rem;">Invisible Watermarks for Audio Leak Attribution</h1>
       <p class="lead" style="max-width: 860px;">
-        Aureal Watermark embeds invisible recipient signatures into master recordings, stems, and screeners. Test detection against your own audio transformations in a client-side workflow designed for on-premise use.
+        Embed a unique recipient ID into a master, stem, or screener. Then scan a copy to see whether that ID can be recovered after your workflow changes the audio.
       </p>
 
       <div class="hero-actions">
@@ -930,12 +939,12 @@
         <div class="trust-dot">&bull;</div>
         <div class="trust-badge-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"></path></svg>
-          <span>Exportable Watermarked Copies</span>
+          <span>Unique Recipient IDs</span>
         </div>
         <div class="trust-dot">&bull;</div>
         <div class="trust-badge-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          <span>Cryptographic CRC-16</span>
+          <span>Recoverable Watermarks</span>
         </div>
       </div>
     </section>
@@ -1041,7 +1050,7 @@
               </div>
 
               <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
-                Simulate leak discovery: Scan any audio file or compressed stream to instantly identify the source recipient and verify master integrity.
+                Simulate leak discovery: scan the marked copy and check whether the recipient ID is recovered.
               </p>
 
               <button type="button" class="demo-btn secondary" id="btn-demo-scan" style="width: 100%; justify-content: center;" disabled>
@@ -1051,7 +1060,7 @@
 
               <div id="demo-scan-status" style="margin-top: 1.25rem;">
                 <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--text-dim); font-size: 0.82rem; font-family: var(--font-mono);">
-                  Click "Load Reference Track" above to test watermark embedding and leak extraction...
+                  Generate the built-in test track or select your own audio to try the workflow.
                 </div>
               </div>
             </div>
@@ -1065,21 +1074,21 @@
         <div class="lifecycle-num">01</div>
         <div class="lifecycle-body">
           <h4>Seamless Studio Ingestion</h4>
-          <p>Embed invisible recipient signatures into master recordings, stems, and screeners during export with 0.0 dB perceptible coloration.</p>
+          <p>Embed a unique recipient ID during export, then compare the original and marked copy with the built-in A/B audition.</p>
         </div>
       </div>
       <div class="lifecycle-card">
         <div class="lifecycle-num">02</div>
         <div class="lifecycle-body">
           <h4>Distribution &amp; Attack Resilience</h4>
-          <p>Watermark survives MP3/AAC compression down to 64 kbps, pitch-shifting, YouTube/TikTok transcoding, and vocal-remover phase cancellation.</p>
+          <p>Use the demo to evaluate detection after the transformations that matter to your distribution workflow.</p>
         </div>
       </div>
       <div class="lifecycle-card">
         <div class="lifecycle-num">03</div>
         <div class="lifecycle-body">
           <h4>Deterministic Attribution</h4>
-          <p>Instantly extract the recipient ID and verify CRC-16 cryptographic integrity for unambiguous studio leak attribution.</p>
+          <p>Scan a suspected copy and compare the recovered ID with your distribution record.</p>
         </div>
       </div>
     </section>
@@ -1146,7 +1155,7 @@
           </div>
           <h3>AI Voice Model &amp; Training Set Ingestion Audit</h3>
           <p>
-            Generative AI platforms (voice cloners, synthetic music generators) scrape web audio without attribution. Aureal's cryptographic signature survives voice cloning training pipelines, providing mathematical proof of unauthorized catalog ingestion for DMCA statutory damages.
+            Forensic watermarks can help you audit distributed audio. Validate results against your own files and keep the original master and distribution record as evidence.
           </p>
         </div>
 
@@ -1165,7 +1174,7 @@
     <section class="prose-section" id="psychoacoustics">
       <h2 class="section-title">Human Auditory System (HAS) Masking Curves</h2>
       <p class="section-lead">
-        Traditional audio watermarking (e.g. metadata tags or ultrasonic chirps) is instantly wiped by MP3 compression or frequency low-pass filters. Aureal embeds within the audible spectrum under psychoacoustic thresholds.
+        Metadata can be stripped during export or re-encoding. Aureal explores spread-spectrum embedding under a perceptual threshold; test the result with your own delivery pipeline.
       </p>
 
       <div class="deep-grid">
@@ -1227,7 +1236,7 @@ assert.equal(detectedId.valid, true);
               <td><strong>Lossy Compression Resistance</strong></td>
               <td>Stripped immediately on YouTube/TikTok re-encode</td>
               <td>Database matching only</td>
-              <td><span class="badge-adv">Survives 64kbps MP3 / AAC</span> transcoding</td>
+              <td><span class="badge-adv">Tested in selected scenarios</span> transcoding</td>
             </tr>
             <tr>
               <td><strong>Individual Recipient Tagging</strong></td>
@@ -1245,7 +1254,7 @@ assert.equal(detectedId.valid, true);
               <td><strong>Offline Private Scanning</strong></td>
               <td>Trivial text inspection</td>
               <td>Requires central corporate database</td>
-              <td><span class="badge-adv">100% Offline Sub-second Scanner</span> in browser</td>
+              <td><span class="badge-adv">Client-Side Demo Scanner</span> in browser</td>
             </tr>
           </tbody>
         </table>
@@ -1280,7 +1289,7 @@ assert.equal(detectedId.valid, true);
         <a href="legal/impressum.html">Impressum</a>
         <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank">GitHub</a>
       </div>
-      <p>&copy; 2026 Keller Systems &bull; Imperceptible Acoustic Provenance &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
+      <p>&copy; 2026 Keller Systems &bull; Aureal Watermark v0.2.4 &bull; <a href="mailto:support@kellersystems.dev">Support</a> &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
     </div>
   </footer>
 
