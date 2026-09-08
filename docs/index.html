@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation &mdash; Aureal Watermark API, CLI &amp; Architecture</title>
+  <meta name="description" content="Complete documentation for Aureal Watermark: CLI quickstart, Web Audio browser verification, Node.js API, acoustic psychoacoustic architecture, and commercial licensing.">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="/assets/icon.png">
+  <link rel="shortcut icon" href="/assets/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08040d;
+      --surface: #12091f;
+      --surface-raised: #1c1030;
+      --border: #301a52;
+      --border-glow: #48277b;
+      
+      --purple: #8b5cf6;
+      --violet: #a855f7;
+      --pink: #ec4899;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+
+      --text: #f0f6fc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: radial-gradient(ellipse at 50% 0%, #200d38 0%, var(--bg) 75%);
+      color: var(--text);
+      font-family: var(--font-heading);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 4, 13, 0.88);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+    }
+    .brand-icon-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-glow {
+      position: absolute;
+      inset: -4px;
+      border-radius: 10px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 75%);
+      filter: blur(4px);
+      pointer-events: none;
+    }
+    .brand-titles {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.18;
+    }
+    .brand-product {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .brand-product span.sub-accent {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .brand-company {
+      font-family: var(--font-heading);
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--purple); }
+
+    .btn-repo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1rem;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-repo:hover {
+      border-color: var(--purple);
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
+    }
+
+    .btn-cta-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 1.1rem;
+      background: linear-gradient(135deg, var(--purple) 0%, #6366f1 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-cta-nav:hover {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* Docs Layout */
+    .docs-layout {
+      display: flex;
+      gap: 3.5rem;
+      padding: 3rem 0 6rem;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 270px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 96px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+      padding-right: 1rem;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .sidebar-group {
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.4rem;
+    }
+
+    .sidebar-menu a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.86rem;
+      display: block;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .sidebar-menu a:hover {
+      color: var(--text);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .sidebar-menu a.active {
+      color: var(--purple);
+      background: rgba(139, 92, 246, 0.15);
+      font-weight: 600;
+    }
+
+    /* Main Docs Content */
+    .docs-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .doc-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .doc-header h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(180deg, #ffffff 30%, #e9d5ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .doc-header p.lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+    }
+
+    .doc-section {
+      margin-bottom: 4rem;
+      scroll-margin-top: 100px;
+    }
+
+    .doc-section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.5rem;
+    }
+
+    .doc-section h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 1.8rem 0 0.75rem;
+      color: #e2e8f0;
+    }
+
+    .doc-section p {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.25rem 0 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .code-top {
+      background: var(--surface-raised);
+      padding: 0.55rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .code-lang {
+      text-transform: uppercase;
+      color: var(--purple);
+      font-weight: 600;
+    }
+
+    pre {
+      padding: 1.2rem 1.4rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    p code, td code {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      color: #d8b4fe;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    .btn-copy-code {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-copy-code:hover {
+      color: var(--text);
+      border-color: var(--purple);
+      background: rgba(139, 92, 246, 0.2);
+    }
+
+    /* Tables */
+    .table-box {
+      width: 100%;
+      overflow-x: auto;
+      margin: 1.5rem 0 2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: var(--surface-raised);
+      padding: 0.85rem 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Callouts */
+    .callout {
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--purple);
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-left-width: 4px;
+    }
+
+    .callout.info {
+      border-left-color: var(--cyan);
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.2);
+      border-left-width: 4px;
+    }
+
+    .callout.warn {
+      border-left-color: var(--amber);
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.2);
+      border-left-width: 4px;
+    }
+
+    .callout h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .callout p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+
+    /* Cards Grid */
+    .docs-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .doc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.4rem;
+      transition: all 0.2s;
+    }
+
+    .doc-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-2px);
+    }
+
+    .doc-card h4 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    .doc-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 950px) {
+      .docs-layout {
+        flex-direction: column;
+        gap: 2rem;
+      }
+      .sidebar {
+        width: 100%;
+        position: static;
+        height: auto;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1.5rem;
+      }
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3.5rem 0;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--purple); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <div class="brand-icon-wrap">
+          <div class="brand-glow"></div>
+          <img src="/assets/icon.svg" alt="Aureal Logo" width="32" height="32" style="border-radius:7px; flex-shrink:0;" />
+        </div>
+        <div class="brand-titles">
+          <div class="brand-product">Aureal <span class="sub-accent">Watermark</span></div>
+          <div class="brand-company">Keller Systems</div>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="/studio" class="nav-link">Studio</a>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="/docs" class="nav-link active">Documentation</a>
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="btn-repo">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          Repository
+        </a>
+        <a href="/studio" class="btn-cta-nav">Launch Studio &rarr;</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container docs-layout">
+    <!-- Left Sticky Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-title">Getting Started</div>
+        <ul class="sidebar-menu">
+          <li><a href="#overview">Overview &amp; Philosophy</a></li>
+          <li><a href="#cli-quickstart">CLI Quick Start</a></li>
+          <li><a href="#cli-commands">CLI Options Reference</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-title">Integration &amp; SDKs</div>
+        <ul class="sidebar-menu">
+          <li><a href="#browser-sdk">Web Audio &amp; Browser DSP</a></li>
+          <li><a href="#nodejs-api">Node.js API Reference</a></li>
+          <li><a href="#audio-formats">Supported Formats &amp; PCM</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-title">Acoustic Engineering</div>
+        <ul class="sidebar-menu">
+          <li><a href="#psychoacoustics-theory">HAS Masking Curves</a></li>
+          <li><a href="#dsss-modulation">DSSS &amp; Spread Spectrum</a></li>
+          <li><a href="#codeword-format">Payload &amp; Error Correction</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-title">Commercial &amp; Production</div>
+        <ul class="sidebar-menu">
+          <li><a href="#licensing-sla">Dual Licensing Model</a></li>
+          <li><a href="#airgapped">Air-Gapped &amp; On-Premise</a></li>
+          <li><a href="#benchmarks">Transcode Survival Tests</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="doc-header">
+        <h1>Aureal Watermark Documentation</h1>
+        <p class="lead">
+          Developer reference, algorithmic principles, and enterprise deployment guides for Aureal's psychoacoustic spread-spectrum watermark engine.
+        </p>
+      </div>
+
+      <!-- SECTION: OVERVIEW -->
+      <section class="doc-section" id="overview">
+        <h2>Overview &amp; Architecture</h2>
+        <p>
+          Aureal Watermark is an acoustic spread-spectrum watermark engine written in pure, zero-dependency JavaScript and Node.js. 
+          It embeds an invisible recipient ID into master audio recordings. Use the documented tests to evaluate detection after the transformations in your workflow.
+        </p>
+
+        <div class="docs-cards-grid">
+          <div class="doc-card">
+            <h4>Air-Gapped &amp; Supply-Chain Secure</h4>
+            <p>The core engine has no runtime package dependency. Review the release contents and deployment environment for your own air-gap requirements.</p>
+          </div>
+          <div class="doc-card">
+            <h4>Client-Side Processing (Demo)</h4>
+            <p>Web Audio API implementation allows full in-browser verification and watermark extraction without sending audio bytes to any server.</p>
+          </div>
+          <div class="doc-card">
+            <h4>Cryptographic Matching</h4>
+            <p>Spread across psychoacoustic frequency bins using keyed orthogonal pseudorandom noise sequences and CRC-16 forward error correction.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: CLI QUICKSTART -->
+      <section class="doc-section" id="cli-quickstart">
+        <h2>CLI Quick Start</h2>
+        <p>
+          Get up and running in seconds. You can generate synthetic speech-like material for testing, embed unique tracking IDs, and verify audio files directly from the command line.
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">Bash / Terminal</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code># 1. Synthesize 30 seconds of speech-like audio (no sample file needed)
+node bin/auralwatermark.js gen test.wav --seconds 30 --rate 44100
+
+# 2. Embed a 32-bit recipient tracking ID with your secret salt
+node bin/auralwatermark.js embed test.wav marked.wav --id 1234567 --key my-secret
+
+# 3. Verify watermark with matched filter detection
+node bin/auralwatermark.js detect marked.wav --id 1234567 --key my-secret
+# Outputs: detected: YES / confidence: 1.000 / ber: 0.0% / band hit: high/mid
+
+# 4. Blind Detection: Extract embedded ID without providing expected ID
+node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre>
+        </div>
+
+        <div class="callout info">
+          <h4>Deterministic CLI Exit Codes</h4>
+          <p>Exit code <code>0</code> indicates verified watermark detection; <code>1</code> indicates not detected; <code>2</code> indicates file or format error. Ideal for automated CI/CD and mastering pipelines.</p>
+        </div>
+      </section>
+
+      <!-- SECTION: CLI COMMANDS -->
+      <section class="doc-section" id="cli-commands">
+        <h2>CLI Options Reference</h2>
+
+        <h3><code>gen &lt;output.wav&gt;</code></h3>
+        <p>Generates harmonic speech-like test audio with envelope modulation to benchmark embedding and detection without external audio files.</p>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--seconds &lt;N&gt;</code></td>
+                <td><code>10</code></td>
+                <td>Audio duration in seconds.</td>
+              </tr>
+              <tr>
+                <td><code>--rate &lt;R&gt;</code></td>
+                <td><code>44100</code></td>
+                <td>Sample rate (e.g. <code>44100</code>, <code>48000</code>, <code>96000</code>).</td>
+              </tr>
+              <tr>
+                <td><code>--channels &lt;C&gt;</code></td>
+                <td><code>2</code></td>
+                <td>Channel count (<code>1</code> for mono, <code>2</code> for stereo).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3><code>embed &lt;in.wav&gt; &lt;out.wav&gt; --id &lt;uint32&gt;</code></h3>
+        <p>Embeds an imperceptible watermark into an existing uncompressed PCM audio file.</p>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--id &lt;uint32&gt;</code></td>
+                <td><strong>Required</strong></td>
+                <td>32-bit unsigned tracking identifier (0 to 4,294,967,295).</td>
+              </tr>
+              <tr>
+                <td><code>--key &lt;string&gt;</code></td>
+                <td><code>default</code></td>
+                <td>Secret cryptographic seed salt. Must match at detection time.</td>
+              </tr>
+              <tr>
+                <td><code>--strength &lt;0..1&gt;</code></td>
+                <td><code>0.5</code></td>
+                <td>Embedding amplitude scale. <code>0.5</code> represents strictly below HAS thresholds.</td>
+              </tr>
+              <tr>
+                <td><code>--band &lt;preset&gt;</code></td>
+                <td><code>dual</code></td>
+                <td><code>high</code> (17â€“19.5 kHz, Ultrasonic), <code>mid</code> (8â€“13 kHz), or <code>dual</code> (both bands).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3><code>detect &lt;in.wav&gt; [--id &lt;uint32&gt;] [--key &lt;s&gt;]</code></h3>
+        <p>Scans an audio stream for watermarks. Operates in targeted verification mode (when <code>--id</code> is passed) or blind extraction mode.</p>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--id &lt;uint32&gt;</code></td>
+                <td><em>Omitted</em></td>
+                <td>Expected ID for matched filter test. If omitted, blind extraction recovers any embedded ID.</td>
+              </tr>
+              <tr>
+                <td><code>--key &lt;string&gt;</code></td>
+                <td><code>default</code></td>
+                <td>Secret key corresponding to the embedder.</td>
+              </tr>
+              <tr>
+                <td><code>--band &lt;preset&gt;</code></td>
+                <td><code>auto</code></td>
+                <td>Auto-evaluates available bands and returns the highest confidence match.</td>
+              </tr>
+              <tr>
+                <td><code>--json</code></td>
+                <td><code>false</code></td>
+                <td>Outputs structured JSON with bit-error-rate (BER), confidence scores, and z-statistics.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION: BROWSER SDK -->
+      <section class="doc-section" id="browser-sdk">
+        <h2>Web Audio &amp; Browser DSP</h2>
+        <p>
+          Aureal provides a browser-native verifier (<code>src/browser/aural-watermark-verify.js</code>) that decodes and validates audio directly inside modern web browsers using standard Web Audio APIs.
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">JavaScript (ESM / Browser)</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code>import { verifyAudioBuffer } from "./src/browser/aural-watermark-verify.js";
+
+// 1. Decode any web-supported format (MP3, AAC, FLAC, WAV, OGG)
+const audioContext = new AudioContext();
+const response = await fetch("streamed_audio.mp3");
+const arrayBuffer = await response.arrayBuffer();
+const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+// 2. Perform offline sub-second matched filter analysis
+const result = verifyAudioBuffer(audioBuffer, 1234567, "my-secret-key");
+
+if (result.detected) {
+  console.log(`Watermark Validated! Confidence: ${result.confidence * 100}%`);
+  console.log(`Recovered Payload ID: ${result.recoveredPayloadId}`);
+} else {
+  console.log("No valid watermark detected in audio stream.");
+}</code></pre>
+        </div>
+
+        <div class="callout warn">
+          <h4>Privacy &amp; Air-Gapped Advantage</h4>
+          <p>Because the detection executes inside the client's Web Audio DSP thread, zero megabytes of audio are ever uploaded to cloud endpoints. This satisfies strict enterprise NDA and zero-data-retention compliance policies.</p>
+        </div>
+      </section>
+
+      <!-- SECTION: NODE.JS API -->
+      <section class="doc-section" id="nodejs-api">
+        <h2>Node.js API Reference</h2>
+        <p>
+          Integrate directly into backend audio pipelines, streaming servers, and distribution platforms:
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">JavaScript (Node.js)</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code>import { embedWatermark, detectWatermark } from "aureal-watermark";
+import { readWavFile, writeWavFile } from "aureal-watermark/src/wav.js";
+
+// Read master recording
+const wav = await readWavFile("master.wav");
+const fmt = { sampleRate: wav.sampleRate, channels: wav.channels };
+
+// Embed tracking signature
+const watermarkedPcm = embedWatermark(wav.samples, fmt, {
+  payloadId: 987654,
+  key: process.env.WATERMARK_SALT,
+  strength: 0.5,
+  band: "dual"
+});
+
+// Write tagged WAV file
+await writeWavFile("preview_watermarked.wav", watermarkedPcm, { ...fmt, bitDepth: 16 });
+
+// Verify watermark
+const verification = detectWatermark(watermarkedPcm, fmt, {
+  payloadId: 987654,
+  key: process.env.WATERMARK_SALT,
+  band: "auto"
+});
+
+console.log(verification);
+// { detected: true, confidence: 1.0, ber: 0.0, zScore: 14.2, frameCount: 30 }</code></pre>
+        </div>
+      </section>
+
+      <!-- SECTION: PSYCHOACOUSTIC THEORY -->
+      <section class="doc-section" id="psychoacoustics-theory">
+        <h2>Human Auditory System (HAS) Masking</h2>
+        <p>
+          Conventional audio watermarking methods rely on simple metadata tags or naive ultrasonic chirps (> 20 kHz). 
+          However, consumer audio encoders (MP3, AAC, Opus) immediately filter out high frequencies and strip ID3 headers during transcoding.
+        </p>
+        <p>
+          Aureal solves this by embedding directly into the <strong>audible frequency spectrum</strong>, strictly constrained below the biological inaudibility envelope of human hearing:
+        </p>
+
+        <div class="callout">
+          <h4>Frequency &amp; Temporal Masking</h4>
+          <p>When a loud musical tone or transient sound occurs (such as a kick drum or vocal formant), adjacent frequency bins within the critical Bark bandwidth cannot be perceived by the human ear. Aureal modulates the watermark energy strictly beneath this dynamic psychoacoustic threshold envelope.</p>
+        </div>
+      </section>
+
+      <!-- SECTION: DSSS MODULATION -->
+      <section class="doc-section" id="dsss-modulation">
+        <h2>Direct Sequence Spread Spectrum (DSSS)</h2>
+        <p>
+          Rather than placing watermark energy in a few concentrated frequencies, Aureal uses an orthogonal pseudo-random noise sequence to spread the 32-bit payload across thousands of frequency bins:
+        </p>
+        <ul style="padding-left: 1.5rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          <li style="margin-bottom: 0.5rem;">The energy per frequency bin is tens of decibels lower than ambient acoustic noise.</li>
+          <li style="margin-bottom: 0.5rem;">Lossy audio compression algorithms (MP3, AAC, YouTube, TikTok) treat the watermark as natural harmonic texture and preserve it during encoding.</li>
+          <li style="margin-bottom: 0.5rem;">A decoder with the matching key is required to recover the embedded payload in the current design.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION: LICENSING -->
+      <section class="doc-section" id="licensing-sla">
+        <h2>Commercial Licensing &amp; Enterprise SLAs</h2>
+        <p>
+          Aureal Watermark offers commercial production licenses and custom enterprise deployment models:
+        </p>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>License Type</th>
+                <th>Price</th>
+                <th>Target Use Case</th>
+                <th>Telemetry / Air-Gap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Noncommercial / Academic</strong></td>
+                <td>Free ($0)</td>
+                <td>Evaluation, open-source research, non-monetized music production.</td>
+                <td>Client-side demo; hosting requests may still generate standard server logs</td>
+              </tr>
+              <tr>
+                <td><strong>Commercial Indie Label</strong></td>
+                <td>$299 / yr</td>
+                <td>Independent record labels, promo distribution pools, podcast networks.</td>
+                <td>Self-Hosted / Unlimited Streams</td>
+              </tr>
+              <tr>
+                <td><strong>Enterprise Platform SLA</strong></td>
+                <td>Custom</td>
+                <td>AI voice cloning training data audit, major streaming services, high-throughput DSP.</td>
+                <td>Air-Gapped / Custom Bands / SLAs</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          For complete licensing terms, procurement details, and enterprise SLAs, visit the <a href="/pricing" style="color: var(--purple); font-weight:600;">Commercial Licensing &amp; Pricing Page &rarr;</a>
+        </p>
+      </section>
+
+      <!-- SECTION: BENCHMARKS -->
+      <section class="doc-section" id="benchmarks">
+        <h2>Transcode Survival Tests</h2>
+        <p>
+          Watermark recovery depends on the source audio, carrier band, encoder settings, and any transformations applied to the copy. Use the Studio verifier to evaluate your own workflow rather than treating a single result as a universal guarantee.
+        </p>
+        <div class="callout">
+          <h4>Evaluate your delivery chain</h4>
+          <p>Export a marked test track, pass it through the codecs or platforms used by your team, and scan the resulting copy. Record the format, bitrate, sample rate, carrier band, detection confidence, and bit error rate for each run.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <div class="container" style="display:flex; flex-direction:column; gap:1rem; align-items:center;">
+      <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; font-size:0.85rem;">
+        <a href="/">Home</a>
+        <a href="/studio">Studio</a>
+        <a href="/pricing">Pricing &amp; Licenses</a>
+        <a href="/docs">Documentation</a>
+        <a href="//legal/terms.html">Terms of Service</a>
+        <a href="//legal/privacy.html">Privacy Policy</a>
+        <a href="//legal/impressum.html">Impressum</a>
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank">GitHub</a>
+      </div>
+      <p>&copy; 2026 Keller Systems &bull; Imperceptible Acoustic Provenance &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Copy code helper
+    function copyCode(btn) {
+      const codeWrapper = btn.closest('.code-wrapper');
+      const code = codeWrapper ? codeWrapper.querySelector('pre code')?.innerText : '';
+      if (!code) return;
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerText;
+        btn.innerText = 'COPIED!';
+        setTimeout(() => { btn.innerText = orig; }, 2000);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+      });
+    }
+
+    // Highlight active sidebar item on scroll
+    const sections = document.querySelectorAll('.doc-section');
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 140;
+        if (pageYOffset >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
