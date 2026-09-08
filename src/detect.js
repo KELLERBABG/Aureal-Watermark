@@ -124,7 +124,9 @@ function findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band) {
   }
 
   const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
-  if (envNorm > 0.02) {
+  const isMid = band && band.lowHz < 14000;
+  const minEnv = isMid ? 0.005 : 0.015;
+  if (envNorm > minEnv) {
     const offsets = [];
     for (let delta = -2; delta <= 2; delta++) {
       const candidate = fineIdx + delta;

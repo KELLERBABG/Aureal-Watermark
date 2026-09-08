@@ -49,12 +49,12 @@ export function hannWindow(n) {
   return w;
 }
 
-export const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
+export const DEFAULT_BAND = Object.freeze({ lowHz: 17000, centerHz: 18250, highHz: 19500 });
 export const BITS_PER_CODEWORD = 48;
 export const CHIPS_PER_SLOT = 24;
 
 export const BAND_PRESETS = Object.freeze({
-  high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+  high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
   mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
 });
 

@@ -137,6 +137,9 @@ function writeEmbeddedIcons(targetDir) {
           copyFileSync(join(c, "favicon.svg"), join(assetsDir, "favicon.svg"));
           copyFileSync(join(c, "favicon.svg"), join(assetsDir, "logo.svg"));
         }
+        if (existsSync(join(c, "lame.min.js"))) {
+          copyFileSync(join(c, "lame.min.js"), join(assetsDir, "lame.min.js"));
+        }
         break;
       } catch {}
     }

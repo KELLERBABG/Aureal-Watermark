@@ -7,9 +7,9 @@ import {
 import { packCodeword } from "./payload.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
-const MAX_AMPLITUDE = 0.024;
+const MAX_AMPLITUDE = 0.0075;
 const MULTI_BAND_SCALE = 0.7;
-const MID_BAND_PERCEPTUAL_WEIGHT = 0.65;
+const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
 
 export function embedWatermark(pcm, fmt, opts) {
   if (!opts || !Number.isInteger(opts.payloadId)) {
@@ -65,10 +65,10 @@ export function embedWatermark(pcm, fmt, opts) {
         }
         const rms = Math.sqrt(sumSq / slotLen);
         // Adaptive proportional masking:
-        // Mute in near-silence (<= -60 dBFS) to preserve clean pauses/breakdowns.
+        // Mute in near-silence (<= -54 dBFS) to preserve clean pauses/breakdowns.
         // In audible sections, scale watermark proportionally to local host RMS,
-        // keeping watermark >= 28-32 dB below the music, capped at 1.0.
-        const mask = rms <= 0.001 ? 0.0 : Math.min(1.0, (rms - 0.001) / 0.035);
+        // keeping watermark >= 32-36 dB below the music, capped at 1.0.
+        const mask = rms <= 0.002 ? 0.0 : Math.min(1.0, (rms - 0.002) / 0.08);
         if (mask > 0) {
           const wmSlotBase = b * slotLen;
           let o = slotOffset;
@@ -142,8 +142,9 @@ function synthesizeWatermarkFrame({ key, sampleRate, geometry, bands, codeword, 
       }
     }
     const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+    const chirpScale = isMid ? 0.25 : 0.75;
     for (let n = 0; n < syncLen; n++) {
-      wm[n] += bandAmp * 0.8 * chirpQ[n];
+      wm[n] += bandAmp * chirpScale * chirpQ[n];
     }
   }
   return wm;

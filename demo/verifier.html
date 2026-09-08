@@ -625,7 +625,7 @@
   const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
 
   const BAND_PRESETS = Object.freeze({
-    high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+    high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
     mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
   });
 
@@ -861,7 +861,9 @@
     }
 
     const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
-    if (envNorm > 0.02) {
+    const isMid = band && band.lowHz < 14000;
+    const minEnv = isMid ? 0.005 : 0.015;
+    if (envNorm > minEnv) {
       const offsets = [];
       for (let delta = -2; delta <= 2; delta++) {
         const candidate = fineIdx + delta;
@@ -1204,12 +1206,12 @@
           const CRC_BITS = 16;
           const Z_FLOOR = 3.0;
           const Z_FULL = 30.0;
-          const MAX_AMPLITUDE = 0.024;
+          const MAX_AMPLITUDE = 0.0075;
           const MULTI_BAND_SCALE = 0.7;
-          const MID_BAND_PERCEPTUAL_WEIGHT = 0.65;
+          const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
           const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
           const BAND_PRESETS = Object.freeze({
-            high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+            high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
             mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
           });
 

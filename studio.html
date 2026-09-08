@@ -12,6 +12,7 @@
   <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
   <link rel="shortcut icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <script src="assets/lame.min.js"></script>
 <style>
   :root {
     --bg: #13151c;
@@ -614,7 +615,23 @@
           <span id="embed-badge-id" style="font-family: ui-monospace, monospace;">ID #—</span>
         </div>
         <audio id="embed-output-player" controls style="display: block; margin-bottom: 0.75rem;"></audio>
-        <button type="button" class="btn" id="btn-download">Download Watermarked WAV</button>
+        
+        <div style="margin-bottom: 0.75rem; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem;">
+          <label for="export-format-select" style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem; font-weight: 600; letter-spacing: 0.02em;">
+            DOWNLOAD FORMAT
+          </label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="export-format-select" style="flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 0.55rem 0.75rem; font-size: 0.83rem; font-family: inherit; cursor: pointer;">
+              <option value="wav-16" selected>WAV — 16-bit PCM (Lossless CD Master)</option>
+              <option value="wav-24">WAV — 24-bit PCM (High-Res Studio Master)</option>
+              <option value="mp3-320">MP3 — 320 kbps (Studio Quality / Highest)</option>
+              <option value="mp3-192">MP3 — 192 kbps (Streaming / Standard)</option>
+              <option value="mp3-128">MP3 — 128 kbps (Compact Web)</option>
+            </select>
+            <button type="button" class="btn" id="btn-download" style="white-space: nowrap; padding: 0.55rem 1.25rem;">Download</button>
+          </div>
+        </div>
+
         <button type="button" class="btn btn-subtle" id="btn-verify-now">Scan in Verifier &rarr;</button>
       </div>
     </div>
@@ -648,13 +665,13 @@
   const CRC_BITS = 16;
   const Z_FLOOR = 3.0;
   const Z_FULL = 30.0;
-  const MAX_AMPLITUDE = 0.024;
+  const MAX_AMPLITUDE = 0.0075;
   const MULTI_BAND_SCALE = 0.7;
-  const MID_BAND_PERCEPTUAL_WEIGHT = 0.65;
+  const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
   const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
 
   const BAND_PRESETS = Object.freeze({
-    high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+    high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
     mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
   });
 
@@ -890,7 +907,9 @@
     }
 
     const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
-    if (envNorm > 0.02) {
+    const isMid = band && band.lowHz < 14000;
+    const minEnv = isMid ? 0.005 : 0.015;
+    if (envNorm > minEnv) {
       const offsets = [];
       for (let delta = -2; delta <= 2; delta++) {
         const candidate = fineIdx + delta;
@@ -1100,8 +1119,9 @@
 
       // Embed deterministic stream synchronization preamble at frame boundary
       const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+      const chirpScale = isMid ? 0.25 : 0.75;
       for (let n = 0; n < syncLen; n++) {
-        wm[n] += bandAmp * 0.8 * chirpQ[n];
+        wm[n] += bandAmp * chirpScale * chirpQ[n];
       }
     }
 
@@ -1119,7 +1139,7 @@
             sumSq += s * s;
           }
           const rms = Math.sqrt(sumSq / slotLen);
-          const mask = rms <= 0.001 ? 0.0 : Math.min(1.0, (rms - 0.001) / 0.035);
+          const mask = rms <= 0.002 ? 0.0 : Math.min(1.0, (rms - 0.002) / 0.08);
           if (mask > 0) {
             const wmSlotBase = b * slotLen;
             let o = slotOffset;
@@ -1191,6 +1211,41 @@
     return new Blob([arr], { type: "audio/wav" });
   }
 
+  function encodeMp3Blob(samples, sampleRate, channels, kbps = 320) {
+    const lame = typeof lamejs !== "undefined" ? lamejs : (window.lamejs || null);
+    if (!lame || !lame.Mp3Encoder) {
+      throw new Error("MP3 encoder (lamejs) is not available. Please choose WAV format.");
+    }
+    const enc = new lame.Mp3Encoder(channels, sampleRate, kbps);
+    const sampleCount = Math.floor(samples.length / channels);
+    const left = new Int16Array(sampleCount);
+    const right = channels >= 2 ? new Int16Array(sampleCount) : left;
+
+    if (channels >= 2) {
+      for (let i = 0; i < sampleCount; i++) {
+        left[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i * 2] * 32767)));
+        right[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i * 2 + 1] * 32767)));
+      }
+    } else {
+      for (let i = 0; i < sampleCount; i++) {
+        left[i] = Math.max(-32768, Math.min(32767, Math.round(samples[i] * 32767)));
+      }
+    }
+
+    const chunks = [];
+    const chunkSize = 1152;
+    for (let i = 0; i < sampleCount; i += chunkSize) {
+      const l = left.subarray(i, i + chunkSize);
+      const r = channels >= 2 ? right.subarray(i, i + chunkSize) : l;
+      const buf = channels >= 2 ? enc.encodeBuffer(l, r) : enc.encodeBuffer(l);
+      if (buf && buf.length > 0) chunks.push(buf);
+    }
+    const end = enc.flush();
+    if (end && end.length > 0) chunks.push(end);
+
+    return new Blob(chunks, { type: "audio/mp3" });
+  }
+
   // --- DEDICATED WEB WORKER ENGINE (ZERO UI BLOCKING) ---
   let dspWorkerInstance = null;
   let dspReqCounter = 0;
@@ -1233,12 +1288,12 @@
           const CRC_BITS = 16;
           const Z_FLOOR = 3.0;
           const Z_FULL = 30.0;
-          const MAX_AMPLITUDE = 0.024;
+          const MAX_AMPLITUDE = 0.0075;
           const MULTI_BAND_SCALE = 0.7;
-          const MID_BAND_PERCEPTUAL_WEIGHT = 0.65;
+          const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
           const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
           const BAND_PRESETS = Object.freeze({
-            high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+            high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
             mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
           });
 
@@ -1251,7 +1306,7 @@
               } else if (action === "embed") {
                 const watermarked = embedWatermarkCore(pcm, fmt, opts);
                 const wavArr = encodeWavArray(watermarked, fmt.sampleRate, fmt.channels, 16);
-                self.postMessage({ id, success: true, wavArr }, [wavArr.buffer]);
+                self.postMessage({ id, success: true, wavArr, watermarked }, [wavArr.buffer, watermarked.buffer]);
               }
             } catch (err) {
               self.postMessage({ id, success: false, error: err.message || String(err) });
@@ -1322,11 +1377,17 @@
             dspPendingReqs.delete(id);
             reject(new Error("Worker timed out"));
           }, 8000);
+          const pcmCopy = new Float32Array(pcm);
           dspPendingReqs.set(id, {
-            resolve: (val) => { clearTimeout(timer); resolve(new Blob([val.wavArr], { type: "audio/wav" })); },
+            resolve: (val) => {
+              clearTimeout(timer);
+              resolve({
+                blob: new Blob([val.wavArr], { type: "audio/wav" }),
+                watermarked: val.watermarked || pcmCopy,
+              });
+            },
             reject: (err) => { clearTimeout(timer); reject(err); }
           });
-          const pcmCopy = new Float32Array(pcm);
           worker.postMessage({ id, action: "embed", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
         });
       } catch (workerErr) {
@@ -1336,7 +1397,10 @@
       }
     }
     const watermarked = embedWatermarkCore(pcm, fmt, opts);
-    return encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16);
+    return {
+      blob: encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16),
+      watermarked,
+    };
   }
 
   function parseWav(arrayBuffer) {
@@ -1633,6 +1697,7 @@
   const embedKeyInput = document.getElementById("embed-key");
   const embedBandSelect = document.getElementById("embed-band");
   const embedOutputPlayer = document.getElementById("embed-output-player");
+  const exportFormatSelect = document.getElementById("export-format-select");
   const btnDownload = document.getElementById("btn-download");
   const btnVerifyNow = document.getElementById("btn-verify-now");
   const btnRandId = document.getElementById("btn-rand-id");
@@ -1642,6 +1707,10 @@
 
   let embedBuffer = null;
   let lastWavBlob = null;
+  let lastWatermarkedPcm = null;
+  let lastSampleRate = 44100;
+  let lastChannels = 2;
+  let lastBaseFileName = "audio";
   let lastWavFileName = "watermarked.wav";
 
   function rollSecureId() {
@@ -1673,7 +1742,8 @@
       <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); color: #7dd3fc; padding: 0.55rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
         <span>🔍 Scanning audio for existing watermarks...</span>
       </div>`;
-    lastWavFileName = file.name.replace(/\.[^/.]+$/, "") + "_watermarked.wav";
+    lastBaseFileName = file.name.replace(/\.[^/.]+$/, "");
+    lastWavFileName = `${lastBaseFileName}_watermarked.wav`;
     embedBtn.disabled = true;
     embedBtn.textContent = "Analyzing audio...";
 
@@ -1734,12 +1804,17 @@
 
     try {
       const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
-      lastWavBlob = await asyncEmbed(pcm, { sampleRate, channels }, {
+      const resEmbed = await asyncEmbed(pcm, { sampleRate, channels }, {
         payloadId,
         key,
         band,
         strength: 0.5,
       });
+
+      lastWavBlob = resEmbed.blob;
+      lastWatermarkedPcm = resEmbed.watermarked;
+      lastSampleRate = sampleRate;
+      lastChannels = channels;
 
       const url = URL.createObjectURL(lastWavBlob);
       embedOutputPlayer.src = url;
@@ -1753,14 +1828,50 @@
     }
   });
 
-  btnDownload.addEventListener("click", () => {
-    if (!lastWavBlob) return;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(lastWavBlob);
-    a.download = lastWavFileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  btnDownload.addEventListener("click", async () => {
+    const fmt = exportFormatSelect ? exportFormatSelect.value : "wav-16";
+    let downloadBlob = null;
+    let outFileName = `${lastBaseFileName}_watermarked.wav`;
+
+    if (!lastWatermarkedPcm && lastWavBlob) {
+      downloadBlob = lastWavBlob;
+    } else if (lastWatermarkedPcm) {
+      if (fmt === "wav-16") {
+        const arr = encodeWavArray(lastWatermarkedPcm, lastSampleRate, lastChannels, 16);
+        downloadBlob = new Blob([arr], { type: "audio/wav" });
+        outFileName = `${lastBaseFileName}_watermarked.wav`;
+      } else if (fmt === "wav-24") {
+        const arr = encodeWavArray(lastWatermarkedPcm, lastSampleRate, lastChannels, 24);
+        downloadBlob = new Blob([arr], { type: "audio/wav" });
+        outFileName = `${lastBaseFileName}_watermarked_24bit.wav`;
+      } else if (fmt.startsWith("mp3-")) {
+        const kbps = parseInt(fmt.split("-")[1], 10) || 320;
+        const origText = btnDownload.textContent;
+        btnDownload.disabled = true;
+        btnDownload.textContent = `Encoding ${kbps}k MP3...`;
+        try {
+          await new Promise(r => setTimeout(r, 20));
+          downloadBlob = encodeMp3Blob(lastWatermarkedPcm, lastSampleRate, lastChannels, kbps);
+          outFileName = kbps === 320 ? `${lastBaseFileName}_watermarked.mp3` : `${lastBaseFileName}_watermarked_${kbps}k.mp3`;
+        } catch (e) {
+          alert("MP3 export error: " + (e.message || e));
+          btnDownload.disabled = false;
+          btnDownload.textContent = origText;
+          return;
+        }
+        btnDownload.disabled = false;
+        btnDownload.textContent = origText;
+      }
+    }
+
+    if (downloadBlob) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(downloadBlob);
+      a.download = outFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   });
 
   btnVerifyNow.addEventListener("click", async () => {

@@ -8,14 +8,14 @@
   const CRC_BITS = 16;
   const Z_FLOOR = 3.0;
   const Z_FULL = 30.0;
-  const MAX_AMPLITUDE = 0.024;
+  const MAX_AMPLITUDE = 0.0075;
   const MULTI_BAND_SCALE = 0.7;
-  const MID_BAND_PERCEPTUAL_WEIGHT = 0.65;
+  const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
   const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
   const DEFAULT_KEY = "aureal-provenance-salt-2026";
 
   const BAND_PRESETS = Object.freeze({
-    high: Object.freeze({ lowHz: 16500, highHz: 19500 }),
+    high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
     mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
   });
   const DEFAULT_BAND = BAND_PRESETS.high;
@@ -245,7 +245,9 @@
     }
 
     const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
-    if (envNorm > 0.001) {
+    const isMid = band && band.lowHz < 14000;
+    const minEnv = isMid ? 0.005 : 0.015;
+    if (envNorm > minEnv) {
       const offsets = [];
       for (let delta = -2; delta <= 2; delta++) {
         const candidate = fineIdx + delta;
@@ -439,8 +441,9 @@
       }
 
       const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
+      const chirpScale = isMid ? 0.25 : 0.75;
       for (let n = 0; n < syncLen; n++) {
-        wm[n] += bandAmp * 0.35 * chirpQ[n];
+        wm[n] += bandAmp * chirpScale * chirpQ[n];
       }
     }
 
@@ -458,7 +461,7 @@
             sumSq += s * s;
           }
           const rms = Math.sqrt(sumSq / slotLen);
-          const mask = rms <= 0.001 ? 0.0 : Math.min(1.0, (rms - 0.001) / 0.035);
+          const mask = rms <= 0.002 ? 0.0 : Math.min(1.0, (rms - 0.002) / 0.08);
           if (mask > 0) {
             const wmSlotBase = b * slotLen;
             let o = slotOffset;
