@@ -34,8 +34,8 @@ wavCode = wavCode.replace(/const\s+{\s*readFile\s*}\s*=\s*await import\("node:fs
 wavCode = wavCode.replace(/const\s+{\s*writeFile\s*}\s*=\s*await import\("node:fs\/promises"\);/g, "const { writeFile } = fsp;");
 
 // Embed complete HTML inside getStudioHtml() and getPricingHtml()
-const rawStudioHtml = JSON.stringify(readFileSync("studio.html", "utf8"));
-const rawPricingHtml = JSON.stringify(readFileSync("pricing.html", "utf8"));
+const rawStudioHtml = JSON.stringify(readFileSync("demo/studio.html", "utf8"));
+const rawPricingHtml = JSON.stringify(readFileSync("demo/pricing.html", "utf8"));
 const rawIconIcoBase64 = JSON.stringify(readFileSync("assets/icon.ico").toString("base64"));
 const rawIconPngBase64 = JSON.stringify(readFileSync("assets/icon.png").toString("base64"));
 const rawIconSvgBase64 = JSON.stringify(readFileSync("assets/icon.svg").toString("base64"));

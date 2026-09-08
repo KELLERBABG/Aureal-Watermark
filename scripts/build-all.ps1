@@ -35,10 +35,10 @@ if (Test-Path $tempZipDir) { Remove-Item $tempZipDir -Recurse -Force }
 New-Item -ItemType Directory -Path $tempZipDir | Out-Null
 
 Copy-Item "dist/aureal-watermark.cjs" -Destination (Join-Path $tempZipDir "aureal-watermark.cjs")
-Copy-Item "studio.html" -Destination (Join-Path $tempZipDir "studio.html")
-Copy-Item "verifier.html" -Destination (Join-Path $tempZipDir "verifier.html")
-Copy-Item "pricing.html" -Destination (Join-Path $tempZipDir "pricing.html")
-Copy-Item "docs.html" -Destination (Join-Path $tempZipDir "docs.html")
+Copy-Item "demo/studio.html" -Destination (Join-Path $tempZipDir "studio.html")
+Copy-Item "demo/verifier.html" -Destination (Join-Path $tempZipDir "verifier.html")
+Copy-Item "demo/pricing.html" -Destination (Join-Path $tempZipDir "pricing.html")
+Copy-Item "demo/docs.html" -Destination (Join-Path $tempZipDir "docs.html")
 Copy-Item "index.html" -Destination (Join-Path $tempZipDir "index.html")
 Copy-Item "README.md" -Destination (Join-Path $tempZipDir "README.md")
 Copy-Item "LICENSE.md" -Destination (Join-Path $tempZipDir "LICENSE.md")
