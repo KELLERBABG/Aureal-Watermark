@@ -14,6 +14,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 import { getLicenseStatus, activatePolarKey, clearLocalLicense, loadLocalLicense } from "../src/license.js";
+import { generateForensicReport, formatForensicReportText } from "../src/report.js";
 
 const HELP = `Aureal Watermark v0.2.4 — Audio watermarking for anti-theft and AI detection
 
@@ -30,6 +31,7 @@ Command Line Interface:
 
   auralwatermark detect in.wav [--id <uint32>] [--key secret]
       [--band auto|high|mid|dual|lowHz:highHz] [--json]
+      [--report proof.json] [--report-txt proof.txt]
       Verify an expected id or run blind detection + CRC decode.
 
   auralwatermark license [key]      View or activate Polar.sh commercial license
@@ -427,6 +429,33 @@ async function main() {
         }
         console.log(`  time:     ${ms} ms`);
       }
+
+      if (flags.report || flags["report-txt"]) {
+        const rawBytes = readFileSync(inp);
+        const report = generateForensicReport({
+          detectionResult: res,
+          audioBytes: rawBytes,
+          audioMetadata: {
+            durationSec: wav.durationSec,
+            sampleRate: wav.sampleRate,
+            channels: wav.channels,
+            format: wav.format
+          },
+          filePath: inp,
+          expectedPayloadId: expectedId,
+          secret: key
+        });
+
+        if (flags.report) {
+          writeFileSync(String(flags.report), JSON.stringify(report, null, 2), "utf8");
+          if (!flags.json) console.log(`  report:   forensic JSON proof saved to ${flags.report}`);
+        }
+        if (flags["report-txt"]) {
+          writeFileSync(String(flags["report-txt"]), formatForensicReportText(report), "utf8");
+          if (!flags.json) console.log(`  cert:     forensic text certificate saved to ${flags["report-txt"]}`);
+        }
+      }
+
       process.exitCode = res.detected ? 0 : 1;
       return;
     } finally {

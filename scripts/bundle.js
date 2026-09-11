@@ -26,6 +26,7 @@ let detectCode = stripImportsAndExports(readFileSync("src/detect.js", "utf8"));
 let wavCode = stripImportsAndExports(readFileSync("src/wav.js", "utf8"));
 let synthCode = stripImportsAndExports(readFileSync("src/synth.js", "utf8"));
 let licenseCode = stripImportsAndExports(readFileSync("src/license.js", "utf8"));
+let reportCode = stripImportsAndExports(readFileSync("src/report.js", "utf8"));
 let cliCode = stripImportsAndExports(readFileSync("bin/auralwatermark.js", "utf8"));
 
 embedCode = embedCode.replace(/const DEFAULT_KEY = [^;]+;/g, "");
@@ -81,6 +82,7 @@ const os = require("node:os");
 const { spawn, exec, execSync } = require("node:child_process");
 const { createServer } = require("node:http");
 const { join, dirname } = require("node:path");
+const { createHash, createHmac } = require("node:crypto");
 
 const { argv, exit, stdin, stdout } = process;
 const { readFile, writeFile } = fsp;
@@ -104,6 +106,8 @@ ${wavCode}
 ${synthCode}
 
 ${licenseCode}
+
+${reportCode}
 
 ${cliCode}
 `;

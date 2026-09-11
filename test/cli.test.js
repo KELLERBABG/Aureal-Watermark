@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, existsSync, statSync } from "node:fs";
+import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -98,5 +98,42 @@ test("CLI embeds to and detects from MP3 when ffmpeg is available", (t) => {
   const detectRes = run(["detect", mp3Out, "--id", "8675309", "--key", "demo-secret"]);
   assert.equal(detectRes.status, 0, detectRes.stderr || detectRes.stdout);
   assert.match(detectRes.stdout, /detected:\s*YES/);
+});
+
+test("CLI exports forensic JSON proof and text certificate via --report and --report-txt", () => {
+  const markedWav = join(work, "report_test_marked.wav");
+  const reportJson = join(work, "forensic_proof.json");
+  const reportTxt = join(work, "forensic_cert.txt");
+
+  const embedRes = run(["embed", join(work, "tone.wav"), markedWav, "--id", "554433", "--key", "audit-key"]);
+  assert.equal(embedRes.status, 0, embedRes.stderr);
+
+  const detectRes = run([
+    "detect",
+    markedWav,
+    "--id",
+    "554433",
+    "--key",
+    "audit-key",
+    "--report",
+    reportJson,
+    "--report-txt",
+    reportTxt
+  ]);
+
+  assert.equal(detectRes.status, 0, detectRes.stderr || detectRes.stdout);
+  assert.ok(existsSync(reportJson), "report JSON file should exist");
+  assert.ok(existsSync(reportTxt), "report TXT certificate should exist");
+
+  const parsedReport = JSON.parse(readFileSync(reportJson, "utf8"));
+  assert.equal(parsedReport.verification.status, "VERIFIED_AUTHENTIC");
+  assert.equal(parsedReport.verification.recoveredPayloadId, 554433);
+  assert.equal(parsedReport.verification.expectedPayloadId, 554433);
+  assert.ok(parsedReport.targetFile.hashes.sha256.length === 64);
+  assert.ok(parsedReport.signature.seal.length === 64);
+
+  const certContent = readFileSync(reportTxt, "utf8");
+  assert.match(certContent, /FORENSIC PROOF CERTIFICATE/);
+  assert.match(certContent, /Verdict\s*:\s*\[AUTHENTIC \/ MATCH\]/);
 });
 

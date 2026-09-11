@@ -253,3 +253,77 @@ export function getLicenseStatus(): PolarLicenseStatus;
  * Obfuscates sensitive characters of a license key string for display.
  */
 export function maskKey(key: string): string;
+
+export interface ForensicReportOptions {
+  detectionResult: DetectionResult;
+  audioBytes: Buffer | Uint8Array;
+  audioMetadata?: Partial<AudioFormat & { durationSec: number; format: string }>;
+  filePath?: string;
+  expectedPayloadId?: number | null;
+  secret?: string;
+}
+
+export interface ForensicReport {
+  schemaVersion: string;
+  generatedAt: string;
+  engine: {
+    name: string;
+    version: string;
+  };
+  targetFile: {
+    path: string;
+    sizeBytes: number;
+    hashes: {
+      sha256: string;
+      sha512: string;
+    };
+  };
+  audioProperties: {
+    durationSec: number | null;
+    sampleRate: number | null;
+    channels: number | null;
+    format: string;
+  };
+  verification: {
+    status: "VERIFIED_AUTHENTIC" | "PAYLOAD_MISMATCH" | "DETECTION_UNCERTAIN" | "NO_WATERMARK_FOUND";
+    detected: boolean;
+    recoveredPayloadId: number | null;
+    expectedPayloadId: number | null;
+    payloadMatch: boolean | null;
+    confidence: number;
+    ber: number;
+    crcOk: boolean;
+  };
+  forensicMetrics: {
+    ebN0Db: number | null;
+    sqnrDb: number | null;
+    zScore: number | null;
+    repsDetected: number | null;
+    carrierBand: { lowHz: number; highHz: number; centerHz: number } | null;
+    syncMethod: string;
+    resyncShiftSamples: number;
+  };
+  legalAttribution: {
+    intendedUse: string;
+    methodology: string;
+  };
+  signature: {
+    algorithm: string;
+    seal: string;
+    verified: boolean;
+  };
+}
+
+export const REPORT_SCHEMA_VERSION: string;
+export const ENGINE_NAME: string;
+export const ENGINE_VERSION: string;
+
+/**
+ * Generates a cryptographically sealed, structured forensic audit report.
+ */
+export function generateForensicReport(options: ForensicReportOptions): ForensicReport;
+
+/**
+ * Formats a forensic audit report into a printable ASCII certificate.
+ */
+export function formatForensicReportText(report: ForensicReport): string;

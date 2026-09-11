@@ -16,3 +16,10 @@ export {
   maskKey,
   POLAR_ORGANIZATION_ID
 } from "./license.js";
+export {
+  generateForensicReport,
+  formatForensicReportText,
+  REPORT_SCHEMA_VERSION,
+  ENGINE_NAME,
+  ENGINE_VERSION
+} from "./report.js";
