@@ -94,68 +94,122 @@ No installation or technical setup needed:
 
 ### Option 3: Standalone Universal Script (Cross-Platform CLI)
 
-A single, zero-dependency file that runs on **Windows, macOS, and Linux** using standard Node.js (&ge; 18):
+A single, zero-dependency file that runs on **Windows, macOS, and Linux** using standard Node.js (&ge; 18). Supports direct input and output of **MP3, FLAC, AAC, M4A, OGG, AIFF, and WAV** with automatic FFmpeg fallback:
 
 1. Download **[`aureal-watermark.cjs`](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest/download/aureal-watermark.cjs)** from the Releases page.
 2. Run from your terminal or command prompt:
 
 ```bash
-# 1. Embed an ID number into a song
-node aureal-watermark.cjs embed master.wav protected.wav --id 883921
+# 1. Embed an ID directly into an MP3, FLAC, or WAV
+node aureal-watermark.cjs embed master.wav protected.mp3 --id 883921
 
 # 2. Check an audio file to see if it contains your ID
-node aureal-watermark.cjs detect protected.wav --id 883921
+node aureal-watermark.cjs detect protected.mp3 --id 883921
 
 # 3. Blind scan (automatically extracts any embedded ID from an unknown file)
-node aureal-watermark.cjs detect mystery_audio.wav --json
+node aureal-watermark.cjs detect mystery_audio.mp3 --json
 
-# 4. Launch your local offline Desktop Studio
+# 4. Generate a cryptographically sealed forensic audit proof
+node aureal-watermark.cjs detect leak.mp3 --id 883921 --report proof.json --report-txt cert.txt
+
+# 5. Launch your local offline Desktop Studio
 node aureal-watermark.cjs gui
 ```
 
 ---
 
-### Option 3: Promo Leak Batch Distribution & Forensic Audit (For Labels & Artists)
+### Option 4: Air-Gapped Docker REST Microservice (For Cloud & Speech Pipelines)
 
-#### 1. Generate Tagged Copies for Reviewers & DJs
-Generate uniquely watermarked master copies for multiple recipients alongside a cryptographic `recipients.json` mapping manifest in a single command:
-
-```bash
-node scripts/batch_distribute.js album_master.wav --recipients "DJ Snake, Annie Mac, Zane Lowe" --out-dir ./promos
-```
-
-#### 2. One-Click Forensic Audit If a Leak Occurs
-If a rip or leak appears on Discord, SoundCloud, or YouTube, pinpoint the responsible recipient in seconds:
+Deploy an air-gapped, zero-dependency HTTP REST daemon on Kubernetes, AWS ECS, or Nomad in 1 command:
 
 ```bash
-node scripts/audit_leak.js leaked_audio.mp3 --manifest ./promos/recipients.json
+# Launch with Docker Compose
+docker compose -f docker/docker-compose.yml up -d
 ```
 
+The daemon runs rootless on port `8080` with an in-memory `tmpfs` volume:
+
+```bash
+# 1. Liveness & Engine Health Probe
+curl -s http://localhost:8080/v1/health
+
+# 2. Embed via raw binary stream (WAV, MP3, FLAC)
+curl -X POST "http://localhost:8080/v1/embed?id=883921&strength=0.5&band=dual&format=mp3" \
+  -H "Content-Type: audio/wav" \
+  --data-binary @master.wav \
+  --output protected.mp3
+
+# 3. Detect via raw binary stream
+curl -X POST "http://localhost:8080/v1/detect?id=883921&report=true" \
+  -H "Content-Type: audio/mpeg" \
+  --data-binary @protected.mp3
+```
+
+Also accepts JSON bodies with base64 audio payloads (`{ "audioBase64": "...", "id": 883921 }`).
+
+---
+
+### Option 5: Cryptographic Forensic Proof Certificate Generator
+
+When tracing unauthorized leaks or submitting DMCA takedown notices, export a tamper-evident audit report with SHA-256 file hashes, physical layer signal-to-noise metrics ($E_b/N_0$), and an HMAC seal:
+
+```bash
+auralwatermark detect evidence.mp3 --id 883921 --report proof.json --report-txt cert.txt
+```
+
+#### Sample Generated ASCII Certificate (`cert.txt`):
 ```text
-======================================================
-AUREAL FORENSIC AUDIT REPORT
-======================================================
-Target File:      leaked_audio.mp3 (MP3 128 kbps)
-Recovered ID:     #100002 (CRC-16 Valid)
-Confidence:       100.0% (Eb/N0: +17.7 dB)
-------------------------------------------------------
-MATCH CONFIRMED IN DISTRIBUTION MANIFEST:
-  Recipient Name:   Zane Lowe
-  Assigned ID:      #100002
-  Original File:    album_master_[Zane_Lowe].wav
-======================================================
-VERDICT: Leak traced directly to "Zane Lowe".
+==============================================================================
+              AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE               
+               Cryptographic Audio Authentication & Audit                
+==============================================================================
+Date/Time (UTC) : 2026-09-11T09:12:10.476Z
+Engine          : Aureal Watermark Forensic DSP Engine v0.2.4
+Report Schema   : v1.0.0
+------------------------------------------------------------------------------
+1. TARGET EVIDENCE FILE
+   Path         : evidence.mp3
+   Size         : 264,644 bytes
+   SHA-256      : 7dafa0b0c58327ed539a87b78ead6c632007b9dff869849489bef82b2cb1c293
+   SHA-512      : 82b16b5068978739e3fbb5d4e1a11a7bcb14100342f5b2f1...
+------------------------------------------------------------------------------
+2. FORENSIC VERIFICATION RESULT
+   Verdict      : [AUTHENTIC / MATCH]
+   Detected     : YES
+   Payload ID   : 883921
+   Confidence   : 100.0%
+   Bit Error Rate: 0.00%
+   CRC Integrity: VALID (OK)
+------------------------------------------------------------------------------
+3. PHYSICAL-LAYER DSP METRICS
+   Eb/N0        : 13.93 dB
+   SQNR         : 16.94 dB
+   Z-Score      : 32.87
+   Carrier Band : 17000 - 19500 Hz
+   Sync Method  : preamble
+------------------------------------------------------------------------------
+4. INTEGRITY SEAL
+   Algorithm    : HMAC-SHA256
+   Seal Hash    : 9702c8625046347512fe23df534257be752512a650fd8ed072b6aa90d814356b
+==============================================================================
+Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or intellectual property verification.
+==============================================================================
 ```
 
 ---
 
-### Option 4: JavaScript / Node.js API (For Developers & Backends)
+### Option 6: JavaScript & TypeScript API (With First-Class `.d.ts` Types)
 
-Integrate protection directly into your own apps and export pipelines:
+Integrate protection directly into your Node.js or TypeScript applications:
 
-```javascript
-import { embedWatermark, detectWatermark } from "aureal-watermark";
-import { readWavFile, writeWavFile } from "aureal-watermark/src/wav.js";
+```typescript
+import {
+  embedWatermark,
+  detectWatermark,
+  generateForensicReport,
+  readWavFile,
+  writeWavFile
+} from "aureal-watermark";
 
 // Load audio file
 const wav = await readWavFile("song.wav");
@@ -169,8 +223,8 @@ await writeWavFile("song_protected.wav", protectedAudio, { ...format, bitDepth: 
 const result = detectWatermark(protectedAudio, format, { payloadId: 883921 });
 
 console.log(result.detected);           // true
-console.log(result.confidence);         // 0.98 (98%)
-console.log(result.ebN0Db);             // +18.4 dB (Signal-to-Noise)
+console.log(result.confidence);         // 1.0 (100%)
+console.log(result.ebN0Db);             // +14.2 dB (Signal-to-Noise)
 console.log(result.recoveredPayloadId); // 883921
 ```
 

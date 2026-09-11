@@ -9,15 +9,23 @@ A comprehensive architectural and algorithmic reference for every file, module, 
 ```
 Aureal-Watermark/
 ├── bin/
-│   └── auralwatermark.js           # CLI entry point (gen, embed, detect subcommands)
+│   └── auralwatermark.js           # CLI entry point (universal audio format auto-transcoding)
+├── docker/
+│   ├── Dockerfile                  # Hardened Alpine container image with FFmpeg
+│   ├── docker-compose.yml          # 1-command microservice orchestration template
+│   └── server.js                   # Zero-dependency HTTP REST daemon (/v1/embed, /v1/detect)
+├── types/
+│   └── index.d.ts                  # Comprehensive TypeScript type definitions
 ├── src/
 │   ├── index.js                    # Public ESM package root
 │   ├── signal.js                   # DSP primitives, PRNG, Hann cache, template builder
 │   ├── payload.js                  # 32-bit ID + CRC-16 codeword packing & unpacking
 │   ├── embed.js                    # Core watermark waveform injection pipeline
 │   ├── detect.js                   # Matched filter, frame folding, resync, z-score engine
+│   ├── report.js                   # Forensic proof certificate generator (SHA-256/512, HMAC seal)
 │   ├── wav.js                      # RIFF/WAVE parser & writer (8/16/24/32-bit int, float32)
 │   ├── synth.js                    # Deterministic harmonic speech-like audio synthesizer
+│   ├── license.js                  # Polar.sh license validation & local offline caching
 │   └── browser/
 │       └── aural-watermark-verify.js # Browser-native AudioBuffer & DataView verifier
 ├── studio.html                     # Interactive Studio Web UI (Pure client-side offline app)
@@ -35,6 +43,8 @@ Aureal-Watermark/
 │   ├── watermark.test.js           # Core DSP embedding & detection verification
 │   ├── codec.test.js               # ffmpeg MP3 (128k/320k) and AAC (128k) round-trips
 │   ├── cli.test.js                 # Command-line interface subprocess tests
+│   ├── report.test.js              # Forensic report generator & certificate tests
+│   ├── server.test.js              # REST microservice integration tests
 │   ├── wav.test.js                 # WAV header parsing, round-trip, and error handling
 │   └── browser.test.js             # Browser module execution tests
 ├── LICENSE.md                      # PolyForm Noncommercial 1.0.0 + Commercial License
@@ -157,6 +167,38 @@ Aureal-Watermark/
 * **Mechanism:**
   * Synthesizes an acoustic test signal with an $F_0$ fundamental pitch (110–170 Hz), formant resonances ($F_1, F_2, F_3$), vibrato, syllabic amplitude envelope modulation, and low-passed breath noise.
   * Keeps energy concentrated below 11 kHz to provide clean synthetic audio for benchmarks without polluting the watermark carrier band.
+
+---
+
+### `src/report.js`
+* **Role:** Cryptographic forensic proof certificate generator.
+* **Key Functions:**
+  * `generateForensicReport(options)`:
+    * Computes SHA-256 and SHA-512 hashes over evidence audio file bytes.
+    * Evaluates forensic verification status (`VERIFIED_AUTHENTIC`, `PAYLOAD_MISMATCH`, `NO_WATERMARK_FOUND`).
+    * Encapsulates physical-layer DSP metrics: $E_b/N_0$ (dB), SQNR (dB), Z-score, carrier band frequency limits, and CRC integrity.
+    * Computes a canonical HMAC-SHA256 seal to prevent evidence tampering.
+  * `formatForensicReportText(report)`:
+    * Renders a human-readable ASCII certificate suitable for legal DMCA notice attachments and intellectual property exhibits.
+
+---
+
+### `docker/server.js`
+* **Role:** High-performance, air-gapped HTTP REST Microservice.
+* **Architecture:**
+  * Zero external npm runtime dependencies (built on standard `node:http`, `node:crypto`, `node:child_process`).
+  * Endpoints:
+    * `GET /v1/health`: Health, readiness, and FFmpeg capability probe.
+    * `POST /v1/embed`: Watermark injection for binary streams (`audio/wav`, `audio/mpeg`, etc.) or Base64 JSON.
+    * `POST /v1/detect`: Watermark extraction and forensic analysis with optional cryptographic audit proofs (`?report=true`).
+  * Includes automated ephemeral in-memory transcoding via FFmpeg when non-WAV containers are supplied.
+
+---
+
+### `types/index.d.ts`
+* **Role:** First-class TypeScript declarations bundle.
+* **Coverage:**
+  * Provides complete type declarations, interfaces, and function signatures for `WatermarkOptions`, `DetectionResult`, `ForensicReport`, `AudioFormat`, `ParsedWav`, licensing methods, and DSP error classes.
 
 ---
 

@@ -41,6 +41,7 @@ node bin/auralwatermark.js detect unknown.wav --key secret --json
 Synthesizes speech-like audio with harmonic formants and amplitude envelope for testing and benchmarking.
 
 ### `embed <in.wav> <out.wav> --id <uint32> [--key s] [--strength 0..1] [--band dual|high|mid]`
+Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** (via automatic FFmpeg fallback).
 
 | Option | Default | Description |
 |---|---|---|
@@ -49,7 +50,7 @@ Synthesizes speech-like audio with harmonic formants and amplitude envelope for 
 | `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Inaudible and buried $\ge 32\text{--}36\text{ dB}$ below host audio. |
 | `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
 
-### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json]`
+### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json] [--report proof.json] [--report-txt cert.txt]`
 
 | Option | Default | Description |
 |---|---|---|
@@ -57,6 +58,8 @@ Synthesizes speech-like audio with harmonic formants and amplitude envelope for 
 | `--key` | `aural-watermark-default-key` | Secret salt matching the embedder. |
 | `--band` | `auto` | Evaluates all bands and returns the highest-scoring match. |
 | `--json` | `false` | Emits structured JSON diagnostics (BER, confidence, z-score, frame count). |
+| `--report` | *None* | Path to export a cryptographically sealed JSON forensic audit proof. |
+| `--report-txt` | *None* | Path to export a human-readable ASCII certificate for DMCA/evidence exhibits. |
 
 ---
 
@@ -111,7 +114,68 @@ const res = detectWatermark(watermarked, fmt, {
 
 ---
 
-## 5. Choosing a Deployment Band Profile
+## 5. Air-Gapped Docker REST Microservice
+
+Deploy an air-gapped, containerized REST daemon without external npm frameworks:
+
+```bash
+# Start microservice with Docker Compose (port 8080)
+docker compose -f docker/docker-compose.yml up -d
+```
+
+### Endpoints:
+
+#### `GET /v1/health`
+Liveness and readiness probe:
+```json
+{
+  "status": "ok",
+  "service": "aureal-watermark-microservice",
+  "version": "0.2.4",
+  "uptimeSeconds": 142,
+  "dsp": "active",
+  "ffmpeg": true
+}
+```
+
+#### `POST /v1/embed`
+Accepts binary audio or JSON. Supports query params: `?id=1234567&strength=0.5&band=dual&format=mp3`.
+
+```bash
+curl -X POST "http://localhost:8080/v1/embed?id=1234567&format=mp3" \
+  -H "Content-Type: audio/wav" \
+  --data-binary @track.wav \
+  --output watermarked.mp3
+```
+
+#### `POST /v1/detect`
+Accepts binary audio or JSON. Supports optional `?id=...` and `?report=true`.
+
+```bash
+curl -X POST "http://localhost:8080/v1/detect?id=1234567&report=true" \
+  -H "Content-Type: audio/mpeg" \
+  --data-binary @watermarked.mp3
+```
+
+---
+
+## 6. Cryptographic Forensic Proofs (`--report`)
+
+When presenting audio leak evidence for copyright claims, DMCA notices, or legal review, export a tamper-evident audit report:
+
+```bash
+auralwatermark detect leak.mp3 --id 1234567 --report proof.json --report-txt cert.txt
+```
+
+The resulting `proof.json` includes:
+* **Cryptographic Hashes:** SHA-256 and SHA-512 over the investigated file bytes.
+* **Integrity Status:** `VERIFIED_AUTHENTIC`, `PAYLOAD_MISMATCH`, or `NO_WATERMARK_FOUND`.
+* **Forensic Layer Metrics:** Raw $E_b/N_0$ (dB), SQNR (dB), Z-score, carrier bands, and CRC32 verification.
+* **Anti-Tamper Seal:** Canonical HMAC-SHA256 signature over the report payload.
+
+---
+
+## 7. Choosing a Deployment Band Profile
 
 | Scenario | Recommended Band | Rationale |
 | :--- | :--- | :--- |
@@ -121,12 +185,15 @@ const res = detectWatermark(watermarked, fmt, {
 
 ---
 
-## 6. Running Tests
+## 8. Running Tests
 
 ```powershell
-# Run the complete test suite (42 tests, including lossy MP3/AAC ffmpeg round-trips)
+# Run the complete test suite (unit DSP, codecs, CLI, REST server, and forensic proofs)
 node --test
 
-# Run only the lossy codec round-trip suite
-node --test test/codec.test.js
+# Run only the CLI and report suites
+node --test test/cli.test.js test/report.test.js
+
+# Run the REST microservice integration suite
+node --test test/server.test.js
 ```
