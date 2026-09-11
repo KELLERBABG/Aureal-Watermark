@@ -2,8 +2,8 @@
 // auralwatermark — Desktop App & CLI Suite for Aureal Watermark.
 
 import { argv, exit } from "node:process";
-import { spawn, exec } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from "node:fs";
+import { spawn, exec, execSync } from "node:child_process";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, unlinkSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -115,6 +115,72 @@ function getPricingHtml() {
 
   return "";
 }
+
+function hasFfmpeg() {
+  try {
+    execSync("ffmpeg -version", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function loadAudioInput(filePath) {
+  try {
+    const wav = await readWavFile(filePath);
+    return { wav, cleanup: () => {} };
+  } catch (err) {
+    if (!hasFfmpeg()) {
+      throw new Error(
+        `Unable to read '${filePath}': Not a valid WAV file (${err.message}). ` +
+        `Install 'ffmpeg' on your system PATH to automatically ingest MP3, FLAC, AAC, M4A, OGG, and AIFF audio.`
+      );
+    }
+    const tempWav = join(tmpdir(), `aureal-in-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
+    try {
+      execSync(`ffmpeg -hide_banner -loglevel error -y -i "${filePath}" -c:a pcm_s16le "${tempWav}"`, {
+        stdio: ["ignore", "pipe", "pipe"]
+      });
+      const wav = await readWavFile(tempWav);
+      return {
+        wav,
+        cleanup: () => {
+          try { unlinkSync(tempWav); } catch {}
+        }
+      };
+    } catch (ffmpegErr) {
+      try { unlinkSync(tempWav); } catch {}
+      throw new Error(`Failed to decode audio file '${filePath}' with ffmpeg: ${ffmpegErr.message}`);
+    }
+  }
+}
+
+async function saveAudioOutput(outputPath, pcmSamples, fmt, bitDepth) {
+  const ext = outputPath.toLowerCase().split(".").pop();
+  if (ext === "wav") {
+    await writeWavFile(outputPath, pcmSamples, { sampleRate: fmt.sampleRate, channels: fmt.channels, bitDepth });
+    return;
+  }
+
+  if (!hasFfmpeg()) {
+    throw new Error(
+      `Cannot export to '.${ext}': Only uncompressed '.wav' is supported natively. ` +
+      `Install 'ffmpeg' on your system PATH to enable direct encoding to MP3, FLAC, AAC, and OGG.`
+    );
+  }
+
+  const tempWav = join(tmpdir(), `aureal-out-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
+  try {
+    await writeWavFile(tempWav, pcmSamples, { sampleRate: fmt.sampleRate, channels: fmt.channels, bitDepth });
+    const codecArgs = ext === "mp3" ? "-c:a libmp3lame -b:a 320k" : (ext === "flac" ? "-c:a flac" : (ext === "aac" || ext === "m4a" ? "-c:a aac -b:a 256k" : ""));
+    execSync(`ffmpeg -hide_banner -loglevel error -y -i "${tempWav}" ${codecArgs} "${outputPath}"`, {
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+  } finally {
+    try { unlinkSync(tempWav); } catch {}
+  }
+}
+
 
 function writeEmbeddedIcons(targetDir) {
   const assetsDir = join(targetDir, "assets");
@@ -292,27 +358,31 @@ async function main() {
     const band = bandOf(flags, "dual");
 
     const t0 = Date.now();
-    const wav = await readWavFile(inp);
-    const marked = embedWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
-      payloadId,
-      key,
-      strength,
-      band,
-    });
-    const meta = marked.watermarkMeta;
-    const bits = wav.bitsPerSample === 24 ? 24 : 16;
-    await writeWavFile(out, marked, { sampleRate: wav.sampleRate, channels: wav.channels, bitDepth: bits });
-    const ms = Date.now() - t0;
+    const { wav, cleanup } = await loadAudioInput(inp);
+    try {
+      const marked = embedWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
+        payloadId,
+        key,
+        strength,
+        band,
+      });
+      const meta = marked.watermarkMeta;
+      const bits = wav.bitsPerSample === 24 ? 24 : 16;
+      await saveAudioOutput(out, marked, { sampleRate: wav.sampleRate, channels: wav.channels }, bits);
+      const ms = Date.now() - t0;
 
-    const peakDb = (20 * Math.log10(meta.peakWatermark + 1e-12)).toFixed(1);
-    const bandStr = Array.isArray(meta.bands)
-      ? `dual (${meta.bands.map((b) => `${b.lowHz >= 14000 ? "high" : "mid"} ${b.lowHz / 1000}-${b.highHz / 1000} kHz`).join(" + ")})`
-      : `${meta.band.lowHz / 1000}-${meta.band.highHz / 1000} kHz`;
-    const lic = getLicenseStatus();
-    const licenseBadge = lic.isLicensed ? `[Commercial Pro: ${lic.customer}]` : `[Community Evaluation]`;
-    console.log(`embed: id=${payloadId} key='${meta.key}' strength=${strength} -> ${out} ${licenseBadge}`);
-    console.log(`  band ${bandStr}, peak watermark ${peakDb} dBFS, ${meta.geometry.reps} repetition(s), ${(ms / 1000).toFixed(2)}s`);
-    return;
+      const peakDb = (20 * Math.log10(meta.peakWatermark + 1e-12)).toFixed(1);
+      const bandStr = Array.isArray(meta.bands)
+        ? `dual (${meta.bands.map((b) => `${b.lowHz >= 14000 ? "high" : "mid"} ${b.lowHz / 1000}-${b.highHz / 1000} kHz`).join(" + ")})`
+        : `${meta.band.lowHz / 1000}-${meta.band.highHz / 1000} kHz`;
+      const lic = getLicenseStatus();
+      const licenseBadge = lic.isLicensed ? `[Commercial Pro: ${lic.customer}]` : `[Community Evaluation]`;
+      console.log(`embed: id=${payloadId} key='${meta.key}' strength=${strength} -> ${out} ${licenseBadge}`);
+      console.log(`  band ${bandStr}, peak watermark ${peakDb} dBFS, ${meta.geometry.reps} repetition(s), ${(ms / 1000).toFixed(2)}s`);
+      return;
+    } finally {
+      cleanup();
+    }
   }
 
   if (cmd === "detect") {
@@ -326,38 +396,42 @@ async function main() {
       }
     }
     const t0 = Date.now();
-    const wav = await readWavFile(inp);
-    const res = detectWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
-      key,
-      payloadId: expectedId,
-      band: bandOf(flags, "auto"),
-    });
-    const ms = Date.now() - t0;
+    const { wav, cleanup } = await loadAudioInput(inp);
+    try {
+      const res = detectWatermark(wav.samples, { sampleRate: wav.sampleRate, channels: wav.channels }, {
+        key,
+        payloadId: expectedId,
+        band: bandOf(flags, "auto"),
+      });
+      const ms = Date.now() - t0;
 
-    if (flags.json) {
-      console.log(JSON.stringify({ file: inp, format: wav.format, durationSec: wav.durationSec, ...res }, null, 2));
-    } else {
-      console.log(`detect: ${inp}`);
-      console.log(
-        `  file:     ${wav.format}, ${wav.sampleRate} Hz, ${wav.channels}ch, ${wav.durationSec.toFixed(1)}s`
-      );
-      console.log(`  mode:     ${res.details.mode}${expectedId !== undefined ? ` (expect id=${expectedId})` : ""}`);
-      console.log(`  detected: ${res.detected ? "YES" : "NO"}`);
-      console.log(`  confidence: ${res.confidence.toFixed(3)}`);
-      console.log(`  eb/n0:      ${res.ebN0Db > -30 ? `${res.ebN0Db > 0 ? "+" : ""}${res.ebN0Db} dB` : "< -30 dB"}`);
-      console.log(`  sqnr:       ${res.sqnrDb > -30 ? `${res.sqnrDb > 0 ? "+" : ""}${res.sqnrDb} dB` : "< -30 dB"}`);
-      console.log(
-        `  band hit: ${res.details.bandUsed ? `${Math.round(res.details.bandUsed.lowHz)}-${Math.round(res.details.bandUsed.highHz)} Hz` : "-"} (${res.details.bandsTried} tried)`
-      );
-      console.log(`  ber:      ${(res.ber * 100).toFixed(1)}% (${Math.round(res.ber * res.details.bits)}/${res.details.bits} bits)`);
-      console.log(`  recovered id: ${res.recoveredPayloadId ?? "none"}`);
-      if (res.details.bitsCorrected && res.details.bitsCorrected.length > 0) {
-        console.log(`  note:     ${res.details.bitsCorrected.length}-bit error corrected at position(s) ${res.details.bitsCorrected.join(", ")}`);
+      if (flags.json) {
+        console.log(JSON.stringify({ file: inp, format: wav.format, durationSec: wav.durationSec, ...res }, null, 2));
+      } else {
+        console.log(`detect: ${inp}`);
+        console.log(
+          `  file:     ${wav.format}, ${wav.sampleRate} Hz, ${wav.channels}ch, ${wav.durationSec.toFixed(1)}s`
+        );
+        console.log(`  mode:     ${res.details.mode}${expectedId !== undefined ? ` (expect id=${expectedId})` : ""}`);
+        console.log(`  detected: ${res.detected ? "YES" : "NO"}`);
+        console.log(`  confidence: ${res.confidence.toFixed(3)}`);
+        console.log(`  eb/n0:      ${res.ebN0Db > -30 ? `${res.ebN0Db > 0 ? "+" : ""}${res.ebN0Db} dB` : "< -30 dB"}`);
+        console.log(`  sqnr:       ${res.sqnrDb > -30 ? `${res.sqnrDb > 0 ? "+" : ""}${res.sqnrDb} dB` : "< -30 dB"}`);
+        console.log(
+          `  band hit: ${res.details.bandUsed ? `${Math.round(res.details.bandUsed.lowHz)}-${Math.round(res.details.bandUsed.highHz)} Hz` : "-"} (${res.details.bandsTried} tried)`
+        );
+        console.log(`  ber:      ${(res.ber * 100).toFixed(1)}% (${Math.round(res.ber * res.details.bits)}/${res.details.bits} bits)`);
+        console.log(`  recovered id: ${res.recoveredPayloadId ?? "none"}`);
+        if (res.details.bitsCorrected && res.details.bitsCorrected.length > 0) {
+          console.log(`  note:     ${res.details.bitsCorrected.length}-bit error corrected at position(s) ${res.details.bitsCorrected.join(", ")}`);
+        }
+        console.log(`  time:     ${ms} ms`);
       }
-      console.log(`  time:     ${ms} ms`);
+      process.exitCode = res.detected ? 0 : 1;
+      return;
+    } finally {
+      cleanup();
     }
-    process.exitCode = res.detected ? 0 : 1;
-    return;
   }
 
   if (cmd === "license") {

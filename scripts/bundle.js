@@ -78,7 +78,7 @@ const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const process = require("node:process");
 const os = require("node:os");
-const { spawn, exec } = require("node:child_process");
+const { spawn, exec, execSync } = require("node:child_process");
 const { createServer } = require("node:http");
 const { join, dirname } = require("node:path");
 

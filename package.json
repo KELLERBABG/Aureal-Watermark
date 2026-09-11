@@ -4,6 +4,7 @@
   "description": "Audio watermarking for anti-theft and AI detection",
   "type": "module",
   "main": "src/index.js",
+  "types": "types/index.d.ts",
   "bin": {
     "aureal-watermark": "bin/auralwatermark.js",
     "auralwatermark": "bin/auralwatermark.js"
@@ -40,6 +41,7 @@
     "src/",
     "bin/",
     "demo/",
+    "types/",
     "LICENSE.md",
     "README.md"
   ]

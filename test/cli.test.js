@@ -82,3 +82,21 @@ test("unwatermarked file is not detected", () => {
   assert.equal(r.status, 1);
   assert.match(r.stdout, /detected:\s*NO/);
 });
+
+test("CLI embeds to and detects from MP3 when ffmpeg is available", (t) => {
+  try {
+    spawnSync("ffmpeg", ["-version"], { stdio: "ignore" });
+  } catch {
+    t.skip("ffmpeg not available on test host");
+    return;
+  }
+  const mp3Out = join(work, "marked.mp3");
+  const embedRes = run(["embed", join(work, "tone.wav"), mp3Out, "--id", "8675309", "--key", "demo-secret", "--band", "mid"]);
+  assert.equal(embedRes.status, 0, embedRes.stderr);
+  assert.ok(existsSync(mp3Out));
+
+  const detectRes = run(["detect", mp3Out, "--id", "8675309", "--key", "demo-secret"]);
+  assert.equal(detectRes.status, 0, detectRes.stderr || detectRes.stdout);
+  assert.match(detectRes.stdout, /detected:\s*YES/);
+});
+
