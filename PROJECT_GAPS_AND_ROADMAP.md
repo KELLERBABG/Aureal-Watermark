@@ -2,7 +2,7 @@
 
 > **Audit Date:** September 11, 2026  
 > **Repository:** `C:\Users\INTAL Admin\SYSTEMS & CREATIONS\Aural Watermark`  
-> **Current Version:** `v0.2.4`  
+> **Current Version:** `v0.2.5`  
 > **Test Status:** 56 / 56 tests passing locally (`node --test`)
 
 ---
@@ -71,7 +71,7 @@ However, to complete the transition from a robust engineering prototype to a com
   - Polar.sh checkout URLs are configured for Solo ($249) and Label ($499) tiers.
   - License validation and offline caching are implemented in `src/license.js`.
 * **Missing Configuration:**
-  - In the Polar.sh dashboard, ensure the automated product benefit delivers the download link for `aureal-watermark-v0.2.4-universal.zip` and the generated license key upon checkout completion.
+  - In the Polar.sh dashboard, ensure the automated product benefit delivers the download link for `aureal-watermark-v0.2.5-universal.zip` and the generated license key upon checkout completion.
   - Configure Polar.sh webhook endpoint or verify customer portal license generation.
 
 ### 3.2 Automated Certificate of Authenticity Generator

@@ -16,7 +16,7 @@ import { DEFAULT_BAND } from "../src/signal.js";
 import { getLicenseStatus, activatePolarKey, clearLocalLicense, loadLocalLicense } from "../src/license.js";
 import { generateForensicReport, formatForensicReportText } from "../src/report.js";
 
-const HELP = `Aureal Watermark v0.2.4 — Audio watermarking for anti-theft and AI detection
+const HELP = `Aureal Watermark v0.2.5 — Audio watermarking for anti-theft and AI detection
 
 Desktop App:
   auralwatermark [gui]              Launch standalone Desktop Studio application (Default)

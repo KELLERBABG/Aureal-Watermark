@@ -3,7 +3,7 @@ import { createHash, createHmac } from "node:crypto";
 
 export const REPORT_SCHEMA_VERSION = "1.0.0";
 export const ENGINE_NAME = "Aureal Watermark Forensic DSP Engine";
-export const ENGINE_VERSION = "0.2.4";
+export const ENGINE_VERSION = "0.2.5";
 
 /**
  * Generate a cryptographically sealed, structured forensic audit report.
