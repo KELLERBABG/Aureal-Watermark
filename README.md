@@ -297,5 +297,5 @@ Aureal Watermark is distributed under a **Dual License**:
 | **Voice AI & Speech Platforms** | **From $4,900 / yr** *(Custom Enterprise)* | EU AI Act Article 50 compliance, low-latency SDK integration, C2PA persistence, private key vaults. |
 | **Audio Forensics & Legal Labs** | **$1,499** *(perpetual)* | Client-side offline forensic suite, raw $E_b/N_0$ reports, custom branding. |
 
-For commercial licensing, interactive pricing tiers, and instant card checkout via Polar.sh, visit the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/pricing.html), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[enterprise@kellersystems.dev](mailto:enterprise@kellersystems.dev)**.
+For commercial licensing, interactive pricing tiers, and instant card checkout via Polar.sh, visit the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/pricing.html), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[business@kellersystems.dev](mailto:business@kellersystems.dev)**.
 

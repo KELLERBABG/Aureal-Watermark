@@ -10,7 +10,7 @@ Aureal Watermark Software Development
 Deutschland  
 
 ## Kontakt
-* **E-Mail:** [contact@kellersystems.dev](mailto:contact@kellersystems.dev)
+* **E-Mail:** [info@kellersystems.dev](mailto:info@kellersystems.dev)
 * **Website:** [https://aureal.kellersystems.dev/](https://aureal.kellersystems.dev/)
 
 ## Umsatzsteuer
