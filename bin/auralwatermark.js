@@ -25,14 +25,16 @@ Command Line Interface:
   auralwatermark gen out.wav --seconds 30 [--rate 44100] [--channels 1] [--bits 16]
       Generate synthetic speech-like audio for demos/tests.
 
-  auralwatermark embed in.wav out.wav --id <uint32> [--key secret]
+  auralwatermark embed <in.audio> <out.audio> --id <uint32> [--key secret]
       [--strength 0..1] [--band high|mid|dual|lowHz:highHz]
       Embed watermark carrying the payload id (default band: dual).
+      Supports WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF (with ffmpeg).
 
-  auralwatermark detect in.wav [--id <uint32>] [--key secret]
+  auralwatermark detect <in.audio> [--id <uint32>] [--key secret]
       [--band auto|high|mid|dual|lowHz:highHz] [--json]
       [--report proof.json] [--report-txt proof.txt]
       Verify an expected id or run blind detection + CRC decode.
+      Supports WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF (with ffmpeg).
 
   auralwatermark license [key]      View or activate Polar.sh commercial license
       auralwatermark license                      Check current license status
@@ -174,7 +176,20 @@ async function saveAudioOutput(outputPath, pcmSamples, fmt, bitDepth) {
   const tempWav = join(tmpdir(), `aureal-out-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
   try {
     await writeWavFile(tempWav, pcmSamples, { sampleRate: fmt.sampleRate, channels: fmt.channels, bitDepth });
-    const codecArgs = ext === "mp3" ? "-c:a libmp3lame -b:a 320k" : (ext === "flac" ? "-c:a flac" : (ext === "aac" || ext === "m4a" ? "-c:a aac -b:a 256k" : ""));
+    let codecArgs = "";
+    if (ext === "mp3") {
+      codecArgs = "-c:a libmp3lame -b:a 320k";
+    } else if (ext === "flac") {
+      codecArgs = "-c:a flac";
+    } else if (ext === "aac" || ext === "m4a") {
+      codecArgs = "-c:a aac -b:a 256k";
+    } else if (ext === "ogg") {
+      codecArgs = "-c:a libvorbis -q:a 8";
+    } else if (ext === "opus") {
+      codecArgs = "-c:a libopus -b:a 192k";
+    } else if (ext === "aiff" || ext === "aif") {
+      codecArgs = "-c:a pcm_s24be";
+    }
     execSync(`ffmpeg -hide_banner -loglevel error -y -i "${tempWav}" ${codecArgs} "${outputPath}"`, {
       stdio: ["ignore", "pipe", "pipe"]
     });

@@ -98,7 +98,14 @@ export interface PolarLicenseStatus {
   customer: string;
   keyMasked: string;
   status: "active" | "granted" | "unlicensed" | "expired";
-  storagePath: string;
+  expiresAt: string | null;
+  cachedAt: string | null;
+  details?: {
+    licenseKeyId?: string;
+    organizationId?: string;
+    benefitId?: string;
+    userId?: string;
+  };
 }
 
 export interface PolarValidationResult {
@@ -113,30 +120,32 @@ export interface PolarActivationResult {
   error?: string;
 }
 
-/**
- * Embeds an inaudible spread-spectrum watermark into PCM audio samples.
- *
- * @param pcm Interleaved 32-bit floating point audio samples in the range [-1.0, 1.0].
- * @param fmt Format descriptors: sampleRate and channel count.
- * @param opts Watermark configuration (payloadId, key, strength, band).
- * @returns A new Float32Array containing the watermarked audio, augmented with a `watermarkMeta` property.
- */
-export function embedWatermark(
-  pcm: Float32Array,
-  fmt: AudioFormat,
-  opts: WatermarkOptions
-): Float32Array & { watermarkMeta: WatermarkMetadata };
+export interface EmbeddedAudio extends Float32Array {
+  watermarkMeta: WatermarkMetadata;
+}
 
 /**
- * Detects and extracts an acoustic watermark from PCM audio samples.
+ * Embeds an imperceptible spread-spectrum watermark carrying a 32-bit ID into audio.
  *
- * @param pcm Interleaved 32-bit floating point audio samples in the range [-1.0, 1.0].
- * @param fmt Format descriptors: sampleRate and channel count.
- * @param opts Detection parameters (key, expected payloadId, band).
- * @returns Detection result containing confidence, BER, and recovered payload ID.
+ * @param samples Interleaved Float32Array audio samples in [-1.0, 1.0].
+ * @param fmt Audio format containing sampleRate and channels.
+ * @param params Options: payloadId, key, strength, band.
+ */
+export function embedWatermark(
+  samples: Float32Array,
+  fmt: AudioFormat,
+  params: WatermarkOptions
+): EmbeddedAudio;
+
+/**
+ * Detects and extracts an embedded watermark from audio samples.
+ *
+ * @param samples Interleaved Float32Array audio samples in [-1.0, 1.0].
+ * @param fmt Audio format containing sampleRate and channels.
+ * @param opts Detection options: key, payloadId (for verify mode), band.
  */
 export function detectWatermark(
-  pcm: Float32Array,
+  samples: Float32Array,
   fmt: AudioFormat,
   opts?: DetectOptions
 ): DetectionResult;
@@ -146,7 +155,7 @@ export function detectWatermark(
  *
  * @param bytes Raw byte buffer of a WAV file.
  */
-export function parseWav(bytes: Uint8Array | Buffer): ParsedWav;
+export function parseWav(bytes: Uint8Array): ParsedWav;
 
 /**
  * Encodes 32-bit float PCM audio into a standard RIFF/WAVE byte buffer.
@@ -157,7 +166,7 @@ export function parseWav(bytes: Uint8Array | Buffer): ParsedWav;
 export function writeWav(
   samples: Float32Array,
   fmt: AudioFormat
-): Buffer;
+): Uint8Array;
 
 /**
  * Reads and parses a WAV file from disk.
@@ -256,7 +265,7 @@ export function maskKey(key: string): string;
 
 export interface ForensicReportOptions {
   detectionResult: DetectionResult;
-  audioBytes: Buffer | Uint8Array;
+  audioBytes: Uint8Array;
   audioMetadata?: Partial<AudioFormat & { durationSec: number; format: string }>;
   filePath?: string;
   expectedPayloadId?: number | null;
