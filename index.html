@@ -272,25 +272,25 @@
 
     /* Clean Centered Hero Trust Badges */
     .hero-trust-ribbon {
-      display: flex;
-      align-items: center;
+      display: grid;
+      grid-template-columns: repeat(4, max-content);
       justify-content: center;
       gap: 0.65rem 0.85rem;
-      flex-wrap: wrap;
-      max-width: 960px;
-      margin: 2.25rem auto 3.25rem;
+      max-width: 980px;
+      margin: 2rem auto 3rem;
       padding: 0 1rem;
     }
     .trust-badge-item {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.45rem 1rem;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.42rem 0.9rem;
       background: rgba(18, 9, 31, 0.6);
       border: 1px solid rgba(139, 92, 246, 0.22);
       border-radius: 9999px;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       letter-spacing: 0.01em;
       backdrop-filter: blur(8px);
@@ -309,14 +309,22 @@
     .trust-dot {
       display: none;
     }
-    @media (max-width: 640px) {
+    @media (max-width: 860px) {
       .hero-trust-ribbon {
+        grid-template-columns: repeat(2, max-content);
+        gap: 0.6rem 0.75rem;
+        margin: 1.75rem auto 2.75rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .hero-trust-ribbon {
+        grid-template-columns: 1fr;
+        max-width: 320px;
         gap: 0.5rem;
-        margin: 1.75rem auto 2.5rem;
       }
       .trust-badge-item {
         font-size: 0.74rem;
-        padding: 0.4rem 0.8rem;
+        padding: 0.4rem 0.75rem;
       }
     }
 
