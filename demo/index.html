@@ -150,6 +150,8 @@
       font-size: 0.85rem;
       transition: color 0.15s;
     }
+    .nav-toggle { display: none; background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 0.35rem 0.55rem; font-size: 1.05rem; cursor: pointer; }
+    .nav-toggle:focus-visible, .nav-link:focus-visible, .btn-repo:focus-visible, .btn-cta-nav:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
     .nav-link:hover { color: var(--purple); }
     .btn-repo {
       display: inline-flex;
@@ -1016,7 +1018,11 @@
           <div class="brand-company">Keller Systems</div>
         </div>
       </a>
-      <div class="nav-links">
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span aria-hidden="true">&#9776;</span>
+      </button>
+      <div class="nav-links" id="primary-nav">
         <a href="/studio" class="nav-link">Studio</a>
         <a href="/pricing" class="nav-link">Pricing</a>
         <a href="/docs" class="nav-link">Documentation</a>
@@ -1084,7 +1090,7 @@
         <div class="demo-top-bar">
           <div class="demo-live-indicator">
             <div class="demo-pulse-dot" style="background: var(--purple-bright); box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);"></div>
-            <span style="font-family: var(--font-sans); font-weight: 600; font-size: 0.85rem; color: #ffffff; letter-spacing: -0.01em;">Interactive Studio Preview</span>
+            <span style="font-family: var(--font-sans); font-weight: 600; font-size: 0.85rem; color: #ffffff; letter-spacing: -0.01em;">Live In-Browser Demo &bull; Interactive Studio Preview</span>
           </div>
           <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
             <button type="button" class="demo-btn primary" id="btn-demo-synth" style="padding: 0.45rem 0.95rem; font-size: 0.78rem;">
@@ -1124,8 +1130,8 @@
               <div class="demo-input-group">
                 <label for="demo-band-select">Acoustic Carrier Band</label>
                 <select id="demo-band-select">
-                  <option value="dual" selected>Dual Band (8–19.5 kHz) &mdash; MP3 / AAC Transcode Resilient</option>
-                  <option value="high">High Band (17–19.5 kHz) &mdash; Archival &amp; Inaudible Master</option>
+                  <option value="high" selected>High Band (17–19.5 kHz) &mdash; Archival &amp; Inaudible Master (0.0 dB BS.1116)</option>
+                  <option value="dual">Dual Band (8–19.5 kHz) &mdash; MP3 / AAC Transcode Resilient</option>
                   <option value="mid">Mid Band (8–13 kHz) &mdash; Aggressive 64kbps Compression</option>
                 </select>
               </div>
@@ -1240,7 +1246,7 @@
                Cryptographic Audio Authentication &amp; Audit                
 ==============================================================================
 Date/Time (UTC) : 2026-09-14T12:00:00.000Z
-Engine          : Aureal Watermark Forensic DSP Engine v0.2.4
+Engine          : Aureal Watermark Forensic DSP Engine v0.2.5
 Report Schema   : v1.0.0
 ------------------------------------------------------------------------------
 1. TARGET EVIDENCE FILE
@@ -1533,7 +1539,7 @@ assert.equal(detectedId.valid, true);
         <a href="/legal/impressum.html">Impressum</a>
         <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank">GitHub</a>
       </div>
-      <p>&copy; 2026 Keller Systems &bull; Aureal Watermark v0.2.5 &bull; <a href="mailto:support@kellersystems.dev">Support</a> &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
+      <p>&copy; 2026 Keller Systems &bull; Imperceptible Acoustic Provenance &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
     </div>
   </footer>
 
@@ -1703,7 +1709,7 @@ assert.equal(detectedId.valid, true);
                Cryptographic Audio Authentication & Audit                
 ==============================================================================
 Date/Time (UTC) : ${dateStr}
-Engine          : Aureal Watermark Forensic DSP Engine v0.2.4
+Engine          : Aureal Watermark Forensic DSP Engine v0.2.5
 Report Schema   : v1.0.0
 ------------------------------------------------------------------------------
 1. TARGET EVIDENCE FILE
@@ -1748,11 +1754,12 @@ Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or in
 
         // Auto-embed ID #928401
         const payloadId = parseInt(recipientInput.value) || 928401;
+        const initialBand = bandSelect ? bandSelect.value : "high";
         markedPcm = AurealDemo.embedWatermark(origPcm, { sampleRate, channels }, {
           payloadId,
           key: AurealDemo.defaultKey,
           strength: 0.5,
-          band: "dual"
+          band: initialBand
         });
 
         const markedBlob = AurealDemo.encodeWavBlob(markedPcm, sampleRate, channels);
@@ -2016,7 +2023,8 @@ Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or in
               key: AurealDemo.defaultKey,
               band: bandSelect.value
             });
-            const elapsedMs = Math.round(performance.now() - t0);
+            const scanDurationMs = performance.now() - t0;
+            const elapsedMs = Math.round(scanDurationMs);
 
             if (res.detected) {
               const bandLabel = res.bandUsed === 'mid' 

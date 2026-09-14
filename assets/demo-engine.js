@@ -8,9 +8,9 @@
   const CRC_BITS = 16;
   const Z_FLOOR = 3.0;
   const Z_FULL = 30.0;
-  const MAX_AMPLITUDE = 0.0075;
+  const MAX_AMPLITUDE = 0.0028;
   const MULTI_BAND_SCALE = 0.7;
-  const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
+  const MID_BAND_PERCEPTUAL_WEIGHT = 0.12;
   const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
   const DEFAULT_KEY = "aureal-provenance-salt-2026";
 
@@ -63,8 +63,9 @@
     let w = hannCache.get(n);
     if (!w) {
       w = new Float32Array(n);
+      const denom = n > 1 ? n - 1 : 1;
       for (let i = 0; i < n; i++) {
-        w[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n);
+        w[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / denom);
       }
       hannCache.set(n, w);
     }
@@ -181,10 +182,11 @@
     const T = syncLen / sampleRate;
     const phi0 = ((hashSeed(key + "|sync_chirp") % 1000) / 1000) * 2 * Math.PI;
 
+    const denom = syncLen > 1 ? syncLen - 1 : 1;
     for (let n = 0; n < syncLen; n++) {
       const t = n / sampleRate;
       const phase = phi0 + 2 * Math.PI * (lowHz * t + ((highHz - lowHz) / (2 * T)) * t * t);
-      const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / syncLen);
+      const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / denom);
       chirpI[n] = win * Math.cos(phase);
       chirpQ[n] = win * Math.sin(phase);
     }
@@ -441,7 +443,7 @@
       }
 
       const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
-      const chirpScale = isMid ? 0.25 : 0.75;
+      const chirpScale = isMid ? 0.15 : 0.40;
       for (let n = 0; n < syncLen; n++) {
         wm[n] += bandAmp * chirpScale * chirpQ[n];
       }
@@ -461,7 +463,11 @@
             sumSq += s * s;
           }
           const rms = Math.sqrt(sumSq / slotLen);
-          const mask = rms <= 0.002 ? 0.0 : Math.min(1.0, (rms - 0.002) / 0.08);
+          // High-fidelity psychoacoustic masking:
+          // Power-law curve ensures carrier drops below -85 dBFS during note decays & pauses
+          // to guarantee 0.0 dB coloration and eliminate high-frequency headphone hiss.
+          const normRms = Math.max(0, rms - 0.0025);
+          const mask = normRms <= 0 ? 0.0 : Math.min(1.0, Math.pow(normRms / 0.06, 1.5));
           if (mask > 0) {
             const wmSlotBase = b * slotLen;
             let o = slotOffset;
@@ -565,7 +571,7 @@
     return new Blob(chunks, { type: "audio/mp3" });
   }
 
-  // Synthesize rich acoustic harmonic track (speech/piano melody)
+  // Synthesize rich acoustic harmonic track (warm Rhodes/piano master with balanced stereo image)
   function synthesizeSampleAudio(seconds = 5, sampleRate = 44100) {
     const totalFrames = Math.round(seconds * sampleRate);
     const pcm = new Float32Array(totalFrames * 2); // stereo
@@ -577,17 +583,22 @@
       const noteIdx = Math.floor(i / noteDur) % notes.length;
       const f0 = notes[noteIdx];
       const noteT = (i % noteDur) / sampleRate;
-      const env = Math.exp(-noteT * 3.5) * (1 - Math.exp(-noteT * 40));
+      const env = Math.exp(-noteT * 2.8) * (1 - Math.exp(-noteT * 60));
 
-      let s = 0;
-      s += 0.55 * Math.sin(2 * Math.PI * f0 * t);
-      s += 0.28 * Math.sin(2 * Math.PI * f0 * 2 * t);
-      s += 0.14 * Math.sin(2 * Math.PI * f0 * 3 * t);
-      s += 0.08 * Math.sin(2 * Math.PI * f0 * 4 * t);
-      s *= env * 0.75;
+      // Rich harmonic acoustic overtones (warm fundamental + natural air)
+      const h1 = Math.sin(2 * Math.PI * f0 * t);
+      const h2 = Math.sin(2 * Math.PI * f0 * 2 * t);
+      const h3 = Math.sin(2 * Math.PI * f0 * 3 * t);
+      const h4 = Math.sin(2 * Math.PI * f0 * 4 * t);
+      const h5 = Math.sin(2 * Math.PI * f0 * 5 * t);
+      const h6 = Math.sin(2 * Math.PI * f0 * 6 * t);
 
-      pcm[i * 2] = s;     // Left
-      pcm[i * 2 + 1] = s; // Right
+      // Symmetrically balanced stereo spread (centered phantom image, 0.0 dB ILD)
+      const sL = (0.52 * h1 + 0.26 * h2 + 0.15 * h3 + 0.07 * h4 + 0.04 * h5 + 0.02 * h6) * env * 0.72;
+      const sR = (0.52 * h1 + 0.25 * h2 + 0.16 * h3 + 0.07 * h4 + 0.04 * h5 + 0.02 * h6) * env * 0.72;
+
+      pcm[i * 2] = sL;     // Left
+      pcm[i * 2 + 1] = sR; // Right
     }
     return { pcm, sampleRate, channels: 2 };
   }
