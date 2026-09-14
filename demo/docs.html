@@ -561,6 +561,7 @@
       <div class="sidebar-group">
         <div class="sidebar-title">Commercial &amp; Production</div>
         <ul class="sidebar-menu">
+          <li><a href="#forensic-proofs">Forensic Proofs &amp; Audits</a></li>
           <li><a href="#licensing-sla">Dual Licensing Model</a></li>
           <li><a href="#airgapped">Air-Gapped &amp; On-Premise</a></li>
           <li><a href="#benchmarks">Transcode Survival Tests</a></li>
@@ -736,6 +737,16 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
                 <td><code>false</code></td>
                 <td>Outputs structured JSON with bit-error-rate (BER), confidence scores, and z-statistics.</td>
               </tr>
+              <tr>
+                <td><code>--report &lt;path&gt;</code></td>
+                <td><em>Omitted</em></td>
+                <td>Exports an immutable, schema-validated cryptographic JSON forensic audit report.</td>
+              </tr>
+              <tr>
+                <td><code>--report-txt &lt;path&gt;</code></td>
+                <td><em>Omitted</em></td>
+                <td>Exports an ISO-8601 UTC signed plain-text audit certificate for legal filings.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -848,6 +859,77 @@ console.log(verification);
           <li style="margin-bottom: 0.5rem;">Lossy audio compression algorithms (MP3, AAC, YouTube, TikTok) treat the watermark as natural harmonic texture and preserve it during encoding.</li>
           <li style="margin-bottom: 0.5rem;">A decoder with the matching key is required to recover the embedded payload in the current design.</li>
         </ul>
+      </section>
+
+      <!-- SECTION: FORENSIC PROOFS -->
+      <section class="doc-section" id="forensic-proofs">
+        <h2>Forensic Audit Proofs &amp; Chain of Custody</h2>
+        <p>
+          When pursuing copyright infringements, issuing legal DMCA notices, or arbitrating leak provenance, Aureal generates cryptographically sealed forensic audit reports. Every extraction logs immutable SHA-256/512 audio fingerprints, physical-layer DSP metrics, and an HMAC-SHA256 digital signature to verify leak origin without exposing the underlying master audio.
+        </p>
+
+        <h3>Cryptographic Hash Chain &amp; Digital Seal</h3>
+        <p>
+          To maintain an unbroken evidentiary chain of custody, the forensic engine hashes the evidence file with SHA-256 and SHA-512, captures low-level physical-layer DSP metrics (processing gain \(E_b/N_0\), bit error rate, Z-score significance), and seals the verdict with an HMAC-SHA256 digital signature.
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">Bash / CLI</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code># Scan suspected leak and export immutable JSON proof and plain-text certificate
+auralwatermark detect leak_screener.mp3 \
+  --report forensic_proof.json \
+  --report-txt forensic_certificate.txt \
+  --key "studio-master-salt"</code></pre>
+        </div>
+
+        <h3>Sample Court-Admissible Audit Certificate</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
+          The generated plain-text certificate adheres to standard forensic evidence formats for legal filings, arbitration, and DMCA takedown requests:
+        </p>
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">Forensic Evidence Certificate (ISO-8601 UTC)</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code>==============================================================================
+              AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE               
+               Cryptographic Audio Authentication &amp; Audit                
+==============================================================================
+Date/Time (UTC) : 2026-09-14T12:00:00.000Z
+Engine          : Aureal Watermark Forensic DSP Engine v0.2.5
+Report Schema   : v1.0.0
+------------------------------------------------------------------------------
+1. TARGET EVIDENCE FILE
+   Path         : unreleased_screener_leak.mp3 (Lossy 128 kbps Rip)
+   Size         : 3,452,192 bytes
+   SHA-256      : 7dafa0b0c58327ed539a87b78ead6c632007b9dff869849489bef82b2cb1c293
+   SHA-512      : 82b16b5068978739e3fbb5d4e1a11a7bcb14100342f5b2f1...
+------------------------------------------------------------------------------
+2. FORENSIC VERIFICATION RESULT
+   Verdict      : [AUTHENTIC / MATCH]
+   Detected     : YES
+   Payload ID   : #928401 (Recipient: Zane Lowe / BBC Radio 1)
+   Confidence   : 100.0%
+   Bit Error Rate: 0.00% (0/48 bits)
+   CRC Integrity: VALID (OK)
+------------------------------------------------------------------------------
+3. PHYSICAL-LAYER DSP METRICS
+   Eb/N0        : +14.13 dB (Signal-to-Noise Processing Gain)
+   SQNR         : +17.14 dB
+   Z-Score      : 33.49 (Correlation Significance)
+   Carrier Band : 8000 - 19500 Hz (Dual-Band DSSS Rake)
+   Sync Method  : Preamble Cyclic Modulo Fold
+------------------------------------------------------------------------------
+4. INTEGRITY SEAL
+   Algorithm    : HMAC-SHA256
+   Seal Hash    : 9702c8625046347512fe23df534257be752512a650fd8ed072b6aa90d814356b
+==============================================================================
+Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or intellectual property verification.
+==============================================================================</code></pre>
+        </div>
       </section>
 
       <!-- SECTION: LICENSING -->
