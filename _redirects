@@ -1,6 +1,16 @@
+# Forward clean public routes to the actual html files
+/studio /demo/studio.html 200
+/docs /demo/docs.html 200
+/pricing /demo/pricing.html 200
+/verifier /demo/verifier.html 200
+
 # Redirect legacy extensioned/demo URLs to clean public routes
-/demo/index.html /
+/demo/index.html / 301
 /demo/studio.html /studio 301
 /demo/docs.html /docs 301
 /demo/pricing.html /pricing 301
 /demo/verifier.html /verifier 301
+/studio.html /studio 301
+/docs.html /docs 301
+/pricing.html /pricing 301
+/verifier.html /verifier 301
