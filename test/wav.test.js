@@ -75,6 +75,22 @@ test("write->parse round trip preserves 24-bit stereo samples", () => {
   assert.ok(maxErr <= 1.01 / 8388608, `maxErr ${maxErr}`);
 });
 
+test("write->parse round trip preserves 32-bit float samples", () => {
+  const n = 500;
+  const orig = new Float32Array(n);
+  for (let i = 0; i < n; i++) orig[i] = Math.sin((2 * Math.PI * 440 * i) / 48000) * 0.75;
+  const bytes = writeWav(orig, { sampleRate: 48000, channels: 1, bitDepth: 32 });
+  const parsed = parseWav(bytes);
+  assert.equal(parsed.sampleRate, 48000);
+  assert.equal(parsed.channels, 1);
+  assert.equal(parsed.bitsPerSample, 32);
+  assert.equal(parsed.format, "IEEE float 32-bit");
+  assert.equal(parsed.numFrames, n);
+  for (let i = 0; i < n; i++) {
+    assert.ok(Math.abs(parsed.samples[i] - orig[i]) < 1e-6);
+  }
+});
+
 test("24-bit mono with odd byte count is padded and parses", () => {
   // 3 frames mono 24-bit = 9 bytes -> odd -> pad byte appended
   const raw = Buffer.from([10, 0, 0, 200, 50, 255, 0, 128, 255]);

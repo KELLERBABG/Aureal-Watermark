@@ -147,7 +147,7 @@ function int32le(b, o) {
 export function writeWav(samples, opts) {
   const { sampleRate, channels } = opts;
   const bitDepth = opts.bitDepth ?? 16;
-  if (![16, 24].includes(bitDepth)) throw new WavError("writeWav supports 16 or 24 bit only");
+  if (![16, 24, 32].includes(bitDepth)) throw new WavError("writeWav supports 16, 24, or 32 bit only");
   if (!Number.isInteger(channels) || channels < 1) throw new WavError("bad channel count");
   if (!Number.isInteger(sampleRate) || sampleRate < 1) throw new WavError("bad sample rate");
   if (samples.length % channels !== 0) {
@@ -160,12 +160,15 @@ export function writeWav(samples, opts) {
   const padded = dataLen + (dataLen & 1);
   const buf = Buffer.alloc(44 + padded);
 
+  const isFloat = bitDepth === 32;
+  const formatCode = isFloat ? 3 : 1; // 1 = PCM, 3 = IEEE float
+
   buf.write("RIFF", 0, "ascii");
   buf.writeUInt32LE(36 + padded, 4);
   buf.write("WAVE", 8, "ascii");
   buf.write("fmt ", 12, "ascii");
   buf.writeUInt32LE(16, 16);
-  buf.writeUInt16LE(1, 20); // PCM
+  buf.writeUInt16LE(formatCode, 20);
   buf.writeUInt16LE(channels, 22);
   buf.writeUInt32LE(sampleRate, 24);
   buf.writeUInt32LE(sampleRate * channels * bytesPerSample, 28);
@@ -174,18 +177,25 @@ export function writeWav(samples, opts) {
   buf.write("data", 36, "ascii");
   buf.writeUInt32LE(dataLen, 40);
 
-  const peak = bitDepth === 16 ? 32767 : 8388607;
   let p = 44;
-  for (let i = 0; i < samples.length; i++) {
-    let s = Math.round(Math.max(-1, Math.min(1, samples[i])) * peak);
-    if (bitDepth === 16) {
-      buf.writeInt16LE(s, p);
-      p += 2;
-    } else {
-      buf[p] = s & 255;
-      buf[p + 1] = (s >> 8) & 255;
-      buf[p + 2] = (s >> 16) & 255;
-      p += 3;
+  if (isFloat) {
+    for (let i = 0; i < samples.length; i++) {
+      buf.writeFloatLE(samples[i], p);
+      p += 4;
+    }
+  } else {
+    const peak = bitDepth === 16 ? 32767 : 8388607;
+    for (let i = 0; i < samples.length; i++) {
+      let s = Math.round(Math.max(-1, Math.min(1, samples[i])) * peak);
+      if (bitDepth === 16) {
+        buf.writeInt16LE(s, p);
+        p += 2;
+      } else {
+        buf[p] = s & 255;
+        buf[p + 1] = (s >> 8) & 255;
+        buf[p + 2] = (s >> 16) & 255;
+        p += 3;
+      }
     }
   }
   return buf;

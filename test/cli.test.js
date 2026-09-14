@@ -84,9 +84,8 @@ test("unwatermarked file is not detected", () => {
 });
 
 test("CLI embeds to and detects from MP3 when ffmpeg is available", (t) => {
-  try {
-    spawnSync("ffmpeg", ["-version"], { stdio: "ignore" });
-  } catch {
+  const check = spawnSync("ffmpeg", ["-version"], { stdio: "ignore" });
+  if (check.error || check.status !== 0) {
     t.skip("ffmpeg not available on test host");
     return;
   }
