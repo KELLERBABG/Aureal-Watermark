@@ -173,7 +173,7 @@
     .docs-layout {
       display: flex;
       gap: 3.5rem;
-      padding: 3rem 0 45vh;
+      padding: 3rem 0 6rem;
     }
 
     /* Sidebar */
@@ -516,6 +516,7 @@
         </div>
       </a>
       <div class="nav-links">
+        <a href="/" class="nav-link">Homepage</a>
         <a href="/studio" class="nav-link">Studio</a>
         <a href="/pricing" class="nav-link">Pricing</a>
         <a href="/docs" class="nav-link active">Documentation</a>
@@ -561,6 +562,7 @@
       <div class="sidebar-group">
         <div class="sidebar-title">Commercial &amp; Production</div>
         <ul class="sidebar-menu">
+          <li><a href="#forensic-proofs">Detection Audit Reports</a></li>
           <li><a href="#licensing-sla">Dual Licensing Model</a></li>
           <li><a href="#airgapped">Air-Gapped &amp; On-Premise</a></li>
           <li><a href="#benchmarks">Transcode Survival Tests</a></li>
@@ -736,6 +738,16 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
                 <td><code>false</code></td>
                 <td>Outputs structured JSON with bit-error-rate (BER), confidence scores, and z-statistics.</td>
               </tr>
+              <tr>
+                <td><code>--report &lt;path&gt;</code></td>
+                <td><em>Omitted</em></td>
+                <td>Exports a JSON audit report with file hashes, detection metrics, and an HMAC integrity seal.</td>
+              </tr>
+              <tr>
+                <td><code>--report-txt &lt;path&gt;</code></td>
+                <td><em>Omitted</em></td>
+                <td>Exports a human-readable detection report with a timestamp; it is not an identity signature, chain-of-custody record, or legal certification.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -757,7 +769,7 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
 
 // 1. Decode any web-supported format (MP3, AAC, FLAC, WAV, OGG)
 const audioContext = new AudioContext();
-const response = await fetch("streamed_audio.mp3");
+const response = await fetch("/streamed_audio.mp3");
 const arrayBuffer = await response.arrayBuffer();
 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
@@ -774,7 +786,7 @@ if (result.detected) {
 
         <div class="callout warn">
           <h4>Privacy &amp; Air-Gapped Advantage</h4>
-          <p>Because the detection executes inside the client's Web Audio DSP thread, zero megabytes of audio are ever uploaded to cloud endpoints. This satisfies strict enterprise NDA and zero-data-retention compliance policies.</p>
+          <p>In the web demo, audio decoding and DSP run in the browser; license activation is separate and contacts Polar.sh. Confirm the implementation, hosting, and browser environment meet your privacy requirements.</p>
         </div>
       </section>
 
@@ -857,7 +869,7 @@ console.log(verification);
         </p>
         <ul style="padding-left: 1.5rem; color: var(--text-muted); margin-bottom: 1.5rem;">
           <li style="margin-bottom: 0.5rem;">The energy per frequency bin is tens of decibels lower than ambient acoustic noise.</li>
-          <li style="margin-bottom: 0.5rem;">Lossy audio compression algorithms (MP3, AAC, YouTube, TikTok) treat the watermark as natural harmonic texture and preserve it during encoding.</li>
+          <li style="margin-bottom: 0.5rem;">Recovery after lossy compression depends on the audio, codec, bitrate, and subsequent processing; test the formats used in your own delivery chain.</li>
           <li style="margin-bottom: 0.5rem;">A decoder with the matching key is required to recover the embedded payload in the current design.</li>
         </ul>
       </section>
@@ -869,8 +881,79 @@ console.log(verification);
           Each watermark carries a 32-bit recipient ID plus a 16-bit CRC-16/CCITT-FALSE check, transmitted as 48 BPSK symbols. Every symbol is spread with its own key-derived pseudorandom chip sequence and repeated once per frame (~1 second) across the whole track; the detector folds all repetitions together, so detection confidence grows with track length.
         </p>
         <p>
-          Before CRC validation, the detector attempts reliability-ordered single-bit correction. This recovers one flipped bit per codeword; heavier damage after aggressive transcoding is reported as a failed detection rather than a false match. The practical false-positive rate per trial is roughly 2&#8315;&sup1;&#8310; thanks to the CRC gate.
+          Before CRC validation, the detector attempts reliability-ordered soft-decision correction: a 1-bit flip sweep followed by a 2-bit permutation sweep over the lowest-confidence symbols, repairing up to two flipped bits per codeword. Heavier damage after aggressive transcoding is reported as a failed detection rather than a false match. The CRC gate helps reject corrupted payloads; false-positive rates have not been characterized on a representative production corpus.
         </p>
+      </section>
+
+      <!-- SECTION: FORENSIC PROOFS -->
+      <section class="doc-section" id="forensic-proofs">
+        <h2>Watermark Detection Audit Reports</h2>
+        <p>
+          Aureal can export an audit report containing hashes of the analyzed file, watermark-detection metrics, and an HMAC-SHA256 integrity seal. These values can help document a particular scan but do not independently establish authorship, prove when the file existed, or provide a chain of custody.
+        </p>
+
+        <h3>File Hashes &amp; Report Integrity Seal</h3>
+        <p>
+          For documentation purposes, the forensic engine hashes the evidence file with SHA-256 and SHA-512, captures low-level physical-layer DSP metrics (processing gain \(E_b/N_0\), bit error rate, Z-score significance), and can include an HMAC-SHA256 shared-secret integrity seal. HMAC is not a digital signature and does not establish chain of custody or authorship.
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">Bash / CLI</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code># Scan an audio file and export a hash-and-detection audit report
+auralwatermark detect leak_screener.mp3 \
+  --report forensic_proof.json \
+  --report-txt forensic_certificate.txt \
+  --key "studio-master-salt"</code></pre>
+        </div>
+
+        <h3>Sample Audit Report (Illustrative)</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
+          The following is an illustrative sample, not a certification of admissibility, authorship, or chain of custody:
+        </p>
+        <div class="code-wrapper">
+          <div class="code-top">
+            <span class="code-lang">Illustrative Watermark Audit Report</span>
+            <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
+          </div>
+          <pre><code>==============================================================================
+              AUREAL WATERMARK — SAMPLE AUDIT REPORT               
+               Watermark Detection Metrics (Illustrative)                
+==============================================================================
+Date/Time (UTC) : 2026-09-14T12:00:00.000Z
+Engine          : Aureal Watermark Forensic DSP Engine v0.2.5
+Report Schema   : v1.0.0
+------------------------------------------------------------------------------
+1. TARGET EVIDENCE FILE
+   Path         : unreleased_screener_leak.mp3 (Lossy 128 kbps Rip)
+   Size         : 3,452,192 bytes
+   SHA-256      : 7dafa0b0c58327ed539a87b78ead6c632007b9dff869849489bef82b2cb1c293
+   SHA-512      : 82b16b5068978739e3fbb5d4e1a11a7bcb14100342f5b2f1...
+------------------------------------------------------------------------------
+2. FORENSIC VERIFICATION RESULT
+   Result       : [WATERMARK ID MATCH]
+   Detected     : YES
+   Payload ID   : #928401 (Recipient: Zane Lowe / BBC Radio 1)
+   Confidence   : 100.0%
+   Bit Error Rate: 0.00% (0/48 bits)
+   CRC Integrity: VALID (OK)
+------------------------------------------------------------------------------
+3. PHYSICAL-LAYER DSP METRICS
+   Eb/N0        : +14.13 dB (Signal-to-Noise Processing Gain)
+   SQNR         : +17.14 dB
+   Z-Score      : 33.49 (Correlation Significance)
+   Carrier Band : 8000 - 19500 Hz (Dual-Band DSSS Rake)
+   Sync Method  : Preamble Cyclic Modulo Fold
+------------------------------------------------------------------------------
+4. INTEGRITY SEAL
+   Algorithm    : HMAC-SHA256
+   Seal Hash    : 9702c8625046347512fe23df534257be752512a650fd8ed072b6aa90d814356b
+==============================================================================
+Attribution: Illustrative sample output only; a watermark match does not independently prove ownership or legal attribution.
+==============================================================================</code></pre>
+        </div>
       </section>
 
       <!-- SECTION: LICENSING -->
@@ -897,16 +980,22 @@ console.log(verification);
                 <td>Client-side demo; hosting requests may still generate standard server logs</td>
               </tr>
               <tr>
-                <td><strong>Commercial Indie Label</strong></td>
-                <td>$299 / yr</td>
-                <td>Independent record labels, promo distribution pools, podcast networks.</td>
-                <td>Self-Hosted / Unlimited Streams</td>
+                <td><strong>Solo Creator / Indie Studio</strong></td>
+                <td>$249 (one-time, perpetual)</td>
+                <td>Individual producers and mixing engineers releasing commercial music.</td>
+                <td>Self-hosted, offline; optional activation contacts Polar.sh</td>
               </tr>
               <tr>
-                <td><strong>Enterprise Platform SLA</strong></td>
-                <td>Custom</td>
-                <td>AI voice cloning training data audit, major streaming services, high-throughput DSP.</td>
-                <td>Air-Gapped / Custom Bands / SLAs</td>
+                <td><strong>Promo Leak Suite / Label &amp; A&amp;R</strong></td>
+                <td>$499 (one-time, perpetual)</td>
+                <td>Record labels, artist managers, and promo distribution pools.</td>
+                <td>Self-hosted, offline; optional activation contacts Polar.sh</td>
+              </tr>
+              <tr>
+                <td><strong>B2B Platform / Enterprise SLA</strong></td>
+                <td>From $2,900 / yr (custom)</td>
+                <td>Marketplaces, SaaS pipelines, AI speech platforms, high-throughput DSP.</td>
+                <td>Air-gapped deployment possible; review the exact bundle and license workflow before processing sensitive audio</td>
               </tr>
             </tbody>
           </table>
@@ -919,12 +1008,12 @@ console.log(verification);
 
       <!-- SECTION: AIR-GAPPED -->
       <section class="doc-section" id="airgapped">
-        <h2>Air-Gapped &amp; On-Premise</h2>
+        <h2>Local Processing &amp; Deployment</h2>
         <p>
-          All audio processing runs locally: the CLI embeds and scans without any network access, and the web Studio performs every operation in your browser. No audio ever leaves the machine.
+          The DSP embed/detect operations run locally: CLI processing uses the local machine and the web Studio processes audio in the browser. Optional license activation contacts Polar.sh. Hosting and any external assets may generate normal network traffic.
         </p>
         <p>
-          For regulated or air-gapped environments, the single-file <code>aureal-watermark.cjs</code> bundle and the release zip operate fully offline. The only optional network calls in the product are commercial license validations against Polar.sh, which the offline tools never perform and which can be disabled entirely in restricted setups.
+          For air-gapped deployments, review the exact bundle, configuration, and license workflow you intend to use, and test it with network access disabled before processing sensitive audio.
         </p>
         <div class="callout">
           <h4>Enterprise deployments</h4>
@@ -981,41 +1070,22 @@ console.log(verification);
     const sections = document.querySelectorAll('.doc-section');
     const navLinks = document.querySelectorAll('.sidebar-menu a');
 
-    const setActive = (id) => {
-      navLinks.forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
-      });
-    };
-
-    const currentSection = () => {
-      const marker = 140;
-      let current = sections[0] ? sections[0].getAttribute('id') : '';
+    window.addEventListener('scroll', () => {
+      let current = '';
       sections.forEach(section => {
-        if (window.scrollY >= section.getBoundingClientRect().top + window.scrollY - marker) {
+        const sectionTop = section.offsetTop - 140;
+        if (pageYOffset >= sectionTop) {
           current = section.getAttribute('id');
         }
       });
-      // At the bottom of the page, always highlight the last section so it can be reached visually.
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
-        current = sections[sections.length - 1].getAttribute('id');
-      }
-      return current;
-    };
 
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        setActive(currentSection());
-        ticking = false;
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
       });
-    }, { passive: true });
-
-    window.addEventListener('load', () => setActive(currentSection()));
-    if (location.hash) {
-      setActive(location.hash.slice(1));
-    }
+    });
   </script>
 </body>
 </html>

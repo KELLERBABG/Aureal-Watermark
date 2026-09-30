@@ -1,33 +1,30 @@
-// scripts/publish-release-v024.js
+// scripts/publish-release.js
 import fs from "node:fs";
 
 const token = process.env.GITHUB_TOKEN || process.env.TOKEN || "";
 const repo = "KELLERBABG/Aureal-Watermark";
 
-const body = `# Aureal Watermark v0.2.4 — Multi-Format Export, Transparent Inaudibility & Adversarial Hardening
+const body = `# Aureal Watermark v0.2.5 — Audio Watermarking and Leak Investigation Tools
 
-Audio watermarking for anti-theft, AI detection, and pre-release leak attribution. Inaudible spread-spectrum acoustic steganography and deterministic provenance verification engine.
+Aureal embeds keyed audio IDs for leak investigation and recovery testing. Detection depends on content, carrier settings, and transformations. A match is not proof of authorship or provenance.
 
 ---
 
-### Key Highlights in v0.2.4
+### Key Highlights in v0.2.5
 
 * **Multi-Format Audio Export (WAV & MP3):** Export watermarked masters in **WAV 16-bit PCM** (Lossless CD Master), **WAV 24-bit PCM** (High-Res Studio Master), or **MP3** (320 kbps Insane, 192 kbps Standard, 128 kbps Compact Web). Integrated 100% offline pure-JS LAME encoder (\`lame.min.js\`, 156 KB) with zero CDN dependencies.
-* **Transparent Inaudibility Calibration:**
-  * **Ultrasonic Relocation (High Band):** Relocated High Band carrier and preamble chirp to **17.0–19.5 kHz** (center 18.25 kHz), strictly above the human hearing limit to eliminate audible whistles.
-  * **A-Weighted Mid Band Attenuation:** Scaled Mid Band to 0.22 ($\approx -13.2\\text{ dB}$) and sync chirp to 0.25 ($\approx -20\\text{ dB}$) to match equal-loudness contours, completely eliminating audible beeping in Dual Band.
-  * **Continuous Proportional Masking:** Modulates carrier amplitude to remain $\\ge 32\\text{--}36\\text{ dB}$ below local host music, muting to absolute silence ($0.0$) on pauses and quiet breakdowns ($\le -54\\text{ dBFS}$).
-* **Adversarial Torture Attack Hardening (49/49 Tests Pass):**
-  * **Orthogonal Mid/Side Mixing Matrix:** Unitary decorrelation provides 100% immunity against vocal-remover phase cancellation ($L - R$) attacks.
-  * **Circular Modulo Frame Folding:** Enables 100% detection confidence and 0.00 Bit Error Rate on arbitrary unaligned crops down to 1.8 seconds.
-  * **Rake Receiver Micro-Drift Normalization:** Recovers clock and carrier coherence against speed and pitch drift ($\pm0.2\\%$, $\pm1.0\\%$).
-  * **Extreme Multi-Transcoding Resilience:** Watermarks survive aggressive chained compression: \`WAV -> MP3 128k -> AAC 96k -> MP4 -> MP3 64k -> Opus 96k -> WAV\`.
+* **Watermark configuration:** Select carrier bands and strength for the watermark; audibility varies by source material, playback system, and listener. Test with your own content and delivery chain.
+* **Fixture-tested transformations (local suite only):** The local fixture suite exercises selected codec and signal transformations; passing fixtures do not establish broad or universal recovery guarantees, and results vary by content, encoder, and settings.
+  * **Mid/Side decorrelation:** Local phase-cancellation and vocal-remover-style fixtures passed with the orthogonal Mid/Side mixing matrix.
+  * **Unaligned crops:** A 1.8-second local crop fixture passed with full codeword recovery via circular modulo frame folding; shorter or longer crops are not characterized.
+  * **Speed/pitch drift:** Local resampling fixtures at $\pm0.2\\%$ and $\pm1.0\\%$ passed; arbitrary analog wow/flutter is not tested.
+  * **Chained transcoding:** The chained fixture \`WAV -> MP3 128k -> AAC 96k -> MP4 -> MP3 64k -> Opus 96k -> WAV\` passed in local testing; platform-specific re-encoding pipelines differ.
 * **Standalone Desktop Studio App:**
   * Double-click \`aureal-watermark.exe\` or run \`auralwatermark gui\` to launch the offline Desktop Studio.
   * Official multi-resolution Aureal radar icon and PE metadata embedded into the Windows executable.
   * Built-in pre-embed collision detector warns if a master was already tagged to prevent acoustic cross-talk.
   * Cryptographic auto-ID generator and studio namespace key controls.
-* **Tasteful Modern Studio Attribution UI:** Streamlined verification card with glowing status indicators, source recipient highlight box, and zero technical clutter.
+
 
 ---
 
@@ -37,7 +34,7 @@ Audio watermarking for anti-theft, AI detection, and pre-release leak attributio
 | :--- | :--- | :--- |
 | **\`aureal-watermark.exe\`** | Windows (x64) | **Standalone Executable** — double-click to launch Desktop Studio or run via command prompt. |
 | **\`aureal-watermark.cjs\`** | Universal (All OS) | **Single-file standalone script** — run directly with \`node aureal-watermark.cjs [command]\` (Node.js ≥ 18). |
-| **\`aureal-watermark-v0.2.4-universal.zip\`** | Universal (All OS) | Complete bundle containing CLI, offline Desktop Studio, documentation, and assets. |
+| **\`aureal-watermark-v0.2.5-universal.zip\`** | Universal (All OS) | Complete bundle containing CLI, offline Desktop Studio, documentation, and assets. |
 
 ---
 
@@ -52,27 +49,27 @@ Audio watermarking for anti-theft, AI detection, and pre-release leak attributio
 ./aureal-watermark.exe detect protected.wav --id 883921
 \`\`\`
 
-* **Web Studio:** https://aureal.kellersystems.dev/studio.html
-* **Commercial Licensing & Pricing:** https://aureal.kellersystems.dev/pricing.html
-* **Documentation:** https://aureal.kellersystems.dev/docs.html
+* **Web Studio:** https://aureal.kellersystems.dev/studio
+* **Commercial Licensing & Pricing:** https://aureal.kellersystems.dev/pricing
+* **Documentation:** https://aureal.kellersystems.dev/docs
 `;
 
 async function main() {
-  console.log("Checking for release v0.2.4 on GitHub...");
+  console.log("Checking for release v0.2.5 on GitHub...");
 
   if (!fs.existsSync("dist/aureal-watermark.exe") || fs.statSync("dist/aureal-watermark.exe").size < 1000) {
     throw new Error("dist/aureal-watermark.exe not found! Run scripts/build-all.ps1 first.");
   }
   console.log(`Found built binary dist/aureal-watermark.exe (${fs.statSync("dist/aureal-watermark.exe").size} bytes)`);
 
-  const get24 = await fetch(`https://api.github.com/repos/${repo}/releases/tags/v0.2.4`, {
+  const get24 = await fetch(`https://api.github.com/repos/${repo}/releases/tags/v0.2.5`, {
     headers: { Authorization: "Bearer " + token, "User-Agent": "NodeJS" }
   });
 
   let rel;
   if (get24.ok) {
     rel = await get24.json();
-    console.log("Release v0.2.4 exists (ID:", rel.id, "), updating release info...");
+    console.log("Release v0.2.5 exists (ID:", rel.id, "), updating release info...");
     await fetch(`https://api.github.com/repos/${repo}/releases/${rel.id}`, {
       method: "PATCH",
       headers: {
@@ -81,14 +78,14 @@ async function main() {
         "User-Agent": "NodeJS"
       },
       body: JSON.stringify({
-        name: "Aureal Watermark v0.2.4",
+        name: "Aureal Watermark v0.2.5",
         body: body,
         draft: false,
         prerelease: false
       })
     });
   } else {
-    console.log("Creating new GitHub Release v0.2.4...");
+    console.log("Creating new GitHub Release v0.2.5...");
     const createRes = await fetch(`https://api.github.com/repos/${repo}/releases`, {
       method: "POST",
       headers: {
@@ -97,9 +94,9 @@ async function main() {
         "User-Agent": "NodeJS"
       },
       body: JSON.stringify({
-        tag_name: "v0.2.4",
+        tag_name: "v0.2.5",
         target_commitish: "main",
-        name: "Aureal Watermark v0.2.4",
+        name: "Aureal Watermark v0.2.5",
         body: body,
         draft: false,
         prerelease: false
@@ -145,12 +142,12 @@ async function main() {
   }
 
   await uploadAsset("dist/aureal-watermark.cjs", "aureal-watermark.cjs", "application/javascript");
-  await uploadAsset("dist/aureal-watermark-v0.2.4-universal.zip", "aureal-watermark-v0.2.4-universal.zip", "application/zip");
+  await uploadAsset("dist/aureal-watermark-v0.2.5-universal.zip", "aureal-watermark-v0.2.5-universal.zip", "application/zip");
   if (fs.existsSync("dist/aureal-watermark.exe") && fs.statSync("dist/aureal-watermark.exe").size > 1000) {
     await uploadAsset("dist/aureal-watermark.exe", "aureal-watermark.exe", "application/octet-stream");
   }
 
-  console.log("SUCCESS: Release v0.2.4 fully published with all assets!");
+  console.log("SUCCESS: Release v0.2.5 fully published with all assets!");
 }
 
 main().catch(console.error);

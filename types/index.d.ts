@@ -294,7 +294,7 @@ export interface ForensicReport {
     format: string;
   };
   verification: {
-    status: "VERIFIED_AUTHENTIC" | "PAYLOAD_MISMATCH" | "DETECTION_UNCERTAIN" | "NO_WATERMARK_FOUND";
+    status: "WATERMARK_ID_MATCH" | "WATERMARK_DETECTED" | "PAYLOAD_MISMATCH" | "DETECTION_UNCERTAIN" | "NO_WATERMARK_FOUND";
     detected: boolean;
     recoveredPayloadId: number | null;
     expectedPayloadId: number | null;
@@ -312,8 +312,8 @@ export interface ForensicReport {
     syncMethod: string;
     resyncShiftSamples: number;
   };
-  legalAttribution: {
-    intendedUse: string;
+  interpretation: {
+    note: string;
     methodology: string;
   };
   signature: {
@@ -328,11 +328,12 @@ export const ENGINE_NAME: string;
 export const ENGINE_VERSION: string;
 
 /**
- * Generates a cryptographically sealed, structured forensic audit report.
+ * Generates a detection audit report with file hashes and a shared-key HMAC seal.
+ * The report does not establish authorship, identity, or chain of custody.
  */
 export function generateForensicReport(options: ForensicReportOptions): ForensicReport;
 
 /**
- * Formats a forensic audit report into a printable ASCII certificate.
+ * Formats a detection audit report into human-readable text.
  */
 export function formatForensicReportText(report: ForensicReport): string;

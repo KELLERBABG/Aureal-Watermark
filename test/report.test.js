@@ -46,7 +46,7 @@ test("generateForensicReport produces valid schema and matching hashes", () => {
   assert.equal(report.targetFile.hashes.sha512, expectedSha512);
 
   // Check verification block
-  assert.equal(report.verification.status, "VERIFIED_AUTHENTIC");
+  assert.equal(report.verification.status, "WATERMARK_ID_MATCH");
   assert.equal(report.verification.detected, true);
   assert.equal(report.verification.recoveredPayloadId, 123456);
   assert.equal(report.verification.expectedPayloadId, 123456);
@@ -63,7 +63,9 @@ test("generateForensicReport produces valid schema and matching hashes", () => {
 
   // Check signature
   assert.equal(report.signature.algorithm, "HMAC-SHA256");
+  assert.equal(report.signature.verified, false);
   assert.ok(typeof report.signature.seal === "string" && report.signature.seal.length === 64);
+  assert.match(report.interpretation.note, /not proof of authorship/);
 
   // Verify seal determinism
   const { signature, ...body } = report;
@@ -144,7 +146,7 @@ test("formatForensicReportText outputs clean formatted certificate", () => {
       format: "PCM 16-bit"
     },
     verification: {
-      status: "VERIFIED_AUTHENTIC",
+      status: "WATERMARK_ID_MATCH",
       detected: true,
       recoveredPayloadId: 445566,
       expectedPayloadId: 445566,
@@ -160,8 +162,8 @@ test("formatForensicReportText outputs clean formatted certificate", () => {
       carrierBand: { lowHz: 17000, highHz: 19500 },
       syncMethod: "preamble"
     },
-    legalAttribution: {
-      intendedUse: "Forensic audit proof for copyright enforcement, DMCA notices, or intellectual property verification."
+    interpretation: {
+      note: "A watermark match is not proof of authorship or legal attribution."
     },
     signature: {
       algorithm: "HMAC-SHA256",
@@ -170,9 +172,10 @@ test("formatForensicReportText outputs clean formatted certificate", () => {
   };
 
   const text = formatForensicReportText(dummyReport);
-  assert.ok(text.includes("AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE"));
+  assert.ok(text.includes("AUREAL WATERMARK — DETECTION AUDIT REPORT"));
   assert.ok(text.includes("SHA-256      : a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0"));
   assert.ok(text.includes("Payload ID   : 445566"));
-  assert.ok(text.includes("Verdict      : [AUTHENTIC / MATCH]"));
+  assert.ok(text.includes("Result       : [WATERMARK_ID_MATCH]"));
   assert.ok(text.includes("100.0%"));
+  assert.match(text, /not proof of authorship or legal attribution/);
 });

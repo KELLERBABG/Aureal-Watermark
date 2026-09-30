@@ -125,14 +125,14 @@ test("CLI exports forensic JSON proof and text certificate via --report and --re
   assert.ok(existsSync(reportTxt), "report TXT certificate should exist");
 
   const parsedReport = JSON.parse(readFileSync(reportJson, "utf8"));
-  assert.equal(parsedReport.verification.status, "VERIFIED_AUTHENTIC");
+  assert.equal(parsedReport.verification.status, "WATERMARK_ID_MATCH");
   assert.equal(parsedReport.verification.recoveredPayloadId, 554433);
   assert.equal(parsedReport.verification.expectedPayloadId, 554433);
   assert.ok(parsedReport.targetFile.hashes.sha256.length === 64);
   assert.ok(parsedReport.signature.seal.length === 64);
 
   const certContent = readFileSync(reportTxt, "utf8");
-  assert.match(certContent, /FORENSIC PROOF CERTIFICATE/);
-  assert.match(certContent, /Verdict\s*:\s*\[AUTHENTIC \/ MATCH\]/);
+  assert.match(certContent, /DETECTION AUDIT REPORT/);
+  assert.match(certContent, /Result\s*:\s*\[WATERMARK_ID_MATCH\]/);
 });
 

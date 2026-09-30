@@ -11,7 +11,10 @@
   },
   "scripts": {
     "test": "node --test",
-    "demo": "node bin/auralwatermark.js"
+    "demo": "node bin/auralwatermark.js",
+    "sync:site": "node scripts/sync-site.js",
+    "sync:site:check": "node scripts/sync-site.js --check",
+    "bundle": "node scripts/bundle.js"
   },
   "keywords": [
     "audio",
@@ -41,6 +44,7 @@
     "src/",
     "bin/",
     "demo/",
+    "site/",
     "types/",
     "LICENSE.md",
     "README.md"

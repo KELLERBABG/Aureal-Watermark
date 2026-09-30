@@ -27,8 +27,8 @@ Frequency (Hz)
 | **Codeword Structure** | 32 data bits + 16-bit CRC-16/CCITT-FALSE | $2^{32} = 4,294,967,296$ unique IDs |
 | **Carrier Bands** | `High` (17.0–19.5 kHz, Ultrasonic)<br>`Mid` (8.0–13.0 kHz, A-Weighted)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
 | **Window Shaping** | Continuous periodic Hann window | Zero DC offset, continuous phase transitions across chip boundaries |
-| **Dynamic Psychoacoustic Masking** | Continuous proportional RMS tracking | Carrier tracks local energy, guaranteed $\ge 32\text{--}36\text{ dB}$ below audio; muted on silence ($\le -54\text{ dBFS}$) |
-| **Headroom Protection** | True-Peak Limiter ($\le 0.995$) | Guarantees superposition never clips on maximized $0\text{ dBFS}$ masters |
+| **Dynamic Psychoacoustic Masking** | Continuous proportional RMS tracking | Carrier tracks local energy; nominal embedding target $\ge 32\text{--}36\text{ dB}$ below host audio, subject to source material and `strength` setting; muted on silence ($\le -54\text{ dBFS}$) |
+| **Headroom Protection** | True-Peak Limiter ($\le 0.995$) | Designed to keep superposition below clipping on maximized $0\text{ dBFS}$ masters |
 | **Embedding Level** | $-48.5\text{ dB}$ to $-55\text{ dBFS}$ (nominal) | Scaled by `strength` parameter ($0.01 \le s \le 1.0$) |
 | **Repetition Period** | ~1.0 second per frame | Integrates coherently over time ($S/N \propto \sqrt{N}$) |
 | **Stream Sync Preamble** | In-Phase / Quadrature (IQ) Chirp | Key-derived Linear Frequency Chirp at each frame boundary; fast single-pass lock on arbitrary crop offsets |
@@ -60,9 +60,9 @@ Verdict ◄── Z-Score ◄── Eb/N0 Metric ◄── Frame Folding (Modulo
 
 ---
 
-## 3. Lossy Codec Survival Benchmarks
+### Lossy Codec Survival Benchmarks (Local Fixture Matrix)
 
-Measured across 42 automated test matrices including `ffmpeg` compression round-trips (synthetic & speech material, 20s, 44.1 kHz, strength 0.5):
+Measured across 42 automated test matrices including `ffmpeg` compression round-trips (synthetic & speech material, 20s, 44.1 kHz, strength 0.5). Results are limited to these fixtures and settings; they do not establish survival for all content, bitrates, encoders, or platforms:
 
 | Carrier Band | MP3 128 kbps | MP3 320 kbps | AAC 128 kbps | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) | Digital Silence |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -74,18 +74,18 @@ Measured across 42 automated test matrices including `ffmpeg` compression round-
 
 ## 4. Threat Model, Attack Vectors & Operational Boundaries
 
-### What Aureal Watermark IS Designed To Survive:
-* **Multi-Generational Transcode Chains:** Chained lossy transcodes (e.g. WAV &rarr; MP3 128k &rarr; AAC 96k &rarr; MP4 &rarr; MP3 64k &rarr; Opus 96k &rarr; WAV) survive at 100% confidence via Dual-Band fallback.
-* **Mid/Side Subtraction ($L - R$) & Phase Inversion:** Orthogonal Mid/Side channel decorrelation ($W_L = \frac{M+S}{\sqrt{2}}, W_R = \frac{M-S}{\sqrt{2}}$) ensures that vocal-remover subtraction and single-channel phase flips isolate the side component with $+3\text{ dB}$ processing gain.
+### Tested Locally (Named Fixtures Only):
+* **Multi-Generational Transcode Chains:** Chained lossy transcodes (e.g. WAV &rarr; MP3 128k &rarr; AAC 96k &rarr; MP4 &rarr; MP3 64k &rarr; Opus 96k &rarr; WAV) passed in the current local fixture run via Dual-Band; outcomes vary by source material and encoder settings.
+* **Mid/Side Subtraction ($L - R$) & Phase Inversion:** Orthogonal Mid/Side channel decorrelation ($W_L = \frac{M+S}{\sqrt{2}}, W_R = \frac{M-S}{\sqrt{2}}$) leaves the watermark in the Mid component; single-channel phase flips and vocal-remover subtraction passed in local fixtures.
 * **Linear Playback Speed & Pitch Drift ($\pm1.0\%$):** Frequency rake receiver sweeps micro-drift factors ($\pm0.2\%, \pm0.5\%, \pm1.0\%$) to lock carrier phase coherence after analog playback speed changes.
 * **Arbitrary Unaligned Crops down to 1.0s:** Circular modulo frame folding reconstructs complete 48-bit codewords from fragmented segments without discarding audio before the preamble.
 * **Lossy Codec Transcoding:** MP3 (64k–320k), AAC (64k–256k), Opus, WebM, Ogg Vorbis.
-* **Air-Gap Acoustic Transmission:** Survives speaker-to-phone-mic playback in reverberant acoustic environments.
-* **Extreme Harmonic Overdrive:** Tolerates $+12\text{ dB}$ hard clipping without symbol sign corruption.
+* **Air-Gap Acoustic Transmission:** Passed speaker-to-phone-mic playback in the local reverberant-room fixture; real rooms and devices vary.
+* **Extreme Harmonic Overdrive:** Tolerated $+12\text{ dB}$ hard clipping in fixtures without symbol sign corruption.
 * **Acoustic Background Noise:** Additive noise down to $-30\text{ dBFS}$.
-* **Stereo-to-Mono Downmixing:** In-phase Mid component reconstructs with $+3\text{ dB}$ gain.
+* **Stereo-to-Mono Downmixing:** In-phase Mid component reconstructs with $+3\text{ dB}$ gain in the current detector design.
 * **Multi-Tenant CDMA Coexistence:** Multiple independent studios can mark the same track using distinct private keys; all watermarks coexist and detect independently without destructive interference.
 
-### Operational Boundaries & Protections:
-* **Same-Key Overwrite Collisions:** Re-marking a file using the *same* private key with a conflicting ID causes destructive bit interference, intentionally preventing unauthorized modification or spoofing under an existing studio key.
+### Operational Boundaries & Known Limitations:
+* **Same-Key Overwrite Collisions:** Re-marking a file using the *same* private key with a conflicting ID causes destructive bit interference; the original ID is not reliably recoverable. Treat this as a limitation of the current design, not a security feature.
 * **32-Bit Payload Boundary:** 32 bits ($4.29 \times 10^9$ unique IDs) is intentionally designed as an ultra-lightweight pointer/ticket architecture (like an ISRC or database foreign key), not a multi-kilobyte metadata container.

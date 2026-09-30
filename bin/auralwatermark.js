@@ -84,12 +84,57 @@ function die(msg, code = 2) {
   process.exit(code);
 }
 
+// --- Offline (file://) link rewriting ---------------------------------------
+// The embedded Desktop Studio HTML is written to the OS temp directory and
+// opened via file://, where Cloudflare Pages `_redirects` routes do not apply.
+// Absolute links like /studio, /pricing, /docs, /legal/... would resolve to
+// filesystem roots and break. The studio page only needs two offline targets
+// (the bundled studio + pricing pages); everything else web-only is degraded
+// gracefully.
+
+const OFFLINE_LOCAL_PATHS = new Set(["/studio.html", "/pricing.html"]);
+
+function adaptHtmlForOffline(html) {
+  // 1. Navigation links with an offline target: /studio -> studio.html,
+  //    /pricing -> pricing.html (both written next to the entry file in tmp).
+  html = html.replace(
+    /(href\s*=\s*")(?:\/studio|\/pricing)(#[^"]*)?("|')/g,
+    (m, pre, hash, quote) => {
+      const local = m.includes("/studio") ? "studio.html" : "pricing.html";
+      return `${pre}${local}${hash || ""}${quote}`;
+    }
+  );
+
+  // 2. Homepage link: href="/" cannot resolve offline -> stay on this page.
+  html = html.replace(/(href\s*=\s*")(\/)("|')/g, "$1#$3");
+
+  // 3. Remaining site-absolute links (docs, legal, verifier, asset favicons)
+  //    have no offline equivalent. Point them at the upstream site so the
+  //    user gets the real page instead of a file:// error. If no site URL is
+  //    configured, strip the href so they render as inert text.
+  const siteBase = process.env.AUREAL_SITE_BASE_URL;
+  if (siteBase) {
+    const base = siteBase.endsWith("/") ? siteBase : `${siteBase}/`;
+    html = html.replace(
+      /(href\s*=\s*")(\/[^"']*)("|')/g,
+      (m, pre, path, quote) =>
+        OFFLINE_LOCAL_PATHS.has(path) ? m : `${pre}${base}${path.slice(1)}${quote}`
+    );
+  } else {
+    html = html.replace(/href\s*=\s*"(\/[^"']*)"/g, 'href="#" data-offline-unavailable="$1"');
+  }
+
+  return html;
+}
+
 function getStudioHtml() {
   const candidates = [
     join(process.cwd(), "studio.html"),
     join(process.cwd(), "demo", "studio.html"),
+    join(process.cwd(), "site", "demo", "studio.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "studio.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "studio.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "site", "demo", "studio.html"),
     join(process.cwd(), "index.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "index.html"),
   ];
@@ -107,8 +152,10 @@ function getPricingHtml() {
   const candidates = [
     join(process.cwd(), "pricing.html"),
     join(process.cwd(), "demo", "pricing.html"),
+    join(process.cwd(), "site", "demo", "pricing.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "pricing.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "pricing.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "site", "demo", "pricing.html"),
   ];
 
   for (const c of candidates) {
@@ -264,8 +311,8 @@ function findAppRuntime() {
 }
 
 function launchDesktopApp() {
-  const html = getStudioHtml();
-  const pricingHtml = getPricingHtml();
+  let html = adaptHtmlForOffline(getStudioHtml());
+  const pricingHtml = adaptHtmlForOffline(getPricingHtml());
   const localFile = join(tmpdir(), "studio.html");
   const localStudioAlias = join(tmpdir(), "aureal-watermark-studio.html");
   const localPricingFile = join(tmpdir(), "pricing.html");

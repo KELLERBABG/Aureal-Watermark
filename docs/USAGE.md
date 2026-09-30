@@ -1,10 +1,12 @@
 # Aureal Watermark — Usage Guide
 
-**Version:** 0.2.4 &bull; Node.js &ge; 18 &bull; Standalone Windows Executable & Universal Bundle
+**Version:** 0.2.5 &bull; Node.js &ge; 18 &bull; Standalone Windows Executable & Universal Bundle
 
 ---
 
 ## 1. Desktop Studio App & CLI Quick Start
+
+All commands below run locally. Detection results depend on the source audio, carrier settings, and transformations applied after embedding; a watermark match is a detection result, not proof of authorship or ownership.
 
 ### Standalone Desktop Studio GUI
 ```powershell
@@ -13,7 +15,7 @@ auralwatermark
 # or explicitly:
 auralwatermark gui
 ```
-Features interactive waveform visualization, recipient collision pre-checks, secure cryptographic ID generators, and multi-format audio export (WAV 16/24-bit and MP3 320/192/128k).
+Features interactive waveform visualization, recipient collision pre-checks, an ID generator, and multi-format audio export (WAV 16/24-bit and MP3 320/192/128k).
 
 ### CLI Usage
 ```powershell
@@ -47,7 +49,7 @@ Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** 
 |---|---|---|
 | `--id` | **Required** | Unsigned 32-bit tracking ID (`0` to `4294967295`). |
 | `--key` | `aural-watermark-default-key` | Secret salt used for PRNG sequence generation. Must match at detection time. |
-| `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Inaudible and buried $\ge 32\text{--}36\text{ dB}$ below host audio. |
+| `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Nominal target is $\ge 32\text{--}36\text{ dB}$ below host audio; audibility depends on source material, playback system, and listener. |
 | `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
 
 ### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json] [--report proof.json] [--report-txt cert.txt]`
@@ -58,16 +60,16 @@ Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** 
 | `--key` | `aural-watermark-default-key` | Secret salt matching the embedder. |
 | `--band` | `auto` | Evaluates all bands and returns the highest-scoring match. |
 | `--json` | `false` | Emits structured JSON diagnostics (BER, confidence, z-score, frame count). |
-| `--report` | *None* | Path to export a cryptographically sealed JSON forensic audit proof. |
-| `--report-txt` | *None* | Path to export a human-readable ASCII certificate for DMCA/evidence exhibits. |
+| `--report` | *None* | Path to export a JSON audit report with file hashes, detection metrics, and an HMAC integrity seal. |
+| `--report-txt` | *None* | Path to export a human-readable detection audit report. Neither report independently proves authorship, ownership, scan time, chain of custody, or legal admissibility. |
 
 ---
 
 ## 3. Web Studio & Offline Browser Verifier
 
-Open `studio.html` or `demo/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
+Open `site/demo/studio.html` or `site/demo/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
 
-* **Verify Audio Tab:** Select or drop any audio file (MP3, WAV, AAC, M4A, OGG, FLAC) to extract or verify the provenance payload.
+* **Verify Audio Tab:** Select or drop any audio file (MP3, WAV, AAC, M4A, OGG, FLAC) to extract or verify the embedded payload.
 * **Embed Watermark Tab:** Select a source audio file, enter a 32-bit ID, choose the frequency band, and export the watermarked audio.
 
 ### Programmatic Browser API
@@ -131,7 +133,7 @@ Liveness and readiness probe:
 {
   "status": "ok",
   "service": "aureal-watermark-microservice",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "uptimeSeconds": 142,
   "dsp": "active",
   "ffmpeg": true
@@ -159,9 +161,9 @@ curl -X POST "http://localhost:8080/v1/detect?id=1234567&report=true" \
 
 ---
 
-## 6. Cryptographic Forensic Proofs (`--report`)
+## 6. Watermark Detection Audit Reports (`--report`)
 
-When presenting audio leak evidence for copyright claims, DMCA notices, or legal review, export a tamper-evident audit report:
+Export an audit report for your own records. A recovered ID is a detection result, not proof of authorship, ownership, or when an audio file was created:
 
 ```bash
 auralwatermark detect leak.mp3 --id 1234567 --report proof.json --report-txt cert.txt
@@ -169,9 +171,9 @@ auralwatermark detect leak.mp3 --id 1234567 --report proof.json --report-txt cer
 
 The resulting `proof.json` includes:
 * **Cryptographic Hashes:** SHA-256 and SHA-512 over the investigated file bytes.
-* **Integrity Status:** `VERIFIED_AUTHENTIC`, `PAYLOAD_MISMATCH`, or `NO_WATERMARK_FOUND`.
+* **Detection Status:** `WATERMARK_ID_MATCH`, `WATERMARK_DETECTED`, `PAYLOAD_MISMATCH`, `DETECTION_UNCERTAIN`, or `NO_WATERMARK_FOUND`.
 * **Forensic Layer Metrics:** Raw $E_b/N_0$ (dB), SQNR (dB), Z-score, carrier bands, and CRC32 verification.
-* **Anti-Tamper Seal:** Canonical HMAC-SHA256 signature over the report payload.
+* **Report Integrity Seal:** HMAC-SHA256 over the report payload, using a shared key. This is not a public-key signature or identity authentication; the default key is public in the source.
 
 ---
 
@@ -179,7 +181,7 @@ The resulting `proof.json` includes:
 
 | Scenario | Recommended Band | Rationale |
 | :--- | :--- | :--- |
-| **Archival Masters / Lossless Distribution** | `high` | Complete inaudibility in near-ultrasound (17.0–19.5 kHz). |
+| **Archival Masters / Lossless Distribution** | `high` | Places most watermark energy in the 17.0–19.5 kHz band; audibility depends on source, hardware, and listener. |
 | **Podcasts, Streaming, Social Media (MP3/AAC)** | `dual` (embed) + `auto` (detect) | Redundant encoding across mid and high bands survives encoder low-passes. |
 | **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (8–13 kHz) masked under speech sibilants and music transients. |
 

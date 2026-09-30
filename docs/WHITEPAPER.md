@@ -1,18 +1,18 @@
 # Aureal Watermark Whitepaper
 
-**Version:** 0.2.4 &bull; **Status:** Production-Ready DSP Core & Universal Application Bundle
+**Version:** 0.2.5 &bull; **Status:** Technical overview; benchmark results are limited to named local fixtures
 
-> An inaudible spread-spectrum steganographic audio watermark proving that an audio recording originates from a verified human creator or official source. Verifiable in seconds, client-side in the browser, with zero server infrastructure.
+> A spread-spectrum audio watermarking implementation for embedding and recovering keyed identifiers in audio. A match does not prove authorship, ownership, identity, or origin.
 
 ---
 
 ## 1. Abstract
 
-With the proliferation of realistic voice-cloning models, deepfake audio and unauthorized voice scraping have become significant legal and commercial liabilities. High-profile podcast hosts, voice actors, musicians, and executives frequently find their voices cloned or leaked without consent. While regulatory frameworks like the EU AI Act mandate provenance transparency for synthetic media, the industry lacks an accessible, client-side verification tool to prove the inverse: **This audio is an authentic, registered human production.**
+With the proliferation of realistic voice-cloning models, deepfake audio and unauthorized voice scraping have become significant legal and commercial liabilities. High-profile podcast hosts, voice actors, musicians, and executives frequently find their voices cloned or leaked without consent. While regulatory frameworks like the EU AI Act mandate provenance transparency for synthetic media, this document describes one experimental approach to embedding identifiers; it does not authenticate a human creator or prove that a recording is original.
 
-Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across strictly near-ultrasonic bands (17.0–19.5 kHz) and A-weighted speech-masked mid-bands (8–13 kHz). The payload is protected by a CRC-16 checksum, supports 2-bit reliability-ordered error correction, repeats coherently across the full track duration, and remains invariant to volume/gain shifts.
+Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across strictly near-ultrasonic bands (17.0–19.5 kHz) and A-weighted speech-masked mid-bands (8–13 kHz). The payload includes a CRC-16 checksum and uses repeated symbols and error correction. Recovery depends on audio content and transformations.
 
-Tested across multi-generation `ffmpeg` encoding round-trips, the watermark survives MP3 (128 kbps / 320 kbps) and AAC (128 kbps) re-encoding while correctly rejecting unregistered or mismatched IDs.
+Selected local `ffmpeg` fixtures exercise MP3/AAC transcodes and mismatched IDs. These tests do not guarantee recovery across all encoders, content, bitrates, or services.
 
 ---
 
@@ -25,7 +25,7 @@ Tested across multi-generation `ffmpeg` encoding round-trips, the watermark surv
 | **Existing watermarking research is locked in proprietary labs** | Creators lack an instant, zero-dependency, 1-click offline attribution tool. |
 
 **Primary Buyers:** Podcast networks, radio broadcasters, record labels, legal evidence archives, and voice talent agencies.
-**Cost Structure:** Zero server overhead. Embedding happens locally in the export pipeline; detection runs client-side in browser memory.
+**Cost Structure:** The CLI and browser demo process audio locally within their respective environments. Hosting, external assets, and license activation may involve network requests.
 
 ---
 
@@ -44,15 +44,15 @@ Each of the 48 symbols is modulated by an independent $\pm 1$ pseudorandom noise
 
 For each symbol slot (24 chips), a Hann-windowed sinusoidal carrier burst at the band center is multiplied by the PN chip sign. Energy is strictly confined within the configured band; one complete codeword spans exactly one frame (~1.0 second), repeating continuously across the track duration. This provides coherent integration gain with every additional second of audio.
 
-**Deployment Profiles:**
+**Configured Profiles (audibility and recovery are content-dependent):**
 
 | Mode | Carrier Band | Characteristics |
 | :--- | :--- | :--- |
-| `high` | 17.0–19.5 kHz | Maximum psychoacoustic stealth; strictly inaudible near-ultrasound; high-bitrate & lossless. |
-| `mid` | 8.0–13.0 kHz | Survives lossy compression low-pass filters; A-weighted for transparent masking. |
-| `dual` | Both bands | Redundant simultaneous embedding across both bands; detector automatically falls back to best band. |
+| `high` | 17.0–19.5 kHz | Places energy in a near-ultrasonic band; audibility and recovery depend on source material and playback equipment. |
+| `mid` | 8.0–13.0 kHz | Uses a mid-frequency band; recovery depends on the audio and the codec's frequency response. |
+| `dual` | Both bands | Embeds in both configured bands; the detector scores the available bands. This does not guarantee recovery after processing. |
 
-In `dual` mode, the embedder scales each copy by $\times 0.7$ with A-weighted attenuation on the mid band to maintain complete psychoacoustic transparency ($-51\text{--}-55\text{ dBFS}$ nominal level).
+In `dual` mode, the embedder scales each copy with configured attenuation to set $\times 0.7$ with A-weighted attenuation on the mid band to set configured band levels ($-51\text{--}-55\text{ dBFS}$ nominal level).
 
 ### 3.3 Detection Pipeline
 
@@ -69,13 +69,13 @@ In `dual` mode, the embedder scales each copy by $\times 0.7$ with A-weighted at
 
 ## 4. Evaluation & Measured Benchmarks
 
-Automated test suite (42 tests via `node --test`) including 11 `ffmpeg` lossy codec round-trips (synthetic & speech material, 20s, 44.1 kHz mono, strength 0.5):
+The current automated suite contains Node tests and selected local `ffmpeg` fixtures. Fixture coverage and outcomes are specific to their synthetic inputs and configured transformations; they are not a broad real-world benchmark.
 
 | Carrier Band | MP3 128k | MP3 320k | AAC 128k | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **High** | ✔ Detected | ✔ Detected | ✔ Detected | ✔ Detected | ✔ Detected |
-| **Mid** | ✔ Detected | ✔ Detected | ✔ Detected | ✔ Detected | ✔ Detected |
-| **Dual** | ✔ Detected | ✔ Detected | ✔ Detected | ✔ Detected | ✔ Detected |
+| **High** | Fixture tested | Fixture tested | Fixture tested | Fixture tested | Fixture tested |
+| **Mid** | Fixture tested | Fixture tested | Fixture tested | Fixture tested | Fixture tested |
+| **Dual** | Fixture tested | Fixture tested | Fixture tested | Fixture tested | Fixture tested |
 
 * **Rejection Accuracy:** Unmarked audio, wrong secret keys, and mismatched expected IDs are rejected with $0.0\%$ confidence.
 * **Blind Recovery:** Recovers embedded 32-bit payloads without prior ID knowledge via CRC-16 validation.
@@ -85,18 +85,18 @@ Automated test suite (42 tests via `node --test`) including 11 `ffmpeg` lossy co
 
 ## 5. Threat Model & Explicit Boundaries
 
-### Verified Capabilities
-* **Key-Bound Forensic Attribution:** Proves conclusively that a leaked recording originated from a specific master or was licensed to a specific recipient.
-* **Adversarial Channel Resilience:** Survives Mid/Side vocal-remover subtraction ($L - R$) and anti-phase cancellations via unitary orthogonal mixing ($W_L = \frac{M+S}{\sqrt{2}}, W_R = \frac{M-S}{\sqrt{2}}$).
-* **Multi-Generational Transcoding:** Retains $100\%$ confidence and $0.00$ BER through complex re-encoding chains (WAV &rarr; MP3 128k &rarr; AAC 96k &rarr; MP4 &rarr; MP3 64k &rarr; Opus 96k &rarr; WAV).
-* **Analog Speed & Pitch Drift ($\pm1.0\%$):** Frequency rake receiver sweeps drift factors to lock carrier phase coherence after playback speed modifications.
-* **Micro-Snippet Reconstruction (1.0s &ndash; 1.8s):** Circular modulo frame folding reconstructs complete codewords across unaligned cuts.
-* **Multi-Tenant CDMA Coexistence:** Multiple studios can embed distinct watermarks on the same file with independent private keys; all coexist without destructive cross-talk.
+### Selected Fixture Results
+* **Keyed ID Detection:** A matching watermark ID is one signal that can be compared with independently maintained distribution records; it does not prove origin or attribution.
+* **Adversarial Channel Resilience:** Was detected in a synthetic mid/side fixture; this does not establish general adversarial resilience. selected synthetic mid/side and phase-inversion fixtures ($W_L = \frac{M+S}{\sqrt{2}}, W_R = \frac{M-S}{\sqrt{2}}$).
+* **Selected transcode fixture:** Passed a local fixture; it does not establish universal recovery. Reported $100\%$ confidence and $0.00$ BER through complex re-encoding chains (WAV &rarr; MP3 128k &rarr; AAC 96k &rarr; MP4 &rarr; MP3 64k &rarr; Opus 96k &rarr; WAV).
+* **Analog Speed & Pitch Drift ($\pm1.0\%$):** Selected local resampling fixtures passed; this does not guarantee recovery with arbitrary analog wow/flutter or other speed changes.
+* **Short crop fixture:** A 1.8-second local synthetic crop passed; recovery at other durations or on other audio is not guaranteed.
+* **Multiple distinct keys:** Several local synthetic layered-watermark fixtures passed. This does not establish general multi-tenant coexistence for arbitrary files or repeated processing.
 
 ### Operational Boundaries
 * **Extreme Low-Pass Filtering ($<4\text{ kHz}$):** Audio low-passed below 4 kHz (e.g. vintage telephone bandpass) strips all modulation bands.
 * **Cryptographic Signatures:** Payloads are unsigned uint32 integers with CRC-16 integrity. (Cryptographic PKI digital signatures over metadata are scheduled for future revisions).
-* **Same-Key Overwriting:** Re-marking a file using the *same* private key with a conflicting ID causes destructive bit interference, intentionally preventing unauthorized tampering under an existing studio key.
+* **Same-key re-embedding:** Re-embedding with a conflicting ID is not reliably recoverable; this should be treated as a limitation, not a tamper-protection feature.
 
 ---
 

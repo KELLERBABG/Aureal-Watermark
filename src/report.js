@@ -1,12 +1,13 @@
-// src/report.js — Forensic proof certificate and audit report generator
+// src/report.js — Watermark detection audit report generator
 import { createHash, createHmac } from "node:crypto";
 
 export const REPORT_SCHEMA_VERSION = "1.0.0";
-export const ENGINE_NAME = "Aureal Watermark Forensic DSP Engine";
+export const ENGINE_NAME = "Aureal Watermark DSP Engine";
 export const ENGINE_VERSION = "0.2.5";
 
 /**
- * Generate a cryptographically sealed, structured forensic audit report.
+ * Generate a structured detection audit report with file hashes and an HMAC integrity seal.
+ * The seal is not a public-key signature and does not establish authorship or chain of custody.
  *
  * @param {object} params
  * @param {object} params.detectionResult Result returned by detectWatermark()
@@ -14,7 +15,7 @@ export const ENGINE_VERSION = "0.2.5";
  * @param {object} [params.audioMetadata] Audio format metadata (durationSec, sampleRate, channels, format)
  * @param {string} [params.filePath] Optional path of analyzed file
  * @param {number} [params.expectedPayloadId] Optional expected payload ID to verify against
- * @param {string} [params.secret] Secret used to compute HMAC seal (defaults to deterministic key)
+ * @param {string} [params.secret] Shared secret used to compute the HMAC (defaults to a public deterministic key)
  * @returns {object} Structured forensic report object
  */
 export function generateForensicReport({
@@ -40,20 +41,18 @@ export function generateForensicReport({
   let status = "NO_WATERMARK_FOUND";
   let payloadMatch = null;
 
-  if (detected) {
-    if (expectedId !== null) {
-      if (recoveredId === expectedId) {
-        status = "VERIFIED_AUTHENTIC";
-        payloadMatch = true;
-      } else {
-        status = "PAYLOAD_MISMATCH";
-        payloadMatch = false;
-      }
+  if (detected && expectedId !== null) {
+    if (recoveredId === expectedId) {
+      status = "WATERMARK_ID_MATCH";
+      payloadMatch = true;
     } else {
-      status = detectionResult.confidence >= 0.75 && (detectionResult.crcOk !== false)
-        ? "VERIFIED_AUTHENTIC"
-        : "DETECTION_UNCERTAIN";
+      status = "PAYLOAD_MISMATCH";
+      payloadMatch = false;
     }
+  } else if (detected) {
+    status = detectionResult.confidence >= 0.75 && (detectionResult.crcOk !== false)
+      ? "WATERMARK_DETECTED"
+      : "DETECTION_UNCERTAIN";
   }
 
   const details = detectionResult.details || {};
@@ -103,27 +102,28 @@ export function generateForensicReport({
       syncMethod: details.syncMethod ?? "unknown",
       resyncShiftSamples: details.resyncShiftSamples ?? 0
     },
-    legalAttribution: {
-      intendedUse: "Forensic audit proof for copyright enforcement, DMCA notices, or intellectual property verification.",
+    interpretation: {
+      note: "A watermark match is not proof of authorship, ownership, identity, creation time, or chain of custody.",
       methodology: "Direct-sequence spread-spectrum (DSSS) pseudo-random phase modulation with cyclic modulo integration and matched filter rake receiver."
     }
   };
 
-  // Compute canonical deterministic seal over payload (excluding signature block)
+  // Compute an HMAC integrity seal. The default secret is public, so production users
+  // should supply and protect a private shared secret; this is not a digital signature.
   const canonicalPayload = JSON.stringify(report, Object.keys(report).sort());
   const seal = createHmac("sha256", String(secret)).update(canonicalPayload).digest("hex");
 
   report.signature = {
     algorithm: "HMAC-SHA256",
     seal,
-    verified: true
+    verified: false
   };
 
   return report;
 }
 
 /**
- * Format a forensic report as an ASCII certificate for legal notices / DMCA exhibits.
+ * Format a forensic report as a human-readable detection audit report.
  *
  * @param {object} report Result from generateForensicReport()
  * @returns {string} Human-readable certificate
@@ -132,12 +132,12 @@ export function formatForensicReportText(report) {
   const line = "=".repeat(78);
   const subline = "-".repeat(78);
 
-  const statusColor = report.verification.status === "VERIFIED_AUTHENTIC" ? "[AUTHENTIC / MATCH]" : `[${report.verification.status}]`;
+  const statusLabel = `[${report.verification.status}]`;
 
   return [
     line,
-    "              AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE               ",
-    "               Cryptographic Audio Authentication & Audit                ",
+    "              AUREAL WATERMARK — DETECTION AUDIT REPORT               ",
+    "                 Watermark ID Matching Results                        ",
     line,
     `Date/Time (UTC) : ${report.generatedAt}`,
     `Engine          : ${report.engine.name} v${report.engine.version}`,
@@ -149,8 +149,8 @@ export function formatForensicReportText(report) {
     `   SHA-256      : ${report.targetFile.hashes.sha256}`,
     `   SHA-512      : ${report.targetFile.hashes.sha512.slice(0, 48)}...`,
     subline,
-    "2. FORENSIC VERIFICATION RESULT",
-    `   Verdict      : ${statusColor}`,
+    "2. WATERMARK DETECTION RESULT",
+    `   Result       : ${statusLabel}`,
     `   Detected     : ${report.verification.detected ? "YES" : "NO"}`,
     `   Payload ID   : ${report.verification.recoveredPayloadId ?? "None"}`,
     report.verification.expectedPayloadId !== null
@@ -167,11 +167,11 @@ export function formatForensicReportText(report) {
     `   Carrier Band : ${report.forensicMetrics.carrierBand ? `${report.forensicMetrics.carrierBand.lowHz} - ${report.forensicMetrics.carrierBand.highHz} Hz` : "N/A"}`,
     `   Sync Method  : ${report.forensicMetrics.syncMethod}`,
     subline,
-    "4. INTEGRITY SEAL",
-    `   Algorithm    : ${report.signature.algorithm}`,
+    "4. REPORT INTEGRITY SEAL (not an identity signature)",
+    `   Algorithm    : ${report.signature.algorithm} (not independently verified)`,
     `   Seal Hash    : ${report.signature.seal}`,
     line,
-    "Attribution: " + report.legalAttribution.intendedUse,
+    "Note: A watermark match is not proof of authorship or legal attribution.",
     line
   ].filter(Boolean).join("\n");
 }

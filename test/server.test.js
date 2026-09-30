@@ -121,10 +121,12 @@ test("POST /v1/embed and POST /v1/detect with JSON Base64 payload and forensic r
 
   // Verify forensic report inclusion
   assert.ok(detectData.forensicReport);
-  assert.equal(detectData.forensicReport.verification.status, "VERIFIED_AUTHENTIC");
+  assert.equal(detectData.forensicReport.verification.status, "WATERMARK_DETECTED");
   assert.ok(detectData.forensicReport.targetFile.hashes.sha256.length === 64);
   assert.ok(detectData.forensicReport.signature.seal.length === 64);
-  assert.ok(detectData.forensicCertificateText.includes("AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE"));
+  assert.equal(detectData.forensicReport.signature.verified, false);
+  assert.match(detectData.forensicReport.interpretation.note, /not proof of authorship/);
+  assert.ok(detectData.forensicCertificateText.includes("AUREAL WATERMARK — DETECTION AUDIT REPORT"));
 });
 
 test("POST /v1/embed rejects requests without valid payload ID", async () => {

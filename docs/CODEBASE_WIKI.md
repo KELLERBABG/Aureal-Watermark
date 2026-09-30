@@ -28,11 +28,13 @@ Aureal-Watermark/
 │   ├── license.js                  # Polar.sh license validation & local offline caching
 │   └── browser/
 │       └── aural-watermark-verify.js # Browser-native AudioBuffer & DataView verifier
-├── studio.html                     # Interactive Studio Web UI (Pure client-side offline app)
-├── pricing.html                    # Commercial Licensing Matrix & Tier Specifications
-├── demo/
-│   ├── studio.html                 # Interactive Studio Web UI (Mirror)
-│   └── verifier.html               # Dual-tab Embed & Verify Studio (Runs offline over file://)
+├── site/
+│   ├── index.html                  # Public landing page
+│   ├── demo/                       # Public Studio, verifier, docs, pricing and mirrored landing pages
+│   ├── legal/                      # Public legal HTML pages
+│   └── docs/, pricing/, studio/, verifier/ # Clean-route index pages
+├── _redirects                      # Public clean routes and legacy page aliases
+├── demo/                           # Demo engine and non-HTML demo assets
 ├── docs/
 │   ├── CODEBASE_WIKI.md            # (This file) Complete codebase reference
 │   ├── WHITEPAPER.md               # Threat model, benchmark data, and formal specifications
@@ -171,15 +173,15 @@ Aureal-Watermark/
 ---
 
 ### `src/report.js`
-* **Role:** Cryptographic forensic proof certificate generator.
+* **Role:** Watermark detection audit report and human-readable output generator.
 * **Key Functions:**
   * `generateForensicReport(options)`:
     * Computes SHA-256 and SHA-512 hashes over evidence audio file bytes.
-    * Evaluates forensic verification status (`VERIFIED_AUTHENTIC`, `PAYLOAD_MISMATCH`, `NO_WATERMARK_FOUND`).
+    * Reports a detector status (`WATERMARK_ID_MATCH`, `WATERMARK_DETECTED`, `PAYLOAD_MISMATCH`, `DETECTION_UNCERTAIN`, or `NO_WATERMARK_FOUND`); a match does not establish authorship.
     * Encapsulates physical-layer DSP metrics: $E_b/N_0$ (dB), SQNR (dB), Z-score, carrier band frequency limits, and CRC integrity.
-    * Computes a canonical HMAC-SHA256 seal to prevent evidence tampering.
+    * Computes a canonical HMAC-SHA256 report-integrity seal using a shared secret; the default is public and this is not an identity signature or chain of custody.
   * `formatForensicReportText(report)`:
-    * Renders a human-readable ASCII certificate suitable for legal DMCA notice attachments and intellectual property exhibits.
+    * Renders a human-readable ASCII audit report; it does not certify legal admissibility or authorship.
 
 ---
 

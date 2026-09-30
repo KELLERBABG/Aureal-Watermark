@@ -516,6 +516,7 @@
         </div>
       </a>
       <div class="nav-links">
+        <a href="/" class="nav-link">Homepage</a>
         <a href="/studio" class="nav-link">Studio</a>
         <a href="/pricing" class="nav-link">Pricing</a>
         <a href="/docs" class="nav-link active">Documentation</a>
@@ -561,7 +562,7 @@
       <div class="sidebar-group">
         <div class="sidebar-title">Commercial &amp; Production</div>
         <ul class="sidebar-menu">
-          <li><a href="#forensic-proofs">Forensic Proofs &amp; Audits</a></li>
+          <li><a href="#forensic-proofs">Detection Audit Reports</a></li>
           <li><a href="#licensing-sla">Dual Licensing Model</a></li>
           <li><a href="#airgapped">Air-Gapped &amp; On-Premise</a></li>
           <li><a href="#benchmarks">Transcode Survival Tests</a></li>
@@ -740,12 +741,12 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
               <tr>
                 <td><code>--report &lt;path&gt;</code></td>
                 <td><em>Omitted</em></td>
-                <td>Exports an immutable, schema-validated cryptographic JSON forensic audit report.</td>
+                <td>Exports a JSON audit report with file hashes, detection metrics, and an HMAC integrity seal.</td>
               </tr>
               <tr>
                 <td><code>--report-txt &lt;path&gt;</code></td>
                 <td><em>Omitted</em></td>
-                <td>Exports an ISO-8601 UTC signed plain-text audit certificate for legal filings.</td>
+                <td>Exports a human-readable detection report with a timestamp; it is not an identity signature, chain-of-custody record, or legal certification.</td>
               </tr>
             </tbody>
           </table>
@@ -768,7 +769,7 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
 
 // 1. Decode any web-supported format (MP3, AAC, FLAC, WAV, OGG)
 const audioContext = new AudioContext();
-const response = await fetch("streamed_audio.mp3");
+const response = await fetch("/streamed_audio.mp3");
 const arrayBuffer = await response.arrayBuffer();
 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
@@ -785,7 +786,7 @@ if (result.detected) {
 
         <div class="callout warn">
           <h4>Privacy &amp; Air-Gapped Advantage</h4>
-          <p>Because the detection executes inside the client's Web Audio DSP thread, zero megabytes of audio are ever uploaded to cloud endpoints. This satisfies strict enterprise NDA and zero-data-retention compliance policies.</p>
+          <p>In the web demo, audio decoding and DSP run in the browser; license activation is separate and contacts Polar.sh. Confirm the implementation, hosting, and browser environment meet your privacy requirements.</p>
         </div>
       </section>
 
@@ -831,6 +832,18 @@ console.log(verification);
         </div>
       </section>
 
+      <!-- SECTION: SUPPORTED FORMATS -->
+      <section class="doc-section" id="audio-formats">
+        <h2>Supported Formats &amp; PCM</h2>
+        <p>
+          The core engine reads and writes uncompressed PCM WAV data, including 16-bit and 24-bit integer samples, mono through multichannel layouts, WAVE_FORMAT_EXTENSIBLE headers, and chunk padding. Compressed input is decoded first: the browser tools accept MP3, AAC, M4A, OGG, and FLAC through the Web Audio API before embedding or scanning.
+        </p>
+        <div class="callout">
+          <h4>Recommended workflow</h4>
+          <p>Embed into the highest-quality master you have (WAV preferred), then distribute lossy copies as needed. Detection runs on whatever format the recipient receives; lossy codecs may reduce detection confidence depending on bitrate and carrier band.</p>
+        </div>
+      </section>
+
       <!-- SECTION: PSYCHOACOUSTIC THEORY -->
       <section class="doc-section" id="psychoacoustics-theory">
         <h2>Human Auditory System (HAS) Masking</h2>
@@ -856,21 +869,32 @@ console.log(verification);
         </p>
         <ul style="padding-left: 1.5rem; color: var(--text-muted); margin-bottom: 1.5rem;">
           <li style="margin-bottom: 0.5rem;">The energy per frequency bin is tens of decibels lower than ambient acoustic noise.</li>
-          <li style="margin-bottom: 0.5rem;">Lossy audio compression algorithms (MP3, AAC, YouTube, TikTok) treat the watermark as natural harmonic texture and preserve it during encoding.</li>
+          <li style="margin-bottom: 0.5rem;">Recovery after lossy compression depends on the audio, codec, bitrate, and subsequent processing; test the formats used in your own delivery chain.</li>
           <li style="margin-bottom: 0.5rem;">A decoder with the matching key is required to recover the embedded payload in the current design.</li>
         </ul>
       </section>
 
+      <!-- SECTION: CODEWORD FORMAT -->
+      <section class="doc-section" id="codeword-format">
+        <h2>Payload &amp; Error Correction</h2>
+        <p>
+          Each watermark carries a 32-bit recipient ID plus a 16-bit CRC-16/CCITT-FALSE check, transmitted as 48 BPSK symbols. Every symbol is spread with its own key-derived pseudorandom chip sequence and repeated once per frame (~1 second) across the whole track; the detector folds all repetitions together, so detection confidence grows with track length.
+        </p>
+        <p>
+          Before CRC validation, the detector attempts reliability-ordered soft-decision correction: a 1-bit flip sweep followed by a 2-bit permutation sweep over the lowest-confidence symbols, repairing up to two flipped bits per codeword. Heavier damage after aggressive transcoding is reported as a failed detection rather than a false match. The CRC gate helps reject corrupted payloads; false-positive rates have not been characterized on a representative production corpus.
+        </p>
+      </section>
+
       <!-- SECTION: FORENSIC PROOFS -->
       <section class="doc-section" id="forensic-proofs">
-        <h2>Forensic Audit Proofs &amp; Chain of Custody</h2>
+        <h2>Watermark Detection Audit Reports</h2>
         <p>
-          When pursuing copyright infringements, issuing legal DMCA notices, or arbitrating leak provenance, Aureal generates cryptographically sealed forensic audit reports. Every extraction logs immutable SHA-256/512 audio fingerprints, physical-layer DSP metrics, and an HMAC-SHA256 digital signature to verify leak origin without exposing the underlying master audio.
+          Aureal can export an audit report containing hashes of the analyzed file, watermark-detection metrics, and an HMAC-SHA256 integrity seal. These values can help document a particular scan but do not independently establish authorship, prove when the file existed, or provide a chain of custody.
         </p>
 
-        <h3>Cryptographic Hash Chain &amp; Digital Seal</h3>
+        <h3>File Hashes &amp; Report Integrity Seal</h3>
         <p>
-          To maintain an unbroken evidentiary chain of custody, the forensic engine hashes the evidence file with SHA-256 and SHA-512, captures low-level physical-layer DSP metrics (processing gain \(E_b/N_0\), bit error rate, Z-score significance), and seals the verdict with an HMAC-SHA256 digital signature.
+          For documentation purposes, the forensic engine hashes the evidence file with SHA-256 and SHA-512, captures low-level physical-layer DSP metrics (processing gain \(E_b/N_0\), bit error rate, Z-score significance), and can include an HMAC-SHA256 shared-secret integrity seal. HMAC is not a digital signature and does not establish chain of custody or authorship.
         </p>
 
         <div class="code-wrapper">
@@ -878,25 +902,25 @@ console.log(verification);
             <span class="code-lang">Bash / CLI</span>
             <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
           </div>
-          <pre><code># Scan suspected leak and export immutable JSON proof and plain-text certificate
+          <pre><code># Scan an audio file and export a hash-and-detection audit report
 auralwatermark detect leak_screener.mp3 \
   --report forensic_proof.json \
   --report-txt forensic_certificate.txt \
   --key "studio-master-salt"</code></pre>
         </div>
 
-        <h3>Sample Court-Admissible Audit Certificate</h3>
+        <h3>Sample Audit Report (Illustrative)</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
-          The generated plain-text certificate adheres to standard forensic evidence formats for legal filings, arbitration, and DMCA takedown requests:
+          The following is an illustrative sample, not a certification of admissibility, authorship, or chain of custody:
         </p>
         <div class="code-wrapper">
           <div class="code-top">
-            <span class="code-lang">Forensic Evidence Certificate (ISO-8601 UTC)</span>
+            <span class="code-lang">Illustrative Watermark Audit Report</span>
             <button type="button" class="btn-copy-code" onclick="copyCode(this)">COPY</button>
           </div>
           <pre><code>==============================================================================
-              AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE               
-               Cryptographic Audio Authentication &amp; Audit                
+              AUREAL WATERMARK — SAMPLE AUDIT REPORT               
+               Watermark Detection Metrics (Illustrative)                
 ==============================================================================
 Date/Time (UTC) : 2026-09-14T12:00:00.000Z
 Engine          : Aureal Watermark Forensic DSP Engine v0.2.5
@@ -909,7 +933,7 @@ Report Schema   : v1.0.0
    SHA-512      : 82b16b5068978739e3fbb5d4e1a11a7bcb14100342f5b2f1...
 ------------------------------------------------------------------------------
 2. FORENSIC VERIFICATION RESULT
-   Verdict      : [AUTHENTIC / MATCH]
+   Result       : [WATERMARK ID MATCH]
    Detected     : YES
    Payload ID   : #928401 (Recipient: Zane Lowe / BBC Radio 1)
    Confidence   : 100.0%
@@ -927,7 +951,7 @@ Report Schema   : v1.0.0
    Algorithm    : HMAC-SHA256
    Seal Hash    : 9702c8625046347512fe23df534257be752512a650fd8ed072b6aa90d814356b
 ==============================================================================
-Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or intellectual property verification.
+Attribution: Illustrative sample output only; a watermark match does not independently prove ownership or legal attribution.
 ==============================================================================</code></pre>
         </div>
       </section>
@@ -956,16 +980,22 @@ Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or in
                 <td>Client-side demo; hosting requests may still generate standard server logs</td>
               </tr>
               <tr>
-                <td><strong>Commercial Indie Label</strong></td>
-                <td>$299 / yr</td>
-                <td>Independent record labels, promo distribution pools, podcast networks.</td>
-                <td>Self-Hosted / Unlimited Streams</td>
+                <td><strong>Solo Creator / Indie Studio</strong></td>
+                <td>$249 (one-time, perpetual)</td>
+                <td>Individual producers and mixing engineers releasing commercial music.</td>
+                <td>Self-hosted, offline; optional activation contacts Polar.sh</td>
               </tr>
               <tr>
-                <td><strong>Enterprise Platform SLA</strong></td>
-                <td>Custom</td>
-                <td>AI voice cloning training data audit, major streaming services, high-throughput DSP.</td>
-                <td>Air-Gapped / Custom Bands / SLAs</td>
+                <td><strong>Promo Leak Suite / Label &amp; A&amp;R</strong></td>
+                <td>$499 (one-time, perpetual)</td>
+                <td>Record labels, artist managers, and promo distribution pools.</td>
+                <td>Self-hosted, offline; optional activation contacts Polar.sh</td>
+              </tr>
+              <tr>
+                <td><strong>B2B Platform / Enterprise SLA</strong></td>
+                <td>From $2,900 / yr (custom)</td>
+                <td>Marketplaces, SaaS pipelines, AI speech platforms, high-throughput DSP.</td>
+                <td>Air-gapped deployment possible; review the exact bundle and license workflow before processing sensitive audio</td>
               </tr>
             </tbody>
           </table>
@@ -974,6 +1004,21 @@ Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or in
         <p>
           For complete licensing terms, procurement details, and enterprise SLAs, visit the <a href="/pricing" style="color: var(--purple); font-weight:600;">Commercial Licensing &amp; Pricing Page &rarr;</a>
         </p>
+      </section>
+
+      <!-- SECTION: AIR-GAPPED -->
+      <section class="doc-section" id="airgapped">
+        <h2>Local Processing &amp; Deployment</h2>
+        <p>
+          The DSP embed/detect operations run locally: CLI processing uses the local machine and the web Studio processes audio in the browser. Optional license activation contacts Polar.sh. Hosting and any external assets may generate normal network traffic.
+        </p>
+        <p>
+          For air-gapped deployments, review the exact bundle, configuration, and license workflow you intend to use, and test it with network access disabled before processing sensitive audio.
+        </p>
+        <div class="callout">
+          <h4>Enterprise deployments</h4>
+          <p>For on-premise rollouts, custom carrier bands, or volume licensing, contact <a href="mailto:business@kellersystems.dev" style="color: var(--purple);">business@kellersystems.dev</a>.</p>
+        </div>
       </section>
 
       <!-- SECTION: BENCHMARKS -->
@@ -997,9 +1042,9 @@ Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or in
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing &amp; Licenses</a>
         <a href="/docs">Documentation</a>
-        <a href="//legal/terms.html">Terms of Service</a>
-        <a href="//legal/privacy.html">Privacy Policy</a>
-        <a href="//legal/impressum.html">Impressum</a>
+        <a href="/legal/terms.html">Terms of Service</a>
+        <a href="/legal/privacy.html">Privacy Policy</a>
+        <a href="/legal/impressum.html">Impressum</a>
         <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank">GitHub</a>
       </div>
       <p>&copy; 2026 Keller Systems &bull; Imperceptible Acoustic Provenance &bull; <a href="https://kellersystems.dev">Main Portal</a></p>

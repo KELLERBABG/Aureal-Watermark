@@ -27,23 +27,19 @@ Write-Host "7. Verifying aureal-watermark.exe..."
 & .\dist\aureal-watermark.exe --help
 
 Write-Host "8. Building universal zip bundle..."
-$zipPath = "dist/aureal-watermark-v0.2.4-universal.zip"
+$zipPath = "dist/aureal-watermark-v0.2.5-universal.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 
-$tempZipDir = Join-Path $env:TEMP "aureal-watermark-v0.2.4-universal"
+$tempZipDir = Join-Path $env:TEMP "aureal-watermark-v0.2.5-universal"
 if (Test-Path $tempZipDir) { Remove-Item $tempZipDir -Recurse -Force }
 New-Item -ItemType Directory -Path $tempZipDir | Out-Null
 
 Copy-Item "dist/aureal-watermark.cjs" -Destination (Join-Path $tempZipDir "aureal-watermark.cjs")
-Copy-Item "demo/studio.html" -Destination (Join-Path $tempZipDir "studio.html")
-Copy-Item "demo/verifier.html" -Destination (Join-Path $tempZipDir "verifier.html")
-Copy-Item "demo/pricing.html" -Destination (Join-Path $tempZipDir "pricing.html")
-Copy-Item "demo/docs.html" -Destination (Join-Path $tempZipDir "docs.html")
-Copy-Item "index.html" -Destination (Join-Path $tempZipDir "index.html")
+Copy-Item "site" -Destination (Join-Path $tempZipDir "site") -Recurse
+Copy-Item "_redirects" -Destination (Join-Path $tempZipDir "_redirects")
 Copy-Item "README.md" -Destination (Join-Path $tempZipDir "README.md")
 Copy-Item "LICENSE.md" -Destination (Join-Path $tempZipDir "LICENSE.md")
 Copy-Item "assets" -Destination (Join-Path $tempZipDir "assets") -Recurse
-Copy-Item "demo" -Destination (Join-Path $tempZipDir "demo") -Recurse
 
 Compress-Archive -Path "$tempZipDir\*" -DestinationPath $zipPath -Force
 Remove-Item $tempZipDir -Recurse -Force

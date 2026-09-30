@@ -4,14 +4,14 @@
 
 <br>
 
-[![Release](https://img.shields.io/badge/Release-v0.2.4-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
-[![Security](https://img.shields.io/badge/Air--Gap%20Security-100%25%20On--Premise-059669?style=flat-square)](https://aureal.kellersystems.dev)
+[![Release](https://img.shields.io/badge/Release-v0.2.5-2563eb?style=flat-square)](https://github.com/KELLERBABG/Aureal-Watermark/releases/latest)
+[![Security](https://img.shields.io/badge/Audio%20Processing-Local-059669?style=flat-square)](https://aureal.kellersystems.dev)
 [![Audio Transparency](https://img.shields.io/badge/Audio%20Transparency-Bit--Transparent%20(%E2%89%A4%20-60%20dBFS)-0891b2?style=flat-square)](docs/TECHNICAL_SPECIFICATIONS.md)
 [![Commercial](https://img.shields.io/badge/Commercial%20Licenses-Available%20via%20Polar-8b5cf6?style=flat-square)](https://aureal.kellersystems.dev/pricing.html)
 
 <br>
 
-[**Launch Web Studio**](https://aureal.kellersystems.dev/studio.html) &bull; [**Commercial Licensing & Pricing**](https://aureal.kellersystems.dev/pricing.html) &bull; [**Documentation**](https://aureal.kellersystems.dev/docs.html) &bull; [**Technical Specifications**](docs/TECHNICAL_SPECIFICATIONS.md)
+[**Launch Web Studio**](https://aureal.kellersystems.dev/studio) &bull; [**Commercial Licensing & Pricing**](https://aureal.kellersystems.dev/pricing) &bull; [**Documentation**](https://aureal.kellersystems.dev/docs) &bull; [**Technical Specifications**](docs/TECHNICAL_SPECIFICATIONS.md)
 
 </div>
 
@@ -19,20 +19,17 @@
 
 ## What is Aureal Watermark?
 
-**Aureal Watermark** hides an invisible digital serial number directly inside your audio files. 
+**Aureal Watermark** embeds a 32-bit identifier into audio using spread-spectrum signal processing. The watermark is designed to be subtle, and the scanner attempts to recover the identifier after supported transformations. Recovery depends on the source audio, codec, and processing.
 
-Human ears cannot hear it, but our scanner can detect it in less than a second. Even if someone re-records your track, converts it to an MP3, or uploads it to social media, your hidden ownership mark stays inside the sound.
+> **Important limitation:** A matching watermark is a provenance signal, not cryptographic proof of authorship, ownership, or when a file was created. Anyone with access to the software and matching key can generate a matching ID. Retain independent source, recipient, and custody records; this tool is not a substitute for cryptographic signing or a complete provenance system.
 
 ---
 
 ## Why Use It?
 
-* **Stop Music & Voice Theft:** If someone steals your beat, song, or podcast, scan the file to prove immediately that you made the original.
-* **Catch Audio Leaks:** Give each listener, producer, or preview tester a uniquely tagged copy. If the song leaks online, scan the leak to see exactly who leaked it.
-* **Detect AI Training & Cloning:** Prove that your voice or music was scraped and used to train an AI model without your permission.
-* **Survives MP3 Compression:** The watermark stays intact through heavy MP3 and AAC compression, volume changes, and format conversions.
-* **100% Private & Offline:** Everything runs directly on your computer. Your audio files are never uploaded to any server or third party.
-* **Air-Gapped & Studio Compliant:** Pure offline signal processing. Audio masters and stems never touch the cloud or any third party.
+* **Audio Leak Investigation:** Give each listener or preview recipient a unique watermark ID, then check recovered IDs against your distribution records when investigating a leak.
+* **Codec Resilience Testing:** Detection has been tested on selected MP3/AAC transcodes and signal transformations; recovery depends on the source audio, codec, and processing.
+* **Local Audio Processing:** The DSP embed/detect workflow runs locally. Optional commercial-license activation makes a network request to Polar.sh.
 
 ---
 
@@ -41,7 +38,7 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
 ```
 [ Your Audio File ] ──► [ Embed Invisible ID (#883921) ] ──► [ Protected Audio ]
                                                                      │
-                                                    (Sounds 100% identical to humans)
+                                                    (Designed to remain subtle; audibility varies by material and playback)
                                                                      │
                                        Later: Someone uploads or leaks your file
                                                                      │
@@ -49,13 +46,13 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
                                                      [ Scan with Aureal Watermark ]
                                                                      │
                                                                      ▼
-                                                   "Verified: Owned by ID #883921"
+                                                   "Recovered watermark ID #883921"
 ```
 
 1. **Pick an ID number:** Choose any serial number (like `#883921` or a recipient's code).
 2. **Protect the file:** Aureal embeds the number into subtle frequency layers of your audio.
-3. **Audio sounds identical:** The exported file plays like normal with zero audible distortion.
-4. **Scan anytime:** Drop any audio file into Aureal to extract the original owner ID and prove ownership.
+3. **Audio remains usable:** Embedding is designed to be subtle; audibility may vary with audio material, settings, and playback.
+4. **Scan a copy:** Drop supported audio into Aureal to check whether an ID can be recovered. Use independent records to establish ownership and provenance.
 
 ---
 
@@ -68,7 +65,7 @@ Human ears cannot hear it, but our scanner can detect it in less than a second. 
    * **Multi-Format Audio Export:** Download masters in WAV 16-bit, WAV 24-bit, or MP3 (320k, 192k, 128k) with built-in offline LAME encoding.
    * **Collision Detector:** Automatic pre-check prevents accidentally over-tagging an already watermarked master.
    * **Cryptographic Auto-ID:** 1-click generation of secure, non-repeating tracking IDs and studio namespace keys.
-   * **100% Offline & Air-Gapped:** Zero external network calls. Complete on-premises privacy.
+   * **Local Audio Processing:** DSP runs on-device; license activation may contact Polar.sh.
 
 You can also run it directly via CLI or command prompt:
 ```bash
@@ -86,9 +83,9 @@ You can also run it directly via CLI or command prompt:
 
 No installation or technical setup needed:
 
-**[Launch Interactive Web Studio &rarr;](https://aureal.kellersystems.dev/studio.html)**
+**[Launch Interactive Web Studio &rarr;](https://aureal.kellersystems.dev/studio)**
 
-*(Runs 100% client-side in browser memory. Nothing ever leaves your device).*
+*(Audio processing runs in your browser. Optional license activation contacts Polar.sh).*
 
 ---
 
@@ -149,22 +146,22 @@ Also accepts JSON bodies with base64 audio payloads (`{ "audioBase64": "...", "i
 
 ---
 
-### Option 5: Cryptographic Forensic Proof Certificate Generator
+### Option 5: Watermark Detection Audit Report
 
-When tracing unauthorized leaks or submitting DMCA takedown notices, export a tamper-evident audit report with SHA-256 file hashes, physical layer signal-to-noise metrics ($E_b/N_0$), and an HMAC seal:
+Export a report with hashes of the analyzed file, detection metrics, and an HMAC integrity seal. The HMAC uses the supplied key (or a built-in default); it is not a public-key signature and the report alone does not establish authorship, scan time, chain of custody, or legal admissibility:
 
 ```bash
 auralwatermark detect evidence.mp3 --id 883921 --report proof.json --report-txt cert.txt
 ```
 
-#### Sample Generated ASCII Certificate (`cert.txt`):
+#### Illustrative Sample Output (`cert.txt`):
 ```text
 ==============================================================================
               AUREAL WATERMARK — FORENSIC PROOF CERTIFICATE               
-               Cryptographic Audio Authentication & Audit                
+               Watermark Detection Metrics (Illustrative)                
 ==============================================================================
 Date/Time (UTC) : 2026-09-11T09:12:10.476Z
-Engine          : Aureal Watermark Forensic DSP Engine v0.2.4
+Engine          : Aureal Watermark Forensic DSP Engine v0.2.5
 Report Schema   : v1.0.0
 ------------------------------------------------------------------------------
 1. TARGET EVIDENCE FILE
@@ -174,7 +171,7 @@ Report Schema   : v1.0.0
    SHA-512      : 82b16b5068978739e3fbb5d4e1a11a7bcb14100342f5b2f1...
 ------------------------------------------------------------------------------
 2. FORENSIC VERIFICATION RESULT
-   Verdict      : [AUTHENTIC / MATCH]
+   Result       : [WATERMARK ID MATCH]
    Detected     : YES
    Payload ID   : 883921
    Confidence   : 100.0%
@@ -192,7 +189,7 @@ Report Schema   : v1.0.0
    Algorithm    : HMAC-SHA256
    Seal Hash    : 9702c8625046347512fe23df534257be752512a650fd8ed072b6aa90d814356b
 ==============================================================================
-Attribution: Forensic audit proof for copyright enforcement, DMCA notices, or intellectual property verification.
+Note: Sample fields are illustrative; a watermark match does not independently prove ownership or legal attribution.
 ==============================================================================
 ```
 
@@ -230,40 +227,39 @@ console.log(result.recoveredPayloadId); // 883921
 
 ---
 
-## Regulatory Compliance: The EU AI Act & C2PA Bridge
+## Regulatory and C2PA Context (Not a Compliance Claim)
 
 ### 1. EU AI Act Article 50 Machine-Readable Synthetic Audio
-Under **Article 50 of the European Union AI Act**, platforms generating synthetic voices, deepfakes, or AI music must ensure outputs are marked with machine-detectable provenance.
-* **The Problem:** Social media platforms (TikTok, Instagram, YouTube Shorts, WhatsApp) automatically strip ID3 tags and RIFF metadata chunks during re-encoding.
-* **The Aureal Solution:** Aureal embeds the machine-readable provenance ID directly inside the acoustic wave using DSSS modulation. The watermark survives lossy re-encoding and format conversion without audible degradation.
+Article 50 of the European Union AI Act establishes transparency obligations for certain providers and deployers of AI systems. This project does not provide a legal compliance determination or guarantee that its watermark meets those requirements.
+* **Metadata limitations:** Audio services may strip or transform metadata during re-encoding.
+* **Aureal's role:** Aureal embeds a keyed 32-bit identifier in audio; recovery depends on the source, encoder, and processing. The ID does not itself establish the identity, origin, or authenticity of content.
 
 ### 2. The C2PA Content Credentials Persistence Bridge
-Traditional C2PA manifests are stored in audio headers that get discarded by lossy encoders. Aureal's 32-bit payload ID serves as an indestructible **Acoustic Pointer**:
-$$\text{Social Media Re-encode} \longrightarrow \text{Header Metadata Stripped} \longrightarrow \text{Aureal Acoustic Scan} \longrightarrow \text{Original C2PA Manifest Recovered}$$
+Aureal's 32-bit ID can be used as an application-level lookup value alongside independently maintained provenance records. Aureal does not create, validate, or recover a C2PA manifest; the repository example is illustrative, not a certified C2PA implementation.
 
 ---
 
 ## Operational Capabilities & Adversarial Attack Resistance
 
-Aureal is continuously verified against an automated adversarial torture test suite covering real-world degradation, DAW editing tricks, and lossy compression pipelines:
+Aureal is exercised against a local adversarial fixture suite. Results are limited to the fixtures listed here and do not establish universal performance across all content, devices, or services:
 
 | Transformation / Attack Vector | Survives? | Empirical Result & Engineering Notes |
 | :--- | :---: | :--- |
-| **Multi-Generational Lossy Transcode**<br>*(WAV &rarr; MP3 128k &rarr; AAC 96k &rarr; MP4 &rarr; MP3 64k &rarr; Opus 96k &rarr; WAV)* | **YES** | **100% Confidence, 0.00 BER.** Survives chained social media re-encodes (YouTube, TikTok, Instagram) via Dual-Band fallback. |
-| **Mid/Side Subtraction ($L - R$)**<br>*(Vocal-remover tools, center-cancellation)* | **YES** | **100% Confidence.** Orthogonal Mid/Side channel decorrelation ($W_L = \frac{M+S}{\sqrt{2}}, W_R = \frac{M-S}{\sqrt{2}}$) isolates side watermark. |
-| **Phase Inversion Cancellation**<br>*($0.5L - 0.5R$ destructive downmixing)* | **YES** | **100% Confidence.** Anti-phase cancellations fold cleanly into the orthogonal side detector. |
-| **Stereo to Mono Downmixing** | **YES** | **100% Confidence.** In-phase Mid component reconstructs with $+3\text{ dB}$ signal gain. |
-| **Short Snippet Crops (1.0s &ndash; 1.8s)** | **YES** | **100% Confidence.** Circular modulo frame folding reconstructs complete codewords across arbitrary unaligned boundaries. |
-| **Playback Speed & Pitch Drift ($\pm1.0\%$)**<br>*(Analog tape wow/flutter, speed stretch)* | **YES** | **100% Confidence.** Frequency rake receiver sweeps micro-drift factors to lock chip phase alignment. |
-| **Brickwall Low-Pass (down to 7 kHz)** | **YES** | **100% Confidence.** Dual-Band architecture falls back from High-Band to Mid-Band under aggressive filtering. |
-| **Brickwall High-Pass & Notch (1 kHz / 18 kHz)** | **YES** | **100% Confidence.** Notch filtering at high carrier is automatically bypassed by mid-band correlation. |
-| **Air-Gap Recording (Speaker to Mic)** | **YES** | **100% Confidence.** Survives acoustic room reflections, early echoes, and phone microphone frequency coloration. |
-| **Extreme Overdrive (+12 dB hard clipping)** | **YES** | **100% Confidence.** BPSK sign detection recovers symbols despite harsh harmonic clipping distortion. |
-| **Heavy Broadcast Compression & Limiting** | **YES** | **100% Confidence.** FM broadcast companding preserves relative spreading chip polarity. |
-| **Additive Background Noise (&minus;30 dBFS)** | **YES** | **100% Confidence.** Spread-spectrum processing gain extracts payload deep below the audible noise floor. |
-| **Sample Rate Conversions (48k &harr; 44.1k &harr; 32k &harr; 22k)** | **YES** | **100% Confidence.** Polyphase sinc resampler normalizes stream sample rate automatically on detection. |
-| **Multi-Layer CDMA Watermarking (3 Studios)** | **YES** | **100% Confidence.** Multiple independent watermarks with distinct private keys coexist simultaneously on the same audio without destructive interference. |
-| **Unauthorized Overwrite (Same Key, Conflicting ID)** | **REJECTED** | Destructive bit interference prevents unauthorized tampering or ID forging under an existing private key. |
+| **Selected Multi-Generational Lossy Transcode**<br>*(Test fixture: WAV &rarr; MP3 128k &rarr; AAC 96k &rarr; MP4 &rarr; MP3 64k &rarr; Opus 96k &rarr; WAV)* | **Tested** | Passed in the current local ffmpeg test run. Results vary by source material, encoder, and transformations; this does not establish compatibility with every social platform. |
+| **Mid/Side Subtraction (L - R fixture)** | **YES** | Detected in the local fixture only. Orthogonal Mid/Side channel decorrelation ($W_L = \frac{M+S}{\sqrt{2}}, W_R = \frac{M-S}{\sqrt{2}}$) Tested on a synthetic side-channel fixture; results depend on source content and transformation. |
+| **Phase-Inversion Downmix Fixture** | **Tested** | The local synthetic fixture passed; behavior depends on the source mix and transformation. |
+| **Stereo-to-Mono Downmix Fixture** | **YES** | Detected in the local fixture only. In-phase Mid component reconstructs with $+3\text{ dB}$ signal gain. |
+| **Short Snippet Crop (1.8s fixture)** | **Tested** | The local fixture passed; minimum reliable duration depends on band, sample rate, and audio content. |
+| **Playback Speed & Pitch Drift ($\pm1.0\%$)**<br>*(Analog tape wow/flutter, speed stretch)* | **YES** | Detected in local resampling fixtures; no general analog wow/flutter guarantee. |
+| **Low-Pass Filtering** | **Partial** | The local 16 kHz fixture passed; the 12 kHz and 7 kHz fixtures failed. Filtering below the watermark bands can erase detection data. |
+| **High-Pass / Notch Fixtures (1 kHz / 18 kHz)** | **Tested** | The local synthetic fixtures passed; source-specific filtering can still remove the watermark. |
+| **Air-Gap Recording (Speaker to Mic)** | **Tested** | Detected in one local room-reverb simulation; this does not establish phone or room recording performance generally. |
+| **Extreme Overdrive (+12 dB hard clipping)** | **Tested** | Detected in the local synthetic fixture; results depend on content and processing. |
+| **Heavy Broadcast Compression & Limiting** | **Tested** | Detected in one local compressor fixture; results vary with audio and settings. |
+| **Additive Background Noise (-20 dB fixture)** | **Tested** | Detected in the local pink-noise fixture; results vary with signal-to-noise ratio and content. |
+| **Sample-Rate Conversion Fixtures** | **Tested** | Selected conversion tests passed; results depend on converter quality and source audio. |
+| **Multi-Layer Watermarking** | **Tested** | Distinct-key watermark layers were detected in the local synthetic fixtures; this limited result is not a general coexistence guarantee. |
+| **Re-embedding with Same Key, Different ID** | **Not reliable** | Current local tests show neither the original nor replacement ID is reliably detected after re-embedding. Treat this as a known limitation; do not claim overwrite protection. |
 
 ---
 
@@ -280,7 +276,7 @@ For audio engineers, DSP researchers, and developers who want to inspect the mat
 
 ---
 
-## Commercial Licensing & Enterprise SLA
+## Commercial Licensing & Enterprise SLA (confirm current offer before publishing)
 
 Aureal Watermark is distributed under a **Dual License**:
 
@@ -294,8 +290,8 @@ Aureal Watermark is distributed under a **Dual License**:
 | **Solo Creator / Indie Studio** | **$249** *(one-time)* | Unlimited Perpetual License: Unrestricted commercial rights, Universal CLI, Web Studio. |
 | **Promo Leak Suite / Label** | **$499** *(one-time)* | Unlimited Perpetual License: Batch leak distributor, one-click forensic audit script, priority leak support. |
 | **B2B Audio Marketplace** | **$2,900 – $5,900 / yr** | Headless backend integration rights, commercial export hook SLA, unlimited embeds. |
-| **Voice AI & Speech Platforms** | **From $4,900 / yr** *(Custom Enterprise)* | EU AI Act Article 50 compliance, low-latency SDK integration, C2PA persistence, private key vaults. |
-| **Audio Forensics & Legal Labs** | **$1,499** *(perpetual)* | Client-side offline forensic suite, raw $E_b/N_0$ reports, custom branding. |
+| **Voice AI & Speech Platforms** | **From $4,900 / yr** *(Custom Enterprise)* | Custom integration services; obtain independent legal and standards review for regulatory or C2PA requirements. |
+| **Audio Forensics & Legal Labs** | **$1,499** *(perpetual)* | Detection reporting and technical review tools; no court-admissibility claim. |
 
-For commercial licensing, interactive pricing tiers, and instant card checkout via Polar.sh, visit the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/pricing.html), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[business@kellersystems.dev](mailto:business@kellersystems.dev)**.
+For current commercial pricing, checkout availability, and terms, confirm the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/pricing), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[business@kellersystems.dev](mailto:business@kellersystems.dev)**.
 

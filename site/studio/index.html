@@ -477,7 +477,7 @@
 <div class="app-container">
   <header style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border);">
     <a href="/" style="text-decoration: none; color: var(--text); font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem;">
-      <span style="color: var(--cyan);">&larr;</span> Back to Home
+      <span style="color: var(--cyan);">&larr;</span> Homepage
     </a>
     <div style="display: flex; gap: 1rem; align-items: center; font-size: 0.84rem;">
       <button type="button" id="btn-open-license" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.35); color: #c084fc; border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.74rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.45rem; transition: all 0.2s ease;">
@@ -629,9 +629,9 @@
       </a>
     </div>
     <div style="margin-top: 0.5rem; font-size: 0.72rem;">
-      <a href="//legal/impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &bull;
-      <a href="//legal/privacy.html" style="color: var(--text-muted); text-decoration: none; margin: 0 0.25rem;">Datenschutz</a> &bull;
-      <a href="//legal/terms.html" style="color: var(--text-muted); text-decoration: none; margin: 0 0.25rem;">Commercial EULA</a> &bull;
+      <a href="/legal/impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &bull;
+      <a href="/legal/privacy.html" style="color: var(--text-muted); text-decoration: none; margin: 0 0.25rem;">Datenschutz</a> &bull;
+      <a href="/legal/terms.html" style="color: var(--text-muted); text-decoration: none; margin: 0 0.25rem;">Commercial EULA</a> &bull;
       <a href="mailto:support@kellersystems.dev" style="color: var(--text-muted); text-decoration: none;">Support &amp; Contact</a>
     </div>
   </footer>
@@ -1672,7 +1672,7 @@
     detectResultBox.className = `status-box ${passed ? "pass" : "fail"}`;
 
     let statusText = passed
-      ? (expectedId !== undefined ? "AUTHENTICITY VERIFIED" : "WATERMARK DETECTED")
+      ? (expectedId !== undefined ? "WATERMARK ID MATCH" : "WATERMARK DETECTED")
       : (expectedId !== undefined ? "VERIFICATION FAILED" : "NO WATERMARK DETECTED");
 
     const idVal = r.recoveredPayloadId != null

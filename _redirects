@@ -1,16 +1,32 @@
-# Forward clean public routes to the actual html files
-/studio /demo/studio.html 200
-/docs /demo/docs.html 200
-/pricing /demo/pricing.html 200
-/verifier /demo/verifier.html 200
+# Serve organized HTML pages through the same clean public URLs.
+/ /site/index.html 200
+/studio /site/demo/studio.html 200
+/docs /site/demo/docs.html 200
+/pricing /site/demo/pricing.html 200
+/verifier /site/demo/verifier.html 200
+/legal/* /site/legal/:splat 200
 
-# Redirect legacy extensioned/demo URLs to clean public routes
-/demo/index.html / 301
-/demo/studio.html /studio 301
-/demo/docs.html /docs 301
-/demo/pricing.html /pricing 301
-/demo/verifier.html /verifier 301
-/studio.html /studio 301
-/docs.html /docs 301
-/pricing.html /pricing 301
-/verifier.html /verifier 301
+# Keep historical root and demo URLs working after the move.
+/index.html /
+/demo/index.html /
+/demo/studio.html /studio
+/demo/docs.html /docs
+/demo/pricing.html /pricing
+/demo/verifier.html /verifier
+/studio.html /studio
+/docs.html /docs
+/pricing.html /pricing
+/verifier.html /verifier
+/site/studio.html /studio
+/site/docs.html /docs
+/site/pricing.html /pricing
+/site/verifier.html /verifier
+/site/demo/index.html /
+/site/demo/studio.html /studio
+/site/demo/docs.html /docs
+/site/demo/pricing.html /pricing
+/site/demo/verifier.html /verifier
+/site/studio /studio
+/site/docs /docs
+/site/pricing /pricing
+/site/verifier /verifier
