@@ -25,5 +25,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Check Generated Site Aliases For Drift
+        run: npm run sync:site:check
+
       - name: Run Test Suite
         run: node --test

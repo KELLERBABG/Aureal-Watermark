@@ -18,12 +18,17 @@ This Commercial EULA governs the commercial use of Aureal Watermark. Non-commerc
 ## 3. Air-Gapped & Offline Guarantee
 Aureal Watermark does not require online DRM activation, hardware dongles, or internet connectivity. Licensees are entitled to run the engine inside isolated, air-gapped studio workflows.
 
-## 4. Restrictions
+## 4. Statutory Right of Withdrawal (Widerruf) & 14-Day Guarantee
+Consumers contracting with the Licensor have a statutory right of withdrawal under §§ 355 ff. BGB. For digital content, the statutory withdrawal right expires upon the consumer's express consent to immediate performance and acknowledgment of the loss of the withdrawal right (§ 356 Abs. 4 BGB), which the Licensee declares at checkout.
+
+Independent of that statutory rule, the Licensor grants every commercial customer a **14-day money-back guarantee**: if a purchased license does not perform materially in accordance with its description, the Licensee may request a full refund within 14 days of purchase by emailing business@kellersystems.dev with the license email and order reference. Refunds are issued via the original payment method through the merchant of record (Polar.sh). This guarantee does not create any warranty beyond Section 5.
+
+## 5. Restrictions
 Licensee shall not decompile, reverse-engineer, or adapt the DSP algorithms to build a competing audio watermarking product, nor resell or sub-license the standalone binary to third parties outside their licensed entity.
 
-## 5. Warranty Disclaimer & Limitation of Liability
+## 6. Warranty Disclaimer & Limitation of Liability
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. While Aureal Watermark is tested across MP3 and AAC compression benchmarks, LICENSOR MAKES NO GUARANTEE OF 100% RECOVERABILITY AGAINST INTENTIONAL ADVERSARIAL SIGNAL ATTACKS, WARPING, OR NON-LINEAR TIME/PITCH EDITS.
 IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY CONSEQUENTIAL, INDIRECT, INCIDENTAL, OR PUNITIVE DAMAGES, INCLUDING LEAKS OR FAILURE TO PROVE OWNERSHIP IN LEGAL PROCEEDINGS.
 
-## 6. Governing Law & Jurisdiction
+## 7. Governing Law & Jurisdiction
 This agreement is governed by the laws of the Federal Republic of Germany. The place of jurisdiction for commercial entities is Bielefeld, Germany.

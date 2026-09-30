@@ -5,6 +5,10 @@
 /pricing /site/demo/pricing.html 200
 /verifier /site/demo/verifier.html 200
 /legal/* /site/legal/:splat 200
+/impressum /legal/impressum.html 200
+/privacy /legal/privacy.html 200
+/terms /legal/terms.html 200
+/datenschutz /legal/privacy.html 200
 
 # Keep historical root and demo URLs working after the move.
 /index.html /
