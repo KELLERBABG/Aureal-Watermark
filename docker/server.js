@@ -153,7 +153,7 @@ export function createAurealServer(options = {}) {
         return sendJson(res, 200, {
           status: "ok",
           service: "aureal-watermark-microservice",
-          version: "0.2.5",
+          version: "0.2.6",
           uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
           dsp: "active",
           ffmpeg: hasFfmpeg()
@@ -164,7 +164,7 @@ export function createAurealServer(options = {}) {
       if (req.method === "GET" && pathname === "/") {
         return sendJson(res, 200, {
           name: "Aureal Watermark Microservice",
-          version: "0.2.5",
+          version: "0.2.6",
           endpoints: {
             "GET /v1/health": "Health and readiness probe",
             "POST /v1/embed": "Embed acoustic watermark (Accepts binary audio or JSON)",
@@ -349,7 +349,7 @@ if (process.argv[1] && process.argv[1].replace(/\\/g, "/").endsWith("docker/serv
   server.listen(port, host, () => {
     console.log(`\n======================================================`);
     console.log(`  Aureal Watermark REST Microservice`);
-    console.log(`  Version:     0.2.5 (Air-gapped ready)`);
+    console.log(`  Version:     0.2.6 (Air-gapped ready)`);
     console.log(`  Listening:   http://${host}:${port}`);
     console.log(`  Healthcheck: http://${host}:${port}/v1/health`);
     console.log(`  FFmpeg:      ${hasFfmpeg() ? "Available (transcoding enabled)" : "Not found (WAV only)"}`);

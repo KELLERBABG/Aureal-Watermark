@@ -1,6 +1,6 @@
 # Aureal Watermark Whitepaper
 
-**Version:** 0.2.5 &bull; **Status:** Technical overview; benchmark results are limited to named local fixtures
+**Version:** 0.2.6 &bull; **Status:** Technical overview; benchmark results are limited to named local fixtures
 
 > A spread-spectrum audio watermarking implementation for embedding and recovering keyed identifiers in audio. A match does not prove authorship, ownership, identity, or origin.
 

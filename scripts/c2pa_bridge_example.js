@@ -48,11 +48,11 @@ function createC2paManifest(payloadId, audioMetadata) {
 
   const manifest = {
     "@context": "https://c2pa.org/specifications/v2.0/",
-    claim_generator: "Aureal-Watermark-C2PA-Bridge/0.2.5",
+    claim_generator: "Aureal-Watermark-C2PA-Bridge/0.2.6",
     claim_generator_info: [
       {
         name: "Aureal Watermark C2PA Persistence Bridge",
-        version: "0.2.5",
+        version: "0.2.6",
         website: "https://aureal.kellersystems.dev"
       }
     ],

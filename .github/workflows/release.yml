@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to rebuild (e.g. v0.2.5). Leave empty for a dry run.'
+        description: 'Existing tag to rebuild (e.g. v0.2.6). Leave empty for a dry run.'
         required: false
         default: ''
 

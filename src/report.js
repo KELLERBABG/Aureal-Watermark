@@ -3,7 +3,7 @@ import { createHash, createHmac } from "node:crypto";
 
 export const REPORT_SCHEMA_VERSION = "1.0.0";
 export const ENGINE_NAME = "Aureal Watermark DSP Engine";
-export const ENGINE_VERSION = "0.2.5";
+export const ENGINE_VERSION = "0.2.6";
 
 /**
  * Generate a structured detection audit report with file hashes and an HMAC integrity seal.

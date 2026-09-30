@@ -27,10 +27,10 @@ Write-Host "7. Verifying aureal-watermark.exe..."
 & .\dist\aureal-watermark.exe --help
 
 Write-Host "8. Building universal zip bundle..."
-$zipPath = "dist/aureal-watermark-v0.2.5-universal.zip"
+$zipPath = "dist/aureal-watermark-v0.2.6-universal.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 
-$tempZipDir = Join-Path $env:TEMP "aureal-watermark-v0.2.5-universal"
+$tempZipDir = Join-Path $env:TEMP "aureal-watermark-v0.2.6-universal"
 if (Test-Path $tempZipDir) { Remove-Item $tempZipDir -Recurse -Force }
 New-Item -ItemType Directory -Path $tempZipDir | Out-Null
 
