@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to rebuild (e.g. v0.2.4). Leave empty for a dry run.'
+        description: 'Existing tag to rebuild (e.g. v0.2.5). Leave empty for a dry run.'
         required: false
         default: ''
 
@@ -67,9 +67,10 @@ jobs:
           if (Test-Path $tempZipDir) { Remove-Item $tempZipDir -Recurse -Force }
           New-Item -ItemType Directory -Path $tempZipDir | Out-Null
           Copy-Item dist/aureal-watermark.cjs (Join-Path $tempZipDir "aureal-watermark.cjs")
-          Copy-Item demo (Join-Path $tempZipDir "demo") -Recurse
+          Copy-Item site (Join-Path $tempZipDir "site") -Recurse
+          Copy-Item _redirects (Join-Path $tempZipDir "_redirects")
           Copy-Item assets (Join-Path $tempZipDir "assets") -Recurse
-          Copy-Item index.html, README.md, LICENSE.md $tempZipDir
+          Copy-Item README.md, LICENSE.md $tempZipDir
           Compress-Archive -Path "$tempZipDir\*" -DestinationPath "dist/$env:ZIP_NAME" -Force
           Remove-Item $tempZipDir -Recurse -Force
 
