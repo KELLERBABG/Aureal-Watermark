@@ -5,8 +5,9 @@ Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)
 ## Diensteanbieter
 **Lukas Negenborn**  
 Aureal Watermark Software Development  
-[Straße und Hausnummer / Ladungsfähige Anschrift]  
-[PLZ und Ort, z.B. 33378 Rheda-Wiedenbrück]  
+[c/o Block Services] 
+[Stuttgarter Str. 106]  
+[70736 Fellbach]  
 Deutschland  
 
 ## Kontakt
