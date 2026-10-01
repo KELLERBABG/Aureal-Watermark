@@ -1,6 +1,6 @@
 # Aureal Watermark — Usage Guide
 
-**Version:** 0.2.6 &bull; Node.js &ge; 18 &bull; Standalone Windows Executable & Universal Bundle
+**Version:** 0.2.7 &bull; Node.js &ge; 18 &bull; Standalone Windows Executable & Universal Bundle
 
 ---
 
@@ -133,7 +133,7 @@ Liveness and readiness probe:
 {
   "status": "ok",
   "service": "aureal-watermark-microservice",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "uptimeSeconds": 142,
   "dsp": "active",
   "ffmpeg": true
