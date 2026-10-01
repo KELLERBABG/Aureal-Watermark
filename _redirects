@@ -49,6 +49,14 @@
 /verifier.html /verifier  301
 
 # The old site/demo paths, and the .html forms of the /site directory.
+# Both the extensionless and .html forms are listed: an old tab or bookmark may
+# hold either, and the extensionless form resolves on its own via the alias
+# directory (site/studio/), so it must be redirected explicitly or it silently
+# keeps serving the studio at the stale URL.
+/site/demo/studio    /studio    301
+/site/demo/docs      /docs      301
+/site/demo/pricing   /pricing   301
+/site/demo/verifier  /verifier  301
 /site/demo/index.html    /         301
 /site/demo/studio.html   /studio   301
 /site/demo/docs.html     /docs     301
