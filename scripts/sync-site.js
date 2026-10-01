@@ -7,7 +7,8 @@
 // `site/<page>.html`, then run `npm run sync:site`.
 //
 // Canonical sources and their generated aliases:
-//   site/index.html          -> (no alias; served at /)
+//   index.html               <- site/index.html (root alias; Cloudflare Pages
+//                               serves this directly at "/")
 //   site/docs.html           -> site/docs/index.html
 //   site/pricing.html        -> site/pricing/index.html
 //   site/studio.html         -> site/studio/index.html
@@ -21,7 +22,11 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const GROUPS = [
-  { canonical: "site/index.html", aliases: [] },
+  // The landing page needs a real file at the build output root: the Pages
+  // output directory is the repository root, and a "/" rewrite alone does not
+  // reliably serve the homepage. index.html is a byte-identical copy of
+  // site/index.html, exactly like the directory aliases below.
+  { canonical: "site/index.html", aliases: ["index.html"] },
   { canonical: "site/docs.html", aliases: ["site/docs/index.html"] },
   { canonical: "site/pricing.html", aliases: ["site/pricing/index.html"] },
   { canonical: "site/studio.html", aliases: ["site/studio/index.html"] },

@@ -31,8 +31,9 @@
 /terms       /site/legal/terms.html      301
 /datenschutz /site/legal/privacy.html    301
 
-# Root and historical root forms.
-/index.html      /  301
+# Root and historical root forms. "/" is served by the real index.html at the
+# output root, so only the explicit .html form needs redirecting; a "/" rewrite
+# is deliberately absent because Cloudflare re-normalises its own target.
 /site/index.html /  301
 
 # Pre-move paths from when the canonical pages lived under site/demo/.
