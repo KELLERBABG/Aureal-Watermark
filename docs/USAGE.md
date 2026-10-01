@@ -67,7 +67,7 @@ Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** 
 
 ## 3. Web Studio & Offline Browser Verifier
 
-Open `site/demo/studio.html` or `site/demo/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
+Open `site/studio.html` or `site/verifier.html` directly in any web browser (`file://` supported — zero build step, zero server required):
 
 * **Verify Audio Tab:** Select or drop any audio file (MP3, WAV, AAC, M4A, OGG, FLAC) to extract or verify the embedded payload.
 * **Embed Watermark Tab:** Select a source audio file, enter a 32-bit ID, choose the frequency band, and export the watermarked audio.

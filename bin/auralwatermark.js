@@ -130,11 +130,11 @@ function adaptHtmlForOffline(html) {
 function getStudioHtml() {
   const candidates = [
     join(process.cwd(), "studio.html"),
+    join(process.cwd(), "site", "studio.html"),
     join(process.cwd(), "demo", "studio.html"),
-    join(process.cwd(), "site", "demo", "studio.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "studio.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "site", "studio.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "studio.html"),
-    join(dirname(fileURLToPath(import.meta.url)), "..", "site", "demo", "studio.html"),
     join(process.cwd(), "index.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "index.html"),
   ];
@@ -151,11 +151,11 @@ function getStudioHtml() {
 function getPricingHtml() {
   const candidates = [
     join(process.cwd(), "pricing.html"),
+    join(process.cwd(), "site", "pricing.html"),
     join(process.cwd(), "demo", "pricing.html"),
-    join(process.cwd(), "site", "demo", "pricing.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "pricing.html"),
+    join(dirname(fileURLToPath(import.meta.url)), "..", "site", "pricing.html"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "pricing.html"),
-    join(dirname(fileURLToPath(import.meta.url)), "..", "site", "demo", "pricing.html"),
   ];
 
   for (const c of candidates) {
