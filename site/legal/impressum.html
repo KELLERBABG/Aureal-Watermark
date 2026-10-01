@@ -6,51 +6,287 @@
 <title>Impressum — Aureal Watermark</title>
 <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
 <style>
-  :root {
-    --bg: #0d0e11;
-    --card: #14161b;
-    --card-subtle: #111317;
-    --border: #222630;
-    --border-bright: #323846;
-    --text: #e6edf3;
-    --text-muted: #7d8590;
-    --accent: #2563eb;
-    --cyan: #38bdf8;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+/* ============================================================================
+   Aureal Watermark — shared base layer
+   Included by every page ahead of its own sheet. Tokens, reset, and the
+   accessibility contract live here so the pages cannot drift apart.
+
+   Performance budget for the whole site:
+     - no backdrop-filter anywhere
+     - no fixed/parallax background layers, no animated gradients
+     - transitions touch only colour, background, border, opacity, transform
+     - every transition collapses under prefers-reduced-motion
+   ========================================================================= */
+
+:root {
+  /* surfaces — four deliberate steps */
+  --bg: #0a0c11;
+  --surface: #10131b;
+  --surface-2: #161a24;
+  --surface-3: #1c212d;
+
+  /* hairlines */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+
+  /* text */
+  --text: #e9edf5;
+  --muted: #8d95a8;
+  --faint: #616a7d;
+
+  /* one accent, reserved for action and focus */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-ink: #0a0c11;
+  --accent-soft: rgba(59, 130, 246, 0.12);
+  --accent-line: rgba(59, 130, 246, 0.38);
+
+  /* a secondary identity hue, used only for licence state */
+  --violet: #a78bfa;
+  --violet-soft: rgba(167, 139, 250, 0.12);
+  --violet-line: rgba(167, 139, 250, 0.34);
+
+  /* semantic, never reused for decoration */
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.12);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251, 191, 36, 0.12);
+  --error: #f87171;
+  --error-soft: rgba(248, 113, 113, 0.12);
+
+  /* geometry */
+  --r-sm: 6px;
+  --r: 10px;
+  --r-lg: 14px;
+  --space: 4px;
+
+  /* motion */
+  --dur: 140ms;
+  --dur-slow: 200ms;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  background-color: var(--bg);
+  /* A single static gradient, painted with the element: scrolling never
+     repaints a viewport-sized layer. */
+  background-image: radial-gradient(115% 60% at 50% -12%, rgba(59, 130, 246, 0.10), transparent 62%);
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers in columns must not jitter. */
+.mono,
+code, kbd, pre, samp,
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.mono { font-family: var(--mono); }
+
+/* --------------------------------------------------------------- a11y */
+
+/* One focus contract for every control; never removed without a replacement. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+[hidden] { display: none; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion: transitions and animations collapse rather than disappear,
+   so state changes still land, they just do not travel. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    padding: 2.5rem 1.5rem 5rem;
+}
+
+/* Forced colours: keep controls legible when the OS overrides the palette. */
+@media (forced-colors: active) {
+  .btn, .btn-primary, .btn-secondary, .btn-tertiary, .drop-zone, .workspace-card, .status-box {
+    border: 1px solid CanvasText;
   }
-  .container { max-width: 860px; margin: 0 auto; }
-  .nav-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-bottom: 1.25rem; margin-bottom: 2.5rem; border-bottom: 1px solid var(--border);
-  }
-  .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--text); font-weight: 600; font-size: 1.05rem; }
-  .nav-btn {
-    font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted);
-    text-decoration: none; border: 1px solid var(--border); padding: 0.35rem 0.65rem; border-radius: 6px;
-    transition: all 0.15s ease;
-  }
-  .nav-btn:hover { border-color: var(--cyan); color: #f0f6fc; }
-  h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
-  h2 { font-size: 1.2rem; font-weight: 600; color: #f0f6fc; margin-top: 2rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
-  p, li { font-size: 0.88rem; color: var(--text); margin-bottom: 0.75rem; }
-  ul { padding-left: 1.25rem; margin-bottom: 1rem; }
-  .legal-box {
-    background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;
-  }
-  .footer {
-    margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
-    font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;
-  }
-  .footer a { color: var(--text); text-decoration: none; }
-  .footer a:hover { color: var(--cyan); }
+}
+
+/* ============================================================================
+   Legal sheet — loaded after base. These pages are plain prose with their own
+   layout rules (append mode), so this only retunes type, links and surfaces.
+   ========================================================================= */
+
+body { line-height: 1.68; }
+
+h1 {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 660;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 10px;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: 16.5px;
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  margin: 30px 0 10px;
+}
+
+h3 {
+  font-size: 14.5px;
+  font-weight: 620;
+  margin: 22px 0 8px;
+}
+
+p, li { color: var(--muted); line-height: 1.7; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text); }
+
+a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--accent-hover); }
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 28px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  margin: 16px 0;
+}
+th, td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: var(--surface-2);
+}
+td { color: var(--muted); }
+
+blockquote {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--border-strong);
+  background: var(--surface-2);
+  border-radius: var(--r);
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------- page shell */
+
+body { padding: 0; }
+
+.container {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-brand {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+.nav-brand:hover { color: var(--accent-hover); }
+
+.nav-btn {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.nav-btn:hover { color: var(--text); background: var(--surface-2); }
+
+/* The two document cards: the Impressum box and the terms box. */
+.legal-box, .terms-box {
+  margin: 26px 0;
+  padding: 22px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+.legal-box > h2:first-child,
+.terms-box > h2:first-child { margin-top: 0; }
+.legal-box > *:last-child,
+.terms-box > *:last-child { margin-bottom: 0; }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--faint);
+}
+.footer a { color: var(--muted); text-decoration: none; }
+.footer a:hover { color: var(--text); }
+
+@media (max-width: 620px) {
+  .container { padding: 1.5rem 1rem 2.5rem; }
+  .legal-box, .terms-box { padding: 18px; }
+}
 </style>
 </head>
 <body>
@@ -66,7 +302,7 @@
   </header>
 
   <h1>Impressum</h1>
-  <p style="color: var(--text-muted); margin-bottom: 2rem;">Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</p>
+  <p>Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</p>
 
   <div class="legal-box">
     <h2>Diensteanbieter</h2>
@@ -83,8 +319,8 @@
 
     <h2>Kontakt</h2>
     <p>
-      E-Mail: <a href="mailto:info@kellersystems.dev" style="color: var(--cyan); text-decoration: none;">info@kellersystems.dev</a><br>
-      Website: <a href="https://aureal.kellersystems.dev/" target="_blank" style="color: var(--cyan); text-decoration: none;">https://aureal.kellersystems.dev/</a>
+      E-Mail: <a href="mailto:info@kellersystems.dev">info@kellersystems.dev</a><br>
+      Website: <a href="https://aureal.kellersystems.dev/" target="_blank">https://aureal.kellersystems.dev/</a>
     </p>
 
     <h2>Umsatzsteuer</h2>
@@ -92,12 +328,18 @@
       Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).<br>
       <em>(Beim gewerblichen Vertrieb über Polar.sh als Merchant of Record tritt die Plattform als autorisierter Wiederverkäufer und Steuerschuldner auf).</em>
     </p>
+
+    <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
+    <p>
+      Lukas Negenborn<br>
+      Anschrift wie oben
+    </p>
   </div>
 
   <h2>EU-Streitschlichtung</h2>
   <p>
     Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: 
-    <a href="https://ec.europa.eu/consumers/odr" target="_blank" style="color: var(--cyan); text-decoration: none;">https://ec.europa.eu/consumers/odr</a>.<br>
+    <a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a>.<br>
     Unsere E-Mail-Adresse finden Sie oben im Impressum.
   </p>
 

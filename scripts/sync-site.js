@@ -1,20 +1,17 @@
 // scripts/sync-site.js — keep generated alias variants identical to their canonical source.
 //
-// The site intentionally serves the same page at two URLs (clean route plus a
-// folder alias, e.g. /docs -> site/demo/docs.html and /site/docs/... ). Every
-// alias is a byte-for-byte copy of its canonical file, so it must never be
-// edited directly: edit the canonical, then run `npm run sync:site`.
+// Each page is served at two URLs: its clean route (via _redirects) and a folder
+// alias, e.g. /docs -> site/docs.html and /site/docs/index.html. The top-level
+// `site/<page>.html` file IS the page; the `site/<page>/index.html` alias is a
+// byte-for-byte copy of it, so the alias must never be edited directly: edit
+// `site/<page>.html`, then run `npm run sync:site`.
 //
 // Canonical sources and their generated aliases:
-//   site/demo/index.html     -> site/index.html            (landing)
-//   site/demo/docs.html      -> site/docs.html
-//                             -> site/docs/index.html
-//   site/demo/pricing.html   -> site/pricing.html
-//                             -> site/pricing/index.html
-//   site/demo/studio.html    -> site/studio.html
-//                             -> site/studio/index.html
-//   site/demo/verifier.html  -> site/verifier.html
-//                             -> site/verifier/index.html
+//   site/index.html          -> (no alias; served at /)
+//   site/docs.html           -> site/docs/index.html
+//   site/pricing.html        -> site/pricing/index.html
+//   site/studio.html         -> site/studio/index.html
+//   site/verifier.html       -> site/verifier/index.html
 // Legal pages are single-source (site/legal/*.html) and are not copied.
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -24,23 +21,11 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const GROUPS = [
-  { canonical: "site/demo/index.html", aliases: ["site/index.html"] },
-  {
-    canonical: "site/demo/docs.html",
-    aliases: ["site/docs.html", "site/docs/index.html"],
-  },
-  {
-    canonical: "site/demo/pricing.html",
-    aliases: ["site/pricing.html", "site/pricing/index.html"],
-  },
-  {
-    canonical: "site/demo/studio.html",
-    aliases: ["site/studio.html", "site/studio/index.html"],
-  },
-  {
-    canonical: "site/demo/verifier.html",
-    aliases: ["site/verifier.html", "site/verifier/index.html"],
-  },
+  { canonical: "site/index.html", aliases: [] },
+  { canonical: "site/docs.html", aliases: ["site/docs/index.html"] },
+  { canonical: "site/pricing.html", aliases: ["site/pricing/index.html"] },
+  { canonical: "site/studio.html", aliases: ["site/studio/index.html"] },
+  { canonical: "site/verifier.html", aliases: ["site/verifier/index.html"] },
 ];
 
 const check = process.argv.includes("--check");

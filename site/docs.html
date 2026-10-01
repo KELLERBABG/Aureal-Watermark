@@ -13,493 +13,719 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #08040d;
-      --surface: #12091f;
-      --surface-raised: #1c1030;
-      --border: #301a52;
-      --border-glow: #48277b;
-      
-      --purple: #8b5cf6;
-      --violet: #a855f7;
-      --pink: #ec4899;
-      --cyan: #38bdf8;
-      --emerald: #10b981;
-      --amber: #f59e0b;
+/* ============================================================================
+   Aureal Watermark — shared base layer
+   Included by every page ahead of its own sheet. Tokens, reset, and the
+   accessibility contract live here so the pages cannot drift apart.
 
-      --text: #f0f6fc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
+   Performance budget for the whole site:
+     - no backdrop-filter anywhere
+     - no fixed/parallax background layers, no animated gradients
+     - transitions touch only colour, background, border, opacity, transform
+     - every transition collapses under prefers-reduced-motion
+   ========================================================================= */
 
-      --font-heading: 'Space Grotesk', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
+:root {
+  /* surfaces — four deliberate steps */
+  --bg: #0a0c11;
+  --surface: #10131b;
+  --surface-2: #161a24;
+  --surface-3: #1c212d;
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+  /* hairlines */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
 
-    body {
-      background: radial-gradient(ellipse at 50% 0%, #200d38 0%, var(--bg) 75%);
-      color: var(--text);
-      font-family: var(--font-heading);
-      line-height: 1.65;
-      min-height: 100vh;
-    }
+  /* text */
+  --text: #e9edf5;
+  --muted: #8d95a8;
+  --faint: #616a7d;
 
-    header {
-      border-bottom: 1px solid var(--border);
-      background: rgba(8, 4, 13, 0.88);
-      backdrop-filter: blur(14px);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
+  /* one accent, reserved for action and focus */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-ink: #0a0c11;
+  --accent-soft: rgba(59, 130, 246, 0.12);
+  --accent-line: rgba(59, 130, 246, 0.38);
 
-    .container {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
+  /* a secondary identity hue, used only for licence state */
+  --violet: #a78bfa;
+  --violet-soft: rgba(167, 139, 250, 0.12);
+  --violet-line: rgba(167, 139, 250, 0.34);
 
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 64px;
-    }
+  /* semantic, never reused for decoration */
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.12);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251, 191, 36, 0.12);
+  --error: #f87171;
+  --error-soft: rgba(248, 113, 113, 0.12);
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      text-decoration: none;
-    }
-    .brand-icon-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .brand-glow {
-      position: absolute;
-      inset: -4px;
-      border-radius: 10px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 75%);
-      filter: blur(4px);
-      pointer-events: none;
-    }
-    .brand-titles {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      line-height: 1.18;
-    }
-    .brand-product {
-      font-family: var(--font-heading);
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .brand-product span.sub-accent {
-      color: var(--cyan);
-      font-weight: 600;
-    }
-    .brand-company {
-      font-family: var(--font-heading);
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
+  /* geometry */
+  --r-sm: 6px;
+  --r: 10px;
+  --r-lg: 14px;
+  --space: 4px;
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
+  /* motion */
+  --dur: 140ms;
+  --dur-slow: 200ms;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
 
-    .nav-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.15s;
-    }
-    .nav-link:hover, .nav-link.active { color: var(--purple); }
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
 
-    .btn-repo {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.45rem 1rem;
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 0.8rem;
-      font-family: var(--font-mono);
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .btn-repo:hover {
-      border-color: var(--purple);
-      box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
-    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .btn-cta-nav {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.45rem 1.1rem;
-      background: linear-gradient(135deg, var(--purple) 0%, #6366f1 100%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-      color: #ffffff;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .btn-cta-nav:hover {
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
-      transform: translateY(-1px);
-    }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
-    /* Docs Layout */
-    .docs-layout {
-      display: flex;
-      gap: 3.5rem;
-      padding: 3rem 0 6rem;
-    }
+body {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  background-color: var(--bg);
+  /* A single static gradient, painted with the element: scrolling never
+     repaints a viewport-sized layer. */
+  background-image: radial-gradient(115% 60% at 50% -12%, rgba(59, 130, 246, 0.10), transparent 62%);
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-    /* Sidebar */
-    .sidebar {
-      width: 270px;
-      flex-shrink: 0;
-      position: sticky;
-      top: 96px;
-      height: calc(100vh - 120px);
-      overflow-y: auto;
-      padding-right: 1rem;
-    }
+/* Numbers in columns must not jitter. */
+.mono,
+code, kbd, pre, samp,
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
 
-    .sidebar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .sidebar::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 2px;
-    }
+.mono { font-family: var(--mono); }
 
-    .sidebar-group {
-      margin-bottom: 2rem;
-    }
+/* --------------------------------------------------------------- a11y */
 
-    .sidebar-title {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
+/* One focus contract for every control; never removed without a replacement. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
 
-    .sidebar-menu {
-      list-style: none;
-    }
+[hidden] { display: none; }
 
-    .sidebar-menu li {
-      margin-bottom: 0.4rem;
-    }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-    .sidebar-menu a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.86rem;
-      display: block;
-      padding: 0.35rem 0.6rem;
-      border-radius: 6px;
-      transition: all 0.15s;
-    }
+/* Reduced motion: transitions and animations collapse rather than disappear,
+   so state changes still land, they just do not travel. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
 
-    .sidebar-menu a:hover {
-      color: var(--text);
-      background: rgba(139, 92, 246, 0.1);
-    }
+/* Forced colours: keep controls legible when the OS overrides the palette. */
+@media (forced-colors: active) {
+  .btn, .btn-primary, .btn-secondary, .btn-tertiary, .drop-zone, .workspace-card, .status-box {
+    border: 1px solid CanvasText;
+  }
+}
 
-    .sidebar-menu a.active {
-      color: var(--purple);
-      background: rgba(139, 92, 246, 0.15);
-      font-weight: 600;
-    }
+/* ============================================================================
+   Shared UI primitives — loaded after base.css by every page.
+   Nav, buttons, cards, code, tables, modal, footer. Page-specific layout lives
+   in that page's own sheet.
+   ========================================================================= */
 
-    /* Main Docs Content */
-    .docs-content {
-      flex: 1;
-      min-width: 0;
-    }
+body { overflow-x: hidden; }
 
-    .doc-header {
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 2rem;
-      margin-bottom: 3rem;
-    }
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 2;
+}
 
-    .doc-header h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.8rem;
-      background: linear-gradient(180deg, #ffffff 30%, #e9d5ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+/* ------------------------------------------------------------------- nav */
 
-    .doc-header p.lead {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      max-width: 800px;
-    }
+/* Sticky, but with an opaque fill instead of a backdrop blur: same separation
+   from the content, no per-frame backdrop readback. */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(10, 12, 17, 0.94);
+  border-bottom: 1px solid var(--border);
+}
 
-    .doc-section {
-      margin-bottom: 4rem;
-      scroll-margin-top: 100px;
-    }
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  height: 64px;
+}
 
-    .doc-section h2 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      color: #ffffff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.5rem;
-    }
+.brand,
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: var(--r-sm);
+}
 
-    .doc-section h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 1.8rem 0 0.75rem;
-      color: #e2e8f0;
-    }
+.brand-icon-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
 
-    .doc-section p {
-      color: var(--text-muted);
-      font-size: 0.98rem;
-      line-height: 1.7;
-      margin-bottom: 1.2rem;
-    }
+/* Was a `filter: blur(4px)` halo. Now a hairline ring — one paint, no blur pass. */
+.brand-glow {
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  pointer-events: none;
+  filter: none;
+}
 
-    /* Code Blocks */
-    .code-wrapper {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 1.25rem 0 2rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
+.brand-icon {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 10px;
+  filter: none;
+}
 
-    .code-top {
-      background: var(--surface-raised);
-      padding: 0.55rem 1.2rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--text-dim);
-    }
+.brand-titles { display: flex; flex-direction: column; justify-content: center; line-height: 1.15; }
+.brand-product { display: flex; align-items: center; gap: 4px; font-weight: 650; letter-spacing: -0.02em; }
+.brand-company { font-weight: 400; color: var(--muted); }
+.sub-accent { color: var(--accent); }
 
-    .code-lang {
-      text-transform: uppercase;
-      color: var(--purple);
-      font-weight: 600;
-    }
+.nav-links { display: flex; align-items: center; gap: 6px; }
 
-    pre {
-      padding: 1.2rem 1.4rem;
-      overflow-x: auto;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      line-height: 1.6;
-      color: #e2e8f0;
-    }
+.nav-link {
+  display: inline-block;
+  padding: 7px 11px;
+  border-radius: var(--r-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.nav-link:hover { color: var(--text); background: var(--surface-2); }
+.nav-link.active { color: var(--text); background: var(--surface-3); }
 
-    code {
-      font-family: var(--font-mono);
-    }
+.nav-toggle {
+  display: none;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px 10px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.nav-toggle:hover { background: var(--surface-2); }
 
-    p code, td code {
-      background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(139, 92, 246, 0.25);
-      color: #d8b4fe;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      font-size: 0.85em;
-    }
+/* --------------------------------------------------------------- buttons */
 
-    .btn-copy-code {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-muted);
-      padding: 0.3rem 0.75rem;
-      border-radius: 5px;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+.btn-primary,
+.btn-secondary,
+.btn-tertiary,
+.btn-procure,
+.btn-checkout,
+.btn-tier,
+.btn-repo,
+.btn-cta-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  padding: 12px 20px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
 
-    .btn-copy-code:hover {
-      color: var(--text);
-      border-color: var(--purple);
-      background: rgba(139, 92, 246, 0.2);
-    }
+.btn-primary,
+.btn-procure,
+.btn-checkout { color: var(--accent-ink); background: var(--accent); }
+.btn-primary:hover,
+.btn-procure:hover,
+.btn-checkout:hover { background: var(--accent-hover); }
 
-    /* Tables */
-    .table-box {
-      width: 100%;
-      overflow-x: auto;
-      margin: 1.5rem 0 2rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
+.btn-secondary { color: var(--text); background: var(--surface-2); border-color: var(--border-strong); }
+.btn-secondary:hover { background: var(--surface-3); border-color: rgba(255, 255, 255, 0.22); }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.88rem;
-    }
+.btn-tertiary { color: var(--muted); background: transparent; padding-left: 8px; padding-right: 8px; }
+.btn-tertiary:hover { color: var(--text); }
 
-    th {
-      background: var(--surface-raised);
-      padding: 0.85rem 1.1rem;
-      font-weight: 600;
-      color: var(--text);
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      border-bottom: 1px solid var(--border);
-    }
+.btn-repo,
+.btn-cta-nav { font-size: 13px; padding: 7px 13px; }
+.btn-repo { color: var(--muted); background: transparent; border-color: var(--border-strong); }
+.btn-repo:hover { color: var(--text); background: var(--surface-2); }
+.btn-cta-nav { color: var(--accent-ink); background: var(--accent); }
+.btn-cta-nav:hover { background: var(--accent-hover); }
 
-    td {
-      padding: 0.85rem 1.1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-    }
+.btn-tier { width: 100%; color: var(--text); background: var(--surface-2); border-color: var(--border-strong); }
+.btn-tier:hover { background: var(--surface-3); border-color: rgba(255, 255, 255, 0.22); }
 
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+/* ------------------------------------------------------------------ cards */
 
-    /* Callouts */
-    .callout {
-      border-radius: 8px;
-      padding: 1.25rem 1.5rem;
-      margin: 1.5rem 0;
-      border-left: 4px solid var(--purple);
-      background: rgba(139, 92, 246, 0.08);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      border-left-width: 4px;
-    }
+.concept-card,
+.pillar-card,
+.lifecycle-card,
+.info-box,
+.tier-card,
+.doc-card,
+.demo-widget-card,
+.demo-panel,
+.forensic-cert-card,
+.terminal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
 
-    .callout.info {
-      border-left-color: var(--cyan);
-      background: rgba(56, 189, 248, 0.08);
-      border-color: rgba(56, 189, 248, 0.2);
-      border-left-width: 4px;
-    }
+.concept-card:hover,
+.pillar-card:hover,
+.doc-card:hover,
+.lifecycle-card:hover { border-color: var(--border-strong); }
 
-    .callout.warn {
-      border-left-color: var(--amber);
-      background: rgba(245, 158, 11, 0.08);
-      border-color: rgba(245, 158, 11, 0.2);
-      border-left-width: 4px;
-    }
+.pillar-card,
+.concept-card { padding: 22px; position: relative; }
+.pillar-card h3,
+.concept-card h3 { font-size: 16px; font-weight: 620; letter-spacing: -0.015em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.pillar-card p,
+.concept-card p { font-size: 14px; color: var(--muted); line-height: 1.62; }
 
-    .callout h4 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 0.35rem;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+.pillar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--accent);
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
 
-    .callout p {
-      margin-bottom: 0;
-      font-size: 0.9rem;
-    }
+/* --------------------------------------------------------------- headings */
 
-    /* Cards Grid */
-    .docs-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin: 1.5rem 0;
-    }
+.section-title,
+h2 {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 660;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  text-wrap: balance;
+}
 
-    .doc-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.4rem;
-      transition: all 0.2s;
-    }
+.section-lead,
+.section-desc,
+.page-intro p {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 820px;
+  text-wrap: pretty;
+}
 
-    .doc-card:hover {
-      border-color: var(--purple);
-      transform: translateY(-2px);
-    }
+.section-lead, .section-desc { max-width: 820px; }
 
-    .doc-card h4 {
-      font-size: 1.05rem;
-      margin-bottom: 0.5rem;
-      color: #ffffff;
-    }
+.prose-section { padding: 64px 0; border-top: 1px solid var(--border); }
+.prose-section h3 { font-size: 16px; font-weight: 620; letter-spacing: -0.015em; margin-bottom: 7px; }
+.prose-section p { color: var(--muted); line-height: 1.65; }
 
-    .doc-card p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0;
-    }
+.badge-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: 999px;
+  padding: 4px 11px;
+  margin-bottom: 14px;
+}
 
-    /* Responsive */
-    @media (max-width: 950px) {
-      .docs-layout {
-        flex-direction: column;
-        gap: 2rem;
-      }
-      .sidebar {
-        width: 100%;
-        position: static;
-        height: auto;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 1.5rem;
-      }
-    }
+.badge-adv, .badge-fail, .instant-delivery-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.badge-adv { color: var(--success); background: var(--success-soft); border: 1px solid rgba(52, 211, 153, 0.28); }
+.badge-fail { color: var(--error); background: var(--error-soft); border: 1px solid rgba(248, 113, 113, 0.28); }
+.instant-delivery-tag { color: var(--warn); background: var(--warn-soft); border: 1px solid rgba(251, 191, 36, 0.28); }
 
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 3.5rem 0;
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 0.85rem;
-    }
-    footer a { color: var(--text-muted); text-decoration: none; }
-    footer a:hover { color: var(--purple); }
-  </style>
+.link-arrow { font-weight: 600; color: var(--accent); text-decoration: none; transition: color var(--dur) var(--ease); }
+.link-arrow:hover { color: var(--accent-hover); }
+
+.info-box, .dual-license-note, .procurement-content {
+  padding: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r);
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------ code blocks */
+
+.code-wrapper, .code-box, .table-container, .table-box, .matrix-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--bg);
+}
+.code-wrapper, .code-box { overflow: hidden; }
+.table-container, .table-box, .matrix-wrapper { overflow-x: auto; }
+
+.code-top, .code-lang, .terminal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 13px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.code-wrapper pre, .code-box pre, .terminal-body, pre {
+  margin: 0;
+  padding: 14px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+  background: transparent;
+}
+
+pre.cert-pre { white-space: pre; overflow-x: auto; }
+
+.copy-btn, .btn-copy-code {
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.copy-btn:hover, .btn-copy-code:hover { color: var(--text); background: var(--surface-3); border-color: rgba(255, 255, 255, 0.22); }
+
+/* ---------------------------------------------------------------- tables */
+
+table { width: 100%; border-collapse: collapse; }
+
+.matrix-table, .table-box table, .data-table { width: 100%; font-size: 13px; }
+.matrix-table th, .matrix-table td,
+.table-box th, .table-box td,
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 10px 13px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.matrix-table th, .table-box th, .data-table th {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: var(--surface-2);
+}
+.matrix-table td, .table-box td, .data-table td { color: var(--muted); }
+.matrix-table td:first-child, .table-box td:first-child, .data-table td:first-child { color: var(--text); font-weight: 500; }
+.matrix-table tr:last-child td, .table-box tr:last-child td, .data-table tr:last-child td { border-bottom: none; }
+
+.val-yes { color: var(--success); font-weight: 600; }
+.val-no { color: var(--faint); }
+
+/* ---------------------------------------------------------------- modal */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 12, 0.82);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  color: var(--text);
+  width: 100%;
+  max-width: 780px;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 22px;
+}
+.modal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.modal-close-btn:hover { color: var(--text); background: var(--surface-2); }
+
+/* --------------------------------------------------------------- footer */
+
+footer {
+  margin-top: 64px;
+  padding: 28px 0 40px;
+  border-top: 1px solid var(--border);
+  color: var(--faint);
+  font-size: 12.5px;
+}
+footer a { color: var(--muted); text-decoration: none; transition: color var(--dur) var(--ease); }
+footer a:hover { color: var(--text); }
+
+/* ---------------------------------------------------------- responsive nav */
+
+/* Only the landing page ships a `.nav-toggle` button. Collapsing the nav into a
+   hamburger on the other pages would hide their links with no way to open them,
+   so the collapse is gated on the button actually existing; pages without one
+   get a nav that wraps instead. */
+@media (max-width: 860px) {
+  .container { padding: 0 18px; }
+  .nav-inner, .nav-header { height: auto; min-height: 64px; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; }
+
+  header:has(.nav-toggle) .nav-toggle { display: inline-block; }
+
+  header:has(.nav-toggle) .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 12px 18px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  }
+  header:has(.nav-toggle) .nav-links.open { display: flex; }
+
+  /* No toggle available: keep every link reachable and let the row wrap. */
+  header:not(:has(.nav-toggle)) .nav-links { flex-wrap: wrap; }
+}
+
+/* ============================================================================
+   Docs sheet — loaded after base + shared primitives.
+   A three-zone shell: sticky sidebar, measured content column, in-page anchors.
+   ========================================================================= */
+
+.container { max-width: 1320px; }
+
+.docs-layout {
+  display: flex;
+  gap: 56px;
+  padding-top: 36px;
+  padding-bottom: 64px;
+  align-items: flex-start;
+}
+
+/* -------------------------------------------------------------- sidebar */
+
+.sidebar {
+  width: 270px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 88px;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 6px;
+  font-size: 13.5px;
+}
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+.sidebar-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin: 20px 0 8px;
+}
+.sidebar-title:first-child { margin-top: 0; }
+
+.sidebar-group { margin-bottom: 22px; }
+
+.sidebar-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
+}
+.sidebar-menu a {
+  display: block;
+  padding: 5px 9px;
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  text-decoration: none;
+  line-height: 1.45;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.sidebar-menu a:hover { color: var(--text); background: var(--surface-2); }
+.sidebar-menu a.active { color: var(--text); background: var(--surface-3); font-weight: 550; }
+
+/* -------------------------------------------------------------- content */
+
+.docs-content { flex: 1; min-width: 0; }
+
+.doc-header { margin-bottom: 14px; }
+.doc-header p.lead { max-width: 800px; }
+
+.doc-section {
+  padding: 34px 0;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 88px;
+}
+.doc-section h2 { display: flex; align-items: center; gap: 10px; scroll-margin-top: 88px; }
+.doc-section h3 { font-size: 15.5px; font-weight: 620; letter-spacing: -0.015em; margin: 24px 0 8px; }
+.doc-section p, .docs-content p { color: var(--muted); line-height: 1.68; }
+.docs-content ul, .docs-content ol { color: var(--muted); line-height: 1.68; padding-left: 22px; }
+.docs-content li { margin-bottom: 5px; }
+.docs-content strong { color: var(--text); }
+
+.docs-content code:not(pre code) {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.doc-card { padding: 18px; }
+
+.docs-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ------------------------------------------------------------- callouts */
+
+.callout, .info, .warn {
+  display: block;
+  padding: 14px 16px;
+  margin: 16px 0;
+  border-radius: var(--r);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  font-size: 13.5px;
+  line-height: 1.62;
+  color: var(--muted);
+}
+.callout h4, .info h4, .warn h4 { display: flex; align-items: center; gap: 8px; color: var(--text); margin-bottom: 4px; }
+.callout, .info { border-left: 3px solid var(--accent); }
+.warn { border-left: 3px solid var(--warn); }
+.callout strong, .info strong, .warn strong { color: var(--text); }
+
+/* ------------------------------------------------------------ code + api */
+
+.code-wrapper { margin: 14px 0; position: relative; }
+.code-lang { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); }
+
+.table-box { margin: 16px 0; }
+
+/* ----------------------------------------------------------- responsive */
+
+@media (max-width: 980px) {
+  .docs-layout { flex-direction: column; gap: 28px; padding-top: 24px; }
+  .sidebar {
+    width: 100%;
+    position: static;
+    height: auto;
+    max-height: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+  }
+  .sidebar-menu { flex-direction: row; flex-wrap: wrap; border-left: none; padding-left: 0; }
+}
+</style>
 </head>
 <body>
 
@@ -508,7 +734,7 @@
       <a href="/" class="brand">
         <div class="brand-icon-wrap">
           <div class="brand-glow"></div>
-          <img src="/assets/icon.svg" alt="Aureal Logo" width="32" height="32" style="border-radius:7px; flex-shrink:0;" />
+          <img src="/assets/icon.svg" alt="Aureal Logo" width="32" height="32" />
         </div>
         <div class="brand-titles">
           <div class="brand-product">Aureal <span class="sub-accent">Watermark</span></div>
@@ -700,7 +926,7 @@ node bin/auralwatermark.js detect unknown.wav --key my-secret --json</code></pre
               <tr>
                 <td><code>--band &lt;preset&gt;</code></td>
                 <td><code>dual</code></td>
-                <td><code>high</code> (17â€“19.5 kHz, Ultrasonic), <code>mid</code> (8â€“13 kHz), or <code>dual</code> (both bands).</td>
+                <td><code>high</code> (17–19.5 kHz, Ultrasonic), <code>mid</code> (8–13 kHz), or <code>dual</code> (both bands).</td>
               </tr>
             </tbody>
           </table>
@@ -867,10 +1093,10 @@ console.log(verification);
         <p>
           Rather than placing watermark energy in a few concentrated frequencies, Aureal uses an orthogonal pseudo-random noise sequence to spread the 32-bit payload across thousands of frequency bins:
         </p>
-        <ul style="padding-left: 1.5rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-          <li style="margin-bottom: 0.5rem;">The energy per frequency bin is tens of decibels lower than ambient acoustic noise.</li>
-          <li style="margin-bottom: 0.5rem;">Recovery after lossy compression depends on the audio, codec, bitrate, and subsequent processing; test the formats used in your own delivery chain.</li>
-          <li style="margin-bottom: 0.5rem;">A decoder with the matching key is required to recover the embedded payload in the current design.</li>
+        <ul>
+          <li>The energy per frequency bin is tens of decibels lower than ambient acoustic noise.</li>
+          <li>Recovery after lossy compression depends on the audio, codec, bitrate, and subsequent processing; test the formats used in your own delivery chain.</li>
+          <li>A decoder with the matching key is required to recover the embedded payload in the current design.</li>
         </ul>
       </section>
 
@@ -910,7 +1136,7 @@ auralwatermark detect leak_screener.mp3 \
         </div>
 
         <h3>Sample Audit Report (Illustrative)</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
+        <p>
           The following is an illustrative sample, not a certification of admissibility, authorship, or chain of custody:
         </p>
         <div class="code-wrapper">
@@ -1002,7 +1228,7 @@ Attribution: Illustrative sample output only; a watermark match does not indepen
         </div>
 
         <p>
-          For complete licensing terms, procurement details, and enterprise SLAs, visit the <a href="/pricing" style="color: var(--purple); font-weight:600;">Commercial Licensing &amp; Pricing Page &rarr;</a>
+          For complete licensing terms, procurement details, and enterprise SLAs, visit the <a href="/pricing">Commercial Licensing &amp; Pricing Page &rarr;</a>
         </p>
       </section>
 
@@ -1017,7 +1243,7 @@ Attribution: Illustrative sample output only; a watermark match does not indepen
         </p>
         <div class="callout">
           <h4>Enterprise deployments</h4>
-          <p>For on-premise rollouts, custom carrier bands, or volume licensing, contact <a href="mailto:business@kellersystems.dev" style="color: var(--purple);">business@kellersystems.dev</a>.</p>
+          <p>For on-premise rollouts, custom carrier bands, or volume licensing, contact <a href="mailto:business@kellersystems.dev">business@kellersystems.dev</a>.</p>
         </div>
       </section>
 
@@ -1036,8 +1262,8 @@ Attribution: Illustrative sample output only; a watermark match does not indepen
   </div>
 
   <footer>
-    <div class="container" style="display:flex; flex-direction:column; gap:1rem; align-items:center;">
-      <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; font-size:0.85rem;">
+    <div class="container">
+      <div>
         <a href="/">Home</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing &amp; Licenses</a>
@@ -1087,6 +1313,26 @@ Attribution: Illustrative sample output only; a watermark match does not indepen
       });
     });
   </script>
+
+<script>
+/* Injected by the design-system pass: the nav toggle had no handler. */
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('primary-nav') || document.querySelector('.nav-links');
+  if (!btn || !nav) return;
+  function set(open) {
+    nav.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  btn.addEventListener('click', function (event) {
+    event.preventDefault();
+    set(!nav.classList.contains('open'));
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') set(false);
+  });
+})();
+</script>
 </body>
 </html>
 

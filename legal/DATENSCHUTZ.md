@@ -13,8 +13,8 @@ Aureal Watermark ist auf maximale Vertraulichkeit und Datensouveränität ausgel
 Lukas Negenborn  
 E-Mail: [info@kellersystems.dev](mailto:info@kellersystems.dev)
 
-## 3. Webhosting über GitHub Pages
-Diese Dokumentations- und Studio-Webseite wird auf Servern von GitHub, Inc. (88 Colin P Kelly Jr St, San Francisco, CA 94107, USA) gehostet. Beim Aufruf der Seiten erfasst GitHub automatisch Zugriffsdaten (Server-Logfiles, IP-Adresse, Datum/Uhrzeit) zur Sicherstellung der Betriebssicherheit und Abwehr von Cyberangriffen gemäß Art. 6 Abs. 1 lit. f DSGVO. Die Datenübermittlung in die USA ist durch EU-Standardvertragsklauseln (SCC) abgesichert.
+## 3. Webhosting über Cloudflare Pages
+Diese Dokumentations- und Studio-Webseite wird über Cloudflare Pages, betrieben von Cloudflare, Inc. (101 Townsend St, San Francisco, CA 94107, USA), bereitgestellt. Beim Aufruf der Seiten erfasst Cloudflare automatisch Zugriffsdaten (Server-Logfiles, IP-Adresse, Datum/Uhrzeit) zur Sicherstellung der Betriebssicherheit und Abwehr von Cyberangriffen gemäß Art. 6 Abs. 1 lit. f DSGVO. Die Datenübermittlung in die USA ist durch EU-Standardvertragsklauseln (SCC) abgesichert.
 
 ## 4. Zahlungsabwicklung (Merchant of Record)
 Der gewerbliche Lizenzvertrieb erfolgt über zertifizierte Merchant of Record-Plattformen (z. B. Polar.sh oder Lemon Squeezy). Bei einem Lizenzkauf schließen Sie den Vertrag direkt mit dem Merchant of Record ab, der die Zahlungsdaten verarbeitet und die weltweite Steuerabführung übernimmt. Wir erhalten zu keinem Zeitpunkt Zugriff auf Ihre Bank- oder Kreditkartendaten.

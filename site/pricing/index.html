@@ -457,7 +457,143 @@
   .footer a:hover {
     color: var(--cyan);
   }
+
+/* --- overrides applied to the legacy stylesheet ------------------------- */
+/* Kill the expensive effects the old sheet still declares. */
+* {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.demo-pulse-dot, .brand-glow { animation: none !important; }
+
+/* ============================================================================
+   Pricing page — polish layer.
+   APPENDED to the page's own stylesheet, which keeps every layout rule.
+   This layer adds the brand typography (loaded alongside), a top glow, hover
+   and focus states, and the accessibility contract the page was missing.
+   ========================================================================= */
+
+:root {
+  /* The page already referenced `--mono`; point it at the real face. */
+  --font-heading: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --border-glow: #3b82f6;
+  --edge-glow: rgba(59, 130, 246, 0.16);
+}
+
+/* A flat page reads as unfinished next to the landing page's glow. One static
+   gradient band, painted with the body box — no fixed layer, no repaint. */
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse 70% 420px at 50% 0%, #101a33 0%, rgba(13, 14, 17, 0) 72%);
+  background-repeat: no-repeat;
+  background-size: 100% 420px;
+}
+
+h1, h2, h3, .tier-title, .section-title {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+p, .section-desc, .page-intro p, .tier-desc { text-wrap: pretty; }
+
+/* Prices, tiers and spec values are data: real monospace, aligned figures. */
+.tier-price, .tier-tag, .instant-delivery-tag, .val-yes, .val-no, .matrix-table td {
+  font-variant-numeric: tabular-nums;
+}
+.tier-price, .tier-tag { font-family: var(--font-mono); }
+
+::selection { background: rgba(59, 130, 246, 0.35); color: #fff; }
+
+/* --------------------------------------------------------------- anchors */
+
+html { scroll-behavior: smooth; }
+[id] { scroll-margin-top: 32px; }
+
+/* The injected nav handler toggles this; the page's sheet never defined it. */
+.nav-links.open { display: flex; flex-wrap: wrap; }
+
+/* ---------------------------------------------------- interaction states */
+
+.tier-card {
+  transition: border-color 0.18s ease, box-shadow 0.22s ease, transform 0.18s ease;
+}
+.tier-card:hover {
+  border-color: var(--border-bright);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--edge-glow);
+  transform: translateY(-2px);
+}
+
+/* The featured tier is the page's whole argument — give it an edge. */
+.tier-card.featured {
+  border-color: var(--border-glow);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08) 0%, var(--card) 42%);
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.22), 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.tier-card.featured:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 22px 46px rgba(0, 0, 0, 0.5);
+}
+
+.tier-tag { color: var(--cyan); }
+
+/* `transition: all` animates layout properties too; name them instead. */
+.btn-checkout {
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+    box-shadow 0.18s ease, transform 0.18s ease;
+}
+.btn-checkout:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.22);
+}
+.btn-tier:hover {
+  border-color: var(--border-glow);
+  color: #fff;
+  background: #1f2530;
+}
+
+.nav-btn, .nav-link, a { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease; }
+.nav-btn:hover, .nav-link:hover { color: var(--cyan); }
+
+.info-box, .dual-license-note, .procurement-content {
+  transition: border-color 0.18s ease;
+}
+.info-box:hover, .dual-license-note:hover { border-color: var(--border-bright); }
+
+/* ---------------------------------------------------------------- tables */
+
+.matrix-table th { color: var(--text-muted); background: var(--card-subtle); }
+.matrix-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+.matrix-wrapper, .table-box { scrollbar-color: var(--border-bright) transparent; scrollbar-width: thin; }
+
+/* --------------------------------------------------------------- a11y */
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .tier-card:hover { transform: none; }
+}
+
+@media (forced-colors: active) {
+  .tier-card, .info-box, .btn-tier, .btn-checkout { border: 1px solid CanvasText; }
+}
 </style>
+
+  <!-- Aureal brand faces: Space Grotesk for headings, JetBrains Mono for data -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -777,6 +913,26 @@
   </footer>
 </div>
 
+
+<script>
+/* Injected by the design-system pass: the nav toggle had no handler. */
+(function () {
+  var btn = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('primary-nav') || document.querySelector('.nav-links');
+  if (!btn || !nav) return;
+  function set(open) {
+    nav.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  btn.addEventListener('click', function (event) {
+    event.preventDefault();
+    set(!nav.classList.contains('open'));
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') set(false);
+  });
+})();
+</script>
 </body>
 </html>
 
