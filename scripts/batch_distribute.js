@@ -19,6 +19,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { readWavFile, writeWavFile } from "../src/wav.js";
 import { embedWatermark } from "../src/embed.js";
+import { generateTardosCodebook } from "../src/tardos.js";
 
 function printHelp() {
   console.log(`
@@ -137,14 +138,30 @@ async function main() {
     generatedAt: new Date().toISOString(),
     band,
     strength,
+    tardos: null,
     recipients: []
+  };
+
+  // Generate Tardos anti-collusion codebook
+  const tardosScheme = generateTardosCodebook({
+    numRecipients: recipientNames.length,
+    codeLength: 48,
+    maxCoalition: Math.min(5, recipientNames.length),
+    seedKey: key || "tardos-seed-" + path.basename(masterPath),
+  });
+  manifest.tardos = {
+    biases: tardosScheme.biases,
+    cutoff: tardosScheme.cutoff,
+    codeLength: tardosScheme.codeLength,
   };
 
   console.log(`Generating individually tagged audio copies:\n`);
 
   for (let i = 0; i < recipientNames.length; i++) {
     const name = recipientNames[i];
-    const payloadId = startId + i;
+    const payloadId = flags["start-id"]
+      ? Number(flags["start-id"]) + i
+      : (crypto.randomInt(100000, 900000) * 1000 + (i + 1)) >>> 0;
     const safeName = sanitizeFilename(name);
     const outFilename = `${masterBase}_[${safeName}].wav`;
     const outFilePath = path.join(outDir, outFilename);
@@ -171,7 +188,8 @@ async function main() {
       id: payloadId,
       name,
       filename: outFilename,
-      sha256: hash
+      sha256: hash,
+      tardosCodeword: Array.from(tardosScheme.codebook[i]),
     });
 
     console.log(`DONE -> ${outFilename}`);

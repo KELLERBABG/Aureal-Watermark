@@ -19,6 +19,7 @@ import os from "node:os";
 import { execSync } from "node:child_process";
 import { readWavFile } from "../src/wav.js";
 import { detectWatermark } from "../src/detect.js";
+import { accuseCoalition } from "../src/tardos.js";
 
 function printHelp() {
   console.log(`
@@ -139,6 +140,19 @@ async function main() {
   const recoveredId = res.recoveredPayloadId;
   const matchedRecipient = recoveredId != null ? idMap.get(recoveredId) : null;
 
+  // Run Tardos anti-collusion accusation if manifest has Tardos metadata
+  let tardosReport = null;
+  if (manifest.tardos && res.details && res.details.softSymbols) {
+    const recipientsWithCodewords = manifest.recipients.filter((r) => r.tardosCodeword);
+    if (recipientsWithCodewords.length > 0) {
+      tardosReport = accuseCoalition(
+        res.details.softSymbols,
+        recipientsWithCodewords.map((r) => ({ id: r.id, name: r.name, codeword: r.tardosCodeword })),
+        manifest.tardos.biases
+      );
+    }
+  }
+
   if (flags.json) {
     console.log(JSON.stringify({
       auditTarget: audioFile,
@@ -149,11 +163,14 @@ async function main() {
       },
       detection: res,
       leakMatch: matchedRecipient || null,
+      tardosCollusion: tardosReport,
       verdict: matchedRecipient
         ? `Audio leaked from recipient "${matchedRecipient.name}" (ID #${matchedRecipient.id})`
-        : (res.detected ? "Watermark detected but ID not found in manifest" : "No watermark detected")
+        : (tardosReport && tardosReport.isCollusion
+            ? `Collusion detected! Accused coalition: ${tardosReport.accused.map(a => a.name).join(", ")}`
+            : (res.detected ? "Watermark detected but ID not found in manifest" : "No watermark detected"))
     }, null, 2));
-    process.exit(res.detected ? 0 : 1);
+    process.exit(res.detected || (tardosReport && tardosReport.accused.length > 0) ? 0 : 1);
   }
 
   console.log(`\n======================================================`);
@@ -162,7 +179,7 @@ async function main() {
   console.log(`Target File:      ${audioFile}`);
   console.log(`Audio Format:     ${wav.sampleRate} Hz, ${wav.channels}ch, ${wav.durationSec.toFixed(1)}s`);
 
-  if (!res.detected) {
+  if (!res.detected && (!tardosReport || tardosReport.accused.length === 0)) {
     console.log(`Status:           NO WATERMARK DETECTED`);
     console.log(`Confidence:       ${(res.confidence * 100).toFixed(1)}%`);
     console.log(`======================================================\n`);
@@ -198,6 +215,12 @@ async function main() {
     }
     console.log(`======================================================`);
     console.log(`VERDICT: Leak traced directly to "${matchedRecipient.name}".\n`);
+  } else if (tardosReport && tardosReport.accused.length > 0) {
+    console.log(`COLLUSION ANALYSIS (Tardos Anti-Collusion Accuser):`);
+    console.log(`  Accused Coalition: ${tardosReport.accused.map(a => `"${a.name}" (score ${a.score.toFixed(2)})`).join(", ")}`);
+    console.log(`  Threshold:         ${tardosReport.threshold.toFixed(2)} (Population mean: ${tardosReport.meanScore.toFixed(2)})`);
+    console.log(`======================================================`);
+    console.log(`VERDICT: Multi-recipient collusion detected! Leaked via joint copies from: ${tardosReport.accused.map(a => a.name).join(" & ")}.\n`);
   } else {
     console.log(`MANIFEST LOOKUP:`);
     console.log(`  No recipient found in manifest matching ID #${recoveredId}.`);

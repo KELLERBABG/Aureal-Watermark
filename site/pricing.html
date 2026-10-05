@@ -684,107 +684,116 @@ html { scroll-behavior: smooth; }
 
   <!-- Page Intro -->
   <section class="page-intro">
-    <h1>Commercial Licensing &amp; Enterprise SLAs</h1>
+    <h1>Commercial Subscriptions &amp; Promo Licensing</h1>
     <p>
-      Forensic acoustic watermark licensing tailored for independent producers, record labels, and major entertainment studios. Choose a production tier or request custom enterprise deployment.
+      Acoustic watermark licensing tailored for independent producers, record labels, and audio distribution desks. Trace promo leaks with cryptographic confidence and Tardos anti-collusion protection.
     </p>
     <div class="dual-license-note">
-      Non-commercial academic evaluation is free. All commercial releases, pre-release promotional pools, film cue distribution, and automated content protection require an active commercial license or Enterprise MSA.
+      Non-commercial evaluation is 100% free. Commercial music releases, promo pool distributions, and automated pipelines require an active Creator, Label, or Platform subscription.
+    </div>
+
+    <!-- Billing Interval Toggle -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin:2rem 0 0.5rem;">
+      <span style="font-size:0.9rem;font-weight:600;color:var(--text);" id="lbl-monthly">Monthly</span>
+      <label style="position:relative;display:inline-block;width:52px;height:28px;">
+        <input type="checkbox" id="pricing-toggle" checked style="opacity:0;width:0;height:0;">
+        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--purple);border-radius:28px;transition:.3s;border:1px solid rgba(255,255,255,0.2);"></span>
+      </label>
+      <span style="font-size:0.9rem;font-weight:600;color:var(--cyan);" id="lbl-yearly">Yearly <span style="background:rgba(56,189,248,0.15);padding:0.2rem 0.5rem;border-radius:12px;font-size:0.75rem;border:1px solid var(--cyan);">Save ~17%</span></span>
     </div>
   </section>
 
   <!-- Tiers Grid -->
-  <div class="tiers-grid">
-    <!-- Solo / Indie Studio -->
+  <div class="tiers-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+    <!-- Solo / Creator Studio -->
     <div class="tier-card">
       <div class="tier-tag">[ SOLO CREATOR ]</div>
-      <div class="tier-title">Indie Studio</div>
-      <div class="tier-price">$249 <span>/ unlimited perpetual</span></div>
-      <div class="tier-desc">For individual producers, beatmakers, and mixing engineers releasing commercial music with zero track limits.</div>
+      <div class="tier-title">Creator Studio</div>
+      <div class="tier-price" id="price-creator">€89 <span>/ year</span></div>
+      <div class="tier-desc">For independent producers, beatmakers, and mixing engineers releasing commercial music with zero track limits.</div>
       <ul class="tier-specs">
         <li><strong>Unlimited</strong> commercial releases on personal catalogue</li>
         <li>Standalone Command Line Tool (macOS, Windows, Linux)</li>
         <li>Offline Web Audio Studio with Background DSP Worker</li>
+        <li>Dual-band codec resilience (survives MP3, AAC, YouTube/SoundCloud)</li>
         <li>16 &amp; 24-bit Lossless WAV Master Export</li>
-        <li>Perpetual lifetime license with free v0.x updates</li>
-        <li>Instant license key &amp; software bundle download</li>
+        <li>Embedded watermarks remain permanent forever</li>
       </ul>
       <a href="https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq" class="btn-tier btn-checkout">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-        <span>Pay with Card &bull; $249</span>
+        <span id="btn-text-creator">Subscribe &bull; €89 / yr</span>
       </a>
-      <div class="instant-delivery-tag">Instant Card Checkout &bull; Immediate Key Delivery</div>
+      <div class="instant-delivery-tag">14-Day Money-Back Guarantee &bull; Instant Key</div>
     </div>
 
-    <!-- Boutique Label & A&R -->
+    <!-- Label & A&R Desk -->
     <div class="tier-card featured">
-      <div class="tier-tag">[ LABEL &amp; A&amp;R DESK ]</div>
+      <div class="tier-tag">[ LABEL &amp; PROMO DESK ]</div>
       <div class="tier-title">Promo Leak Suite</div>
-      <div class="tier-price">$499 <span>/ unlimited perpetual</span></div>
-      <div class="tier-desc">Complete pre-release leak tracking and forensic attribution suite for record labels with unlimited artists &amp; promo runs.</div>
+      <div class="tier-price" id="price-label">€290 <span>/ year</span></div>
+      <div class="tier-desc">Complete pre-release leak tracking and Tardos anti-collusion attribution suite for record labels and promo distributors.</div>
       <ul class="tier-specs">
-        <li>Everything in Indie Studio</li>
+        <li>Everything in Creator Studio</li>
         <li><strong>Unlimited</strong> promo pool distributions &amp; album campaigns</li>
-        <li><strong>Unlimited</strong> recipient serializations across full roster</li>
-        <li>Forensic Audio Leak Auditor &amp; Source Identification</li>
+        <li><strong>Tardos Anti-Collusion Accuser</strong> (unmasks 2-to-5 leaker average attacks)</li>
+        <li>Automated 1-Click Forensic Leak Auditor (<code>audit_leak.js</code>)</li>
         <li>Cryptographic Recipient Manifests &amp; Audit Logs</li>
         <li>Priority Founder &amp; Pipeline Integration Support</li>
       </ul>
       <a href="https://buy.polar.sh/polar_cl_yJRWpGLnbQTA8xrpZcnxaqssxDdjegF3RGkea1ClCZG" class="btn-tier btn-checkout">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-        <span>Pay with Card &bull; $499</span>
+        <span id="btn-text-label">Subscribe &bull; €290 / yr</span>
       </a>
-      <div class="instant-delivery-tag">Instant Card Checkout &bull; Immediate Key Delivery</div>
+      <div class="instant-delivery-tag">14-Day Money-Back Guarantee &bull; Instant Key</div>
     </div>
 
-    <!-- B2B Audio Marketplace -->
+    <!-- Enterprise / Platform API -->
     <div class="tier-card">
-      <div class="tier-tag">[ MARKETPLACE API ]</div>
-      <div class="tier-title">Audio Platform</div>
-      <div class="tier-price">$2,900+ <span>/ year</span></div>
-      <div class="tier-desc">For beat marketplaces, stem distribution platforms, and stock audio libraries.</div>
+      <div class="tier-tag">[ PLATFORM &amp; API ]</div>
+      <div class="tier-title">Custom / Platform</div>
+      <div class="tier-price">Custom</div>
+      <div class="tier-desc">For beat marketplaces, stem distribution platforms, streaming catalogs, and speech tech providers.</div>
       <ul class="tier-specs">
-        <li>Headless Node.js backend integration rights</li>
+        <li>Headless Node.js and Docker REST microservice rights</li>
         <li>Commercial automated export hook SLA</li>
-        <li>Dual-band heavy compression resilience</li>
-        <li>Tier 1: Up to 50k tracks/mo ($2,900/yr)</li>
-        <li>Tier 2: Unlimited catalogue volume ($5,900/yr)</li>
+        <li>High-throughput batch watermarking pipelines</li>
+        <li>Dedicated integration support &amp; private key vaults</li>
+        <li>Flexible volume-based licensing or custom MSA</li>
       </ul>
-      <a href="mailto:business@kellersystems.dev?subject=Aureal%20B2B%20Marketplace%20License" class="btn-tier">Contact Sales</a>
-    </div>
-
-    <!-- Voice AI & Speech Platforms -->
-    <div class="tier-card">
-      <div class="tier-tag">[ AI SPEECH PLATFORMS ]</div>
-      <div class="tier-title">Voice AI &amp; Speech</div>
-      <div class="tier-price">From $4,900 <span>/ year</span></div>
-      <div class="tier-desc">For TTS, voice cloning, and generative speech providers that want to embed audible-range identifiers as one input to their own transparency practices.</div>
-      <ul class="tier-specs">
-        <li>Technical integration support; no legal or regulatory compliance certification</li>
-        <li>ID usable as an application-level lookup alongside independently maintained provenance records (no C2PA implementation included)</li>
-        <li>Growth Tier: Up to 100k generated mins/mo ($4,900/yr)</li>
-        <li>Enterprise / Foundation: Custom SLA &amp; unlimited volume</li>
-        <li>Low-latency real-time stream embedding (&lt;1s)</li>
-        <li>Dedicated engineering support &amp; private key vaults</li>
-      </ul>
-      <a href="mailto:business@kellersystems.dev?subject=Aureal%20EU%20AI%20Act%20Compliance%20Inquiry" class="btn-tier">Contact Enterprise</a>
+      <a href="mailto:business@kellersystems.dev?subject=Aureal%20Platform%20License%20Inquiry" class="btn-tier">Contact Sales</a>
+      <div class="instant-delivery-tag">Custom MSA &bull; Volume Pricing</div>
     </div>
   </div>
 
-  <!-- Forensics & Legal Labs -->
-  <div class="tier-card" style="margin-top: 1.5rem;">
-    <div class="tier-tag">[ FORENSICS &amp; LEGAL REVIEW ]</div>
-    <div class="tier-title">Audio Forensics &amp; Legal Lab</div>
-    <div class="tier-price">$1,499 <span>/ perpetual</span></div>
-    <div class="tier-desc">For digital forensic labs, copyright lawyers, and expert witnesses running independent technical review of distributed audio.</div>
-    <ul class="tier-specs">
-      <li>Client-side offline verification suite (<code>verifier.html</code>)</li>
-      <li>Raw $E_b/N_0$ and SQNR signal-to-noise reporting</li>
-      <li>Custom branding &amp; white-label verification inspector</li>
-      <li>Detection reports for independent review; no court-admissibility claim</li>
-    </ul>
-    <a href="mailto:business@kellersystems.dev?subject=Aureal%20Forensics%20Lab%20License" class="btn-tier">Contact Sales</a>
-  </div>
+  <script>
+    (function() {
+      const toggle = document.getElementById("pricing-toggle");
+      const pCreator = document.getElementById("price-creator");
+      const pLabel = document.getElementById("price-label");
+      const btnCreator = document.getElementById("btn-text-creator");
+      const btnLabel = document.getElementById("btn-text-label");
+
+      function updatePricing() {
+        const isYearly = toggle.checked;
+        if (isYearly) {
+          pCreator.innerHTML = "€89 <span>/ year</span>";
+          pLabel.innerHTML = "€290 <span>/ year</span>";
+          btnCreator.innerText = "Subscribe • €89 / yr";
+          btnLabel.innerText = "Subscribe • €290 / yr";
+        } else {
+          pCreator.innerHTML = "€9 <span>/ month</span>";
+          pLabel.innerHTML = "€29 <span>/ month</span>";
+          btnCreator.innerText = "Subscribe • €9 / mo";
+          btnLabel.innerText = "Subscribe • €29 / mo";
+        }
+      }
+
+      if (toggle) {
+        toggle.addEventListener("change", updatePricing);
+        updatePricing();
+      }
+    })();
+  </script>
 
   <!-- Technical Feature Comparison Matrix -->
   <section>
@@ -797,9 +806,9 @@ html { scroll-behavior: smooth; }
           <tr>
             <th>Feature / Capability</th>
             <th>Non-Commercial (Free)</th>
-            <th>Solo Creator ($249)</th>
-            <th>Label &amp; A&amp;R ($499)</th>
-            <th>B2B Platform ($2.9k+)</th>
+            <th>Creator Studio (€9/mo)</th>
+            <th>Label &amp; A&amp;R (€29/mo)</th>
+            <th>Platform / API</th>
           </tr>
         </thead>
         <tbody>
@@ -834,6 +843,13 @@ html { scroll-behavior: smooth; }
           <tr>
             <td>Batch Promo Distribution &amp; Serialization</td>
             <td><span class="val-no">NO (Evaluation only)</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-yes">YES</span></td>
+          </tr>
+          <tr>
+            <td>Tardos Anti-Collusion Accuser (Multi-Leaker)</td>
+            <td><span class="val-no">NO</span></td>
             <td><span class="val-no">NO</span></td>
             <td><span class="val-yes">YES</span></td>
             <td><span class="val-yes">YES</span></td>

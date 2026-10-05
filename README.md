@@ -259,6 +259,7 @@ Aureal is exercised against a local adversarial fixture suite. Results are limit
 | **Additive Background Noise (-20 dB fixture)** | **Tested** | Detected in the local pink-noise fixture; results vary with signal-to-noise ratio and content. |
 | **Sample-Rate Conversion Fixtures** | **Tested** | Selected conversion tests passed; results depend on converter quality and source audio. |
 | **Multi-Layer Watermarking** | **Tested** | Distinct-key watermark layers were detected in the local synthetic fixtures; this limited result is not a general coexistence guarantee. |
+| **Coalition Collusion Attack (2–5 Leakers Averaging Copies)** | **YES** | Protected via **Tardos Anti-Collusion Accuser** (`src/tardos.js` & `audit_leak.js`). Accuses and identifies participating colluders even when simple single-ID hard decoding cancels out. |
 | **Re-embedding with Same Key, Different ID** | **Not reliable** | Current local tests show neither the original nor replacement ID is reliably detected after re-embedding. Treat this as a known limitation; do not claim overwrite protection. |
 
 ---
@@ -287,11 +288,10 @@ Aureal Watermark is distributed under a **Dual License**:
 
 | Tier | Price | Includes |
 | :--- | :--- | :--- |
-| **Solo Creator / Indie Studio** | **$249** *(one-time)* | Unlimited Perpetual License: Unrestricted commercial rights, Universal CLI, Web Studio. |
-| **Promo Leak Suite / Label** | **$499** *(one-time)* | Unlimited Perpetual License: Batch leak distributor, one-click forensic audit script, priority leak support. |
-| **B2B Audio Marketplace** | **$2,900 – $5,900 / yr** | Headless backend integration rights, commercial export hook SLA, unlimited embeds. |
-| **Voice AI & Speech Platforms** | **From $4,900 / yr** *(Custom Enterprise)* | Custom integration services; obtain independent legal and standards review for regulatory or C2PA requirements. |
-| **Audio Forensics & Legal Labs** | **$1,499** *(perpetual)* | Detection reporting and technical review tools; no court-admissibility claim. |
+| **Non-Commercial / Evaluation** | **Free** | Academic and personal evaluation, 100% offline CLI and Web Studio. |
+| **Creator Studio** | **€9 / mo** *(or €89 / yr)* | Unlimited commercial track releases, standalone CLI, offline Web Studio, permanent watermark survival. |
+| **Promo Leak Suite / Label** | **€29 / mo** *(or €290 / yr)* | Batch promo pool distribution, **Tardos anti-collusion accuser** (catches multi-recipient averaging attacks), 1-click leak audit script, priority support. |
+| **Platform & API** | **Custom / Enterprise** | Headless Node.js backend integration rights, Docker REST microservice, automated export hook SLA. |
 
-For current commercial pricing, checkout availability, and terms, confirm the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/pricing), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[business@kellersystems.dev](mailto:business@kellersystems.dev)**.
+For current commercial subscriptions, checkout availability, and terms, confirm the [**Interactive Pricing Page**](https://aureal.kellersystems.dev/pricing), consult [**docs/COMMERCIAL_LICENSING.md**](docs/COMMERCIAL_LICENSING.md), or contact **[business@kellersystems.dev](mailto:business@kellersystems.dev)**.
 

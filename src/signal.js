@@ -55,7 +55,7 @@ export const CHIPS_PER_SLOT = 24;
 
 export const BAND_PRESETS = Object.freeze({
   high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
-  mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
+  mid: Object.freeze({ lowHz: 4500, highHz: 13500 }),
 });
 
 export function bandPreset(name) {
@@ -80,10 +80,14 @@ export function resolveBand(band, sampleRate) {
 }
 
 export function bandList(spec, sampleRate) {
-  if (spec === "dual" || spec === "auto") {
-    return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
+  if (spec === "high") {
+    return [resolveBand("high", sampleRate)];
   }
-  return [resolveBand(spec ?? undefined, sampleRate)];
+  if (spec === "mid") {
+    return [resolveBand("mid", sampleRate)];
+  }
+  // Default to dual-band for maximum lossy compression resilience (MP3/AAC/streaming)
+  return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
 }
 
 export function deriveGeometry(sampleRate, perChannelSamples, opts = {}) {

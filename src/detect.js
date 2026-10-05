@@ -396,6 +396,7 @@ export function detectWatermark(pcm, fmt, opts = {}) {
       channels: validated.channels,
       perChannelSamples: Math.floor(pcm.length / validated.channels),
       bits: BITS_PER_CODEWORD,
+      softSymbols: winner.soft ? Array.from(winner.soft) : null,
     },
   };
 }

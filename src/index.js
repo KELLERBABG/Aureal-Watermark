@@ -23,3 +23,7 @@ export {
   ENGINE_NAME,
   ENGINE_VERSION
 } from "./report.js";
+export {
+  generateTardosCodebook,
+  accuseCoalition
+} from "./tardos.js";

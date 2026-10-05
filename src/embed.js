@@ -7,9 +7,9 @@ import {
 import { packCodeword } from "./payload.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
-const MAX_AMPLITUDE = 0.0075;
-const MULTI_BAND_SCALE = 0.7;
-const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
+const MAX_AMPLITUDE = 0.0085;
+const MULTI_BAND_SCALE = 0.85;
+const MID_BAND_PERCEPTUAL_WEIGHT = 0.42;
 
 export function embedWatermark(pcm, fmt, opts) {
   if (!opts || !Number.isInteger(opts.payloadId)) {
