@@ -23,13 +23,13 @@
 /docs      /site/docs/      200
 /pricing   /site/pricing/   200
 /verifier  /site/verifier/  200
-/legal/*   /site/legal/:splat 200
+/legal/*   https://kellersystems.dev/legal/ 301
 
 # Legal routes.
-/impressum   /site/legal/impressum.html  301
-/privacy     /site/legal/privacy.html    301
-/terms       /site/legal/terms.html      301
-/datenschutz /site/legal/privacy.html    301
+/impressum   https://kellersystems.dev/impressum/  301
+/privacy     https://kellersystems.dev/privacy/    301
+/terms       https://kellersystems.dev/legal/      301
+/datenschutz https://kellersystems.dev/privacy/    301
 
 # Root and historical root forms. "/" is served by the real index.html at the
 # output root, so only the explicit .html form needs redirecting; a "/" rewrite
