@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aureal Watermark Studio</title>
+  <link rel="canonical" href="https://aureal.kellersystems.dev/studio">
 <meta name="description" content="Audio watermarking for anti-theft and AI detection">
 <meta property="og:title" content="Aureal Watermark">
 <meta property="og:description" content="Audio watermarking for anti-theft and AI detection">
-<meta property="og:image" content="https://raw.githubusercontent.com/KELLERBABG/Aureal-Watermark/main/assets/banner.png">
+<meta property="og:image" content="https://aureal.kellersystems.dev/assets/banner.png">
+  <meta property="og:url" content="https://aureal.kellersystems.dev/studio">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="256x256" href="/assets/icon.png">
   <link rel="shortcut icon" href="/assets/favicon.ico">
@@ -652,7 +654,7 @@ audio:not([src]) { display: none; }
       </button>
       <a href="/docs">Docs</a>
       <a href="/pricing">Pricing &amp; Licenses</a>
-      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank">GitHub</a>
+      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" rel="noopener">GitHub</a>
     </div>
   </header>
 
@@ -674,7 +676,7 @@ audio:not([src]) { display: none; }
     <!-- VERIFY TAB -->
     <div class="tab-pane active" id="pane-detect">
       <div class="form-group">
-        <label>Audio File</label>
+        <label for="detect-file">Audio File</label>
         <div class="drop-zone" id="detect-drop-zone">
           <input type="file" id="detect-file" accept=".wav,.mp3,.m4a,.aac,.ogg,.flac,audio/*">
           <div class="file-label" id="detect-file-label">Click to select or drag audio file</div>
@@ -702,7 +704,7 @@ audio:not([src]) { display: none; }
     <!-- EMBED TAB -->
     <div class="tab-pane" id="pane-embed">
       <div class="form-group">
-        <label>Source Audio</label>
+        <label for="embed-file">Source Audio</label>
         <div class="drop-zone" id="embed-drop-zone">
           <input type="file" id="embed-file" accept=".wav,.mp3,.m4a,.aac,.ogg,.flac,audio/*">
           <div class="file-label" id="embed-file-label">Click to select or drag source master</div>
@@ -743,7 +745,7 @@ audio:not([src]) { display: none; }
         <div class="callout-tag">Commercial Production</div>
         <div class="callout-title">Commercial release, label distribution, or AI platform?</div>
         <div class="callout-desc">Aureal is free for personal & research use. Commercial releases, SaaS platforms, and leak distribution require a commercial license.</div>
-        <a href="/pricing" target="_blank" class="callout-link">View Commercial Tiers & Pricing &rarr;</a>
+        <a href="/pricing" target="_blank" class="callout-link" rel="noopener">View Commercial Tiers & Pricing &rarr;</a>
       </div>
 
       <button type="button" class="btn" id="embed-btn" disabled>Embed Watermark & Export</button>
@@ -765,7 +767,7 @@ audio:not([src]) { display: none; }
             </span>
           </div>
           <div>
-            <select id="export-format-select"%2394a3b8\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 0.65rem center;">
+            <select id="export-format-select">
               <option value="wav-16" selected>WAV — 16-bit PCM (Lossless CD Master)</option>
               <option value="wav-24">WAV — 24-bit PCM (High-Res Studio Master)</option>
               <option value="mp3-320">MP3 — 320 kbps (Studio Quality / Highest)</option>
@@ -779,13 +781,13 @@ audio:not([src]) { display: none; }
           </button>
         </div>
 
-        <button type="button" class="btn btn-subtle" id="btn-verify-now">Scan in Verifier &rarr;</button>
+        <button type="button" class="btn btn-subtle" id="btn-verify-now">Scan this export &rarr;</button>
       </div>
     </div>
   </div>
 
   <footer class="app-footer">
-    <div>Free & open-source for personal use under PolyForm Noncommercial 1.0.0.</div>
+    <div>Free for personal and academic use under PolyForm Noncommercial 1.0.0 (source-available, not OSI open source).</div>
     <div>
       Commercial music release, label leak distribution, or AI platform?
       <a href="/pricing">
@@ -826,7 +828,7 @@ audio:not([src]) { display: none; }
         ****-E976D5
       </div>
       <div>
-        <div>Customer: <strong id="modal-customer">papababg02@gmail.com</strong></div>
+        <div>Customer: <strong id="modal-customer">—</strong></div>
         <div>Offline Status: <span>Credentials cached locally (No server required for audio)</span></div>
       </div>
       <div>
@@ -852,7 +854,7 @@ audio:not([src]) { display: none; }
 
       <div>
         Don't have a commercial license?
-        <a href="https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq" target="_blank">
+        <a href="https://buy.polar.sh/polar_cl_8GNdKaiazCaCLqwFuDS5noS1SrupHxSK9nxr34Iohvq" target="_blank" rel="noopener">
           Get Indie Studio on Polar ($249) &rarr;
         </a>
       </div>
@@ -860,519 +862,51 @@ audio:not([src]) { display: none; }
   </div>
 </div>
 
+<script src="/assets/aureal-engine.js"></script>
 <script>
   // Inlined Zero-Dependency DSP Engine
 
-  const DEFAULT_KEY = "aural-watermark-default-key";
-  const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
-  const BITS_PER_CODEWORD = 48;
-  const CHIPS_PER_SLOT = 24;
-  const PAYLOAD_BITS = 32;
-  const CRC_BITS = 16;
-  const Z_FLOOR = 3.0;
-  const Z_FULL = 30.0;
-  const MAX_AMPLITUDE = 0.0075;
-  const MULTI_BAND_SCALE = 0.7;
-  const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
-  const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
+  // ---------------------------------------------------------------------------
+  // DSP ENGINE
+  // The watermark algorithm is NOT duplicated in this file. /assets/aureal-engine.js
+  // is generated from src/ by scripts/build-engine.js, and CI fails if it drifts.
+  // This adapter only maps the engine's result shape onto the flat view model the
+  // UI below already renders.
+  // ---------------------------------------------------------------------------
+  const AurealEngine = window.AurealEngine || null;
+  const DEFAULT_KEY = (AurealEngine && AurealEngine.DEFAULT_KEY) || "aural-watermark-default-key";
 
-  const BAND_PRESETS = Object.freeze({
-    high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
-    mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
-  });
-
-  function hashSeed(str) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < str.length; i++) {
-      h ^= str.charCodeAt(i);
-      h = Math.imul(h, 0x01000193);
-    }
-    return h >>> 0;
-  }
-
-  function mix(v) {
-    v >>>= 0;
-    v = Math.imul(v ^ (v >>> 16), 0x7feb352d);
-    v = Math.imul(v ^ (v >>> 15), 0x846ca68b);
-    return (v ^ (v >>> 16)) >>> 0;
-  }
-
-  function makeRng(seed) {
-    const s = typeof seed === "string" ? hashSeed(seed) : seed >>> 0;
-    let x = mix(s ^ 0x9e3779b9);
-    let y = mix(s ^ 0x85ebca6b);
-    let z = mix(s ^ 0xc2b2ae35);
-    let w = mix(s ^ 0x27d4eb2f);
-    if ((x | y | z | w) === 0) w = 1;
-    return function next() {
-      const t = x ^ (x << 11);
-      x = y;
-      y = z;
-      z = w;
-      w = (w ^ (w >>> 19) ^ t ^ (t >>> 8)) >>> 0;
-      return w / 4294967296;
-    };
-  }
-
-  function makeSymbolStream(key, label) {
-    const rng = makeRng(key + "|" + label);
-    return () => (rng() < 0.5 ? -1 : 1);
-  }
-
-  const hannCache = new Map();
-  function hannWindow(n) {
-    let w = hannCache.get(n);
-    if (!w) {
-      w = new Float32Array(n);
-      for (let i = 0; i < n; i++) {
-        w[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n);
-      }
-      hannCache.set(n, w);
-    }
-    return w;
-  }
-
-  function clampInt(v, lo, hi) {
-    const n = Number(v);
-    return Math.min(hi, Math.max(lo, Math.round(n)));
-  }
-
-  function resolveBand(band, sampleRate) {
-    const preset = band === "high" || band === "mid" ? BAND_PRESETS[band] : null;
-    const b = { ...DEFAULT_BAND, ...(preset || band || {}) };
-    let { lowHz, highHz } = b;
-    lowHz = clampInt(lowHz, 1000, sampleRate / 2 - 100);
-    highHz = clampInt(highHz, lowHz + 100, sampleRate / 2 - 100);
-    return { lowHz, highHz, centerHz: (lowHz + highHz) / 2 };
-  }
-
-  function bandList(spec, sampleRate) {
-    if (spec === "dual" || spec === "auto") {
-      return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
-    }
-    return [resolveBand(spec || undefined, sampleRate)];
-  }
-
-  function deriveGeometry(sampleRate, perChannelSamples) {
-    let slotLen = Math.max(1, Math.round((1.0 * sampleRate) / BITS_PER_CODEWORD));
-    const maxSlot = Math.floor(perChannelSamples / BITS_PER_CODEWORD);
-    if (slotLen > maxSlot) slotLen = maxSlot;
-    let chipLen = Math.max(4, Math.floor(slotLen / CHIPS_PER_SLOT));
-    slotLen = chipLen * CHIPS_PER_SLOT;
-    const frameLen = slotLen * BITS_PER_CODEWORD;
-    const reps = Math.floor(perChannelSamples / frameLen);
-    if (reps < 1) {
-      throw new RangeError(`Audio too short: need >= ${frameLen} samples (~${(frameLen / sampleRate).toFixed(2)}s), received ${perChannelSamples}`);
-    }
-    return { slotLen, chipLen, frameLen, reps, bits: BITS_PER_CODEWORD };
-  }
-
-  function buildTemplate({ key, sampleRate, geometry, band }) {
-    const { slotLen, chipLen, frameLen } = geometry;
-    const { centerHz } = resolveBand(band, sampleRate);
-    const carrier = new Float64Array(chipLen);
-    const win = hannWindow(chipLen);
-    const w0 = (2 * Math.PI * centerHz) / sampleRate;
-    for (let i = 0; i < chipLen; i++) carrier[i] = win[i] * Math.sin(w0 * i);
-
-    const template = new Float64Array(frameLen);
-    const slotNorms = new Float64Array(BITS_PER_CODEWORD);
-    for (let b = 0; b < BITS_PER_CODEWORD; b++) {
-      const sym = makeSymbolStream(key, "bit" + b);
-      let norm = 0;
-      const base = b * slotLen;
-      for (let c = 0; c < CHIPS_PER_SLOT; c++) {
-        const s = sym();
-        const off = base + c * chipLen;
-        for (let j = 0; j < chipLen; j++) {
-          const v = s * carrier[j];
-          template[off + j] = v;
-          norm += v * v;
-        }
-      }
-      slotNorms[b] = norm;
-    }
-    return { template, slotNorms };
-  }
-
-  function crc16(bytes) {
-    let crc = 0xffff;
-    for (let i = 0; i < bytes.length; i++) {
-      crc ^= bytes[i] << 8;
-      for (let b = 0; b < 8; b++) {
-        crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
-      }
-    }
-    return crc >>> 0;
-  }
-
-  function packCodeword(payloadId) {
-    const out = new Int8Array(BITS_PER_CODEWORD);
-    for (let i = 0; i < PAYLOAD_BITS; i++) {
-      out[i] = (payloadId >>> (PAYLOAD_BITS - 1 - i)) & 1 ? 1 : -1;
-    }
-    const bytes = [
-      (payloadId >>> 24) & 0xff,
-      (payloadId >>> 16) & 0xff,
-      (payloadId >>> 8) & 0xff,
-      payloadId & 0xff,
-    ];
-    const crc = crc16(bytes);
-    for (let i = 0; i < CRC_BITS; i++) {
-      out[PAYLOAD_BITS + i] = (crc >>> (CRC_BITS - 1 - i)) & 1 ? 1 : -1;
-    }
-    return out;
-  }
-
-  function unpackCodeword(cw) {
-    let id = 0;
-    for (let i = 0; i < PAYLOAD_BITS; i++) {
-      id = Math.imul(id, 2) + (cw[i] > 0 ? 1 : 0);
-    }
-    let crcRx = 0;
-    for (let i = 0; i < CRC_BITS; i++) {
-      crcRx = Math.imul(crcRx, 2) + (cw[PAYLOAD_BITS + i] > 0 ? 1 : 0);
-    }
-    const crcCalc = crc16([(id >>> 24) & 255, (id >>> 16) & 255, (id >>> 8) & 255, id & 255]);
-    return { id: id >>> 0, crcOk: crcCalc === crcRx };
-  }
-
-  function buildSyncPreamble({ key, sampleRate, geometry, band }) {
-    const { slotLen } = geometry;
-    const syncLen = slotLen;
-    const { lowHz, highHz } = resolveBand(band, sampleRate);
-    const chirpI = new Float64Array(syncLen);
-    const chirpQ = new Float64Array(syncLen);
-    const T = syncLen / sampleRate;
-    const phi0 = ((hashSeed(key + "|sync_chirp") % 1000) / 1000) * 2 * Math.PI;
-
-    for (let n = 0; n < syncLen; n++) {
-      const t = n / sampleRate;
-      const phase = phi0 + 2 * Math.PI * (lowHz * t + ((highHz - lowHz) / (2 * T)) * t * t);
-      const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * n) / syncLen);
-      chirpI[n] = win * Math.cos(phase);
-      chirpQ[n] = win * Math.sin(phase);
-    }
-
-    let normSq = 0;
-    for (let n = 0; n < syncLen; n++) normSq += chirpQ[n] * chirpQ[n];
-    const norm = Math.sqrt(normSq) || 1.0;
-
-    return { chirpI, chirpQ, syncLen, norm };
-  }
-
-  function findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band) {
-    const { frameLen } = geometry;
-    const { chirpI, chirpQ, syncLen, norm } = buildSyncPreamble({ key, sampleRate, geometry, band });
-    const perChannel = Math.floor(pcm.length / channels);
-    const searchLen = Math.min(frameLen, perChannel - syncLen);
-    if (searchLen <= 0) return [];
-
-    const mono = new Float32Array(searchLen + syncLen);
-    for (let i = 0; i < searchLen + syncLen; i++) {
-      let sum = 0;
-      for (let ch = 0; ch < channels; ch++) sum += pcm[i * channels + ch];
-      mono[i] = sum / channels;
-    }
-
-    const stride = 8;
-    let maxEnvSq = -Infinity;
-    let coarseIdx = 0;
-
-    for (let i = 0; i < searchLen; i += stride) {
-      let dotI = 0, dotQ = 0;
-      for (let k = 0; k < syncLen; k++) {
-        const s = mono[i + k];
-        dotI += s * chirpI[k];
-        dotQ += s * chirpQ[k];
-      }
-      const envSq = dotI * dotI + dotQ * dotQ;
-      if (envSq > maxEnvSq) {
-        maxEnvSq = envSq;
-        coarseIdx = i;
-      }
-    }
-
-    let fineIdx = coarseIdx;
-    let fineMaxEnvSq = maxEnvSq;
-    const fineStart = Math.max(0, coarseIdx - stride * 2);
-    const fineEnd = Math.min(searchLen - 1, coarseIdx + stride * 2);
-
-    for (let i = fineStart; i <= fineEnd; i++) {
-      let dotI = 0, dotQ = 0;
-      for (let k = 0; k < syncLen; k++) {
-        const s = mono[i + k];
-        dotI += s * chirpI[k];
-        dotQ += s * chirpQ[k];
-      }
-      const envSq = dotI * dotI + dotQ * dotQ;
-      if (envSq > fineMaxEnvSq) {
-        fineMaxEnvSq = envSq;
-        fineIdx = i;
-      }
-    }
-
-    const envNorm = Math.sqrt(fineMaxEnvSq) / norm;
-    const isMid = band && band.lowHz < 14000;
-    const minEnv = isMid ? 0.005 : 0.015;
-    if (envNorm > minEnv) {
-      const offsets = [];
-      for (let delta = -2; delta <= 2; delta++) {
-        const candidate = fineIdx + delta;
-        if (candidate >= 0 && candidate < frameLen) {
-          offsets.push({ shift: candidate, isSyncPreamble: true });
-        }
-      }
-      return offsets;
-    }
-    return [];
-  }
-
-  function foldRepetitions(pcm, channels, frameLen, startOffset, usableSamples) {
-    const folded = new Float64Array(frameLen);
-    let count = 0;
-    for (let base = startOffset; base + frameLen <= usableSamples; base += frameLen) {
-      let idx = base * channels;
-      for (let n = 0; n < frameLen; n++) {
-        let acc = 0;
-        for (let ch = 0; ch < channels; ch++) acc += pcm[idx + ch];
-        folded[n] += acc;
-        idx += channels;
-      }
-      count++;
-    }
-    return { folded, reps: count };
-  }
-
-  function scoreHypothesis(pcm, fmt, { key, payloadId, sampleRate, band }) {
-    const { channels } = fmt;
-    const perChannel = Math.floor(pcm.length / channels);
-    const geometry = deriveGeometry(sampleRate, perChannel);
-    const { slotLen, frameLen } = geometry;
-
-    const candidates = [];
-    const preambleOffsets = findPreambleOffsets(pcm, channels, sampleRate, geometry, key, band);
-    for (const c of preambleOffsets) {
-      candidates.push(c);
-    }
-
-    const maxShift = Math.floor(frameLen / 4);
-    for (const f of RESYNC_FRACTIONS) {
-      const shift = Math.round(f * frameLen);
-      const clamped = Math.max(0, Math.min(maxShift, shift));
-      if (!candidates.some((c) => c.shift === clamped)) candidates.push({ shift: clamped, isSyncPreamble: false });
-    }
-
-    let best = null;
-    for (const { shift, isSyncPreamble } of candidates) {
-      const usable = perChannel - shift;
-      const { folded, reps } = foldRepetitions(pcm, channels, frameLen, shift, perChannel);
-      if (reps < 1 || usable < frameLen) continue;
-
-      const { template, slotNorms } = buildTemplate({ key, sampleRate, geometry, band });
-      const soft = new Float64Array(BITS_PER_CODEWORD);
-      for (let b = 0; b < BITS_PER_CODEWORD; b++) {
-        let dot = 0;
-        const off = b * slotLen;
-        for (let n = 0; n < slotLen; n++) dot += folded[off + n] * template[off + n];
-        soft[b] = dot / (reps * channels * slotNorms[b]);
-      }
-
-      let hard = new Int8Array(BITS_PER_CODEWORD);
-      for (let b = 0; b < BITS_PER_CODEWORD; b++) hard[b] = soft[b] >= 0 ? 1 : -1;
-
-      const absSorted = [...soft].map((v, i) => [Math.abs(v), i]).sort((a, b) => a[0] - b[0]);
-      let decoded = unpackCodeword(hard);
-      let correctedBits = [];
-      if (!decoded.crcOk) {
-        for (const [, i] of absSorted) {
-          const trial = Int8Array.from(hard);
-          trial[i] = -trial[i];
-          const t = unpackCodeword(trial);
-          if (t.crcOk) {
-            hard = trial;
-            decoded = t;
-            correctedBits = [i];
-            break;
-          }
-        }
-        if (!decoded.crcOk) {
-          const topCandidates = absSorted.slice(0, 8);
-          outer2Bit: for (let p = 0; p < topCandidates.length; p++) {
-            for (let q = p + 1; q < topCandidates.length; q++) {
-              const i1 = topCandidates[p][1];
-              const i2 = topCandidates[q][1];
-              const trial = Int8Array.from(hard);
-              trial[i1] = -trial[i1];
-              trial[i2] = -trial[i2];
-              const t = unpackCodeword(trial);
-              if (t.crcOk) {
-                hard = trial;
-                decoded = t;
-                correctedBits = [i1, i2];
-                break outer2Bit;
-              }
-            }
-          }
-        }
-      }
-
-      const refBits = payloadId !== undefined ? packCodeword(payloadId) : hard;
-      let mu = 0;
-      let berCount = 0;
-      for (let b = 0; b < BITS_PER_CODEWORD; b++) {
-        mu += soft[b] * refBits[b];
-        if ((hard[b] > 0) !== (refBits[b] > 0)) berCount++;
-      }
-      mu /= BITS_PER_CODEWORD;
-      let varAcc = 0;
-      let maxAbs = 0;
-      for (let b = 0; b < BITS_PER_CODEWORD; b++) {
-        const a = soft[b] * refBits[b] - mu;
-        varAcc += a * a;
-        maxAbs = Math.max(maxAbs, Math.abs(soft[b]));
-      }
-      const sd = Math.sqrt(varAcc / BITS_PER_CODEWORD);
-      const denom = sd / Math.sqrt(BITS_PER_CODEWORD) + 1e-3 * maxAbs + 1e-12;
-      const z = mu / denom;
-      const confidence = Math.min(1, Math.max(0, (z - Z_FLOOR) / (Z_FULL - Z_FLOOR)));
-      const ebN0 = mu > 0 && sd > 0 ? (mu / sd) ** 2 : 1e-4;
-      const ebN0Db = Number((10 * Math.log10(Math.max(1e-4, ebN0))).toFixed(2));
-      const sqnrDb = Number((10 * Math.log10(Math.max(1e-4, ebN0 * reps))).toFixed(2));
-
-      const isWinner =
-        !best ||
-        (decoded.crcOk && !best.decoded.crcOk) ||
-        (decoded.crcOk === best.decoded.crcOk && confidence > best.confidence);
-
-      if (isWinner) {
-        best = { soft, hard, decoded, correctedBits, mu, sd, z, confidence, ebN0Db, sqnrDb, ber: berCount / BITS_PER_CODEWORD, reps, shiftUsed: shift, isSyncPreamble: isSyncPreamble || false };
-      }
-    }
-    return best;
+  function engineBandLabel(b) {
+    if (!b) return null;
+    return `${b.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(b.lowHz)}–${Math.round(b.highHz)} Hz)`;
   }
 
   function detectWatermarkCore(pcm, fmt, opts = {}) {
-    const sampleRate = fmt.sampleRate;
-    const channels = fmt.channels;
-    const key = typeof opts.key === "string" && opts.key.length ? opts.key : DEFAULT_KEY;
-    const bands = bandList(opts.band || "auto", sampleRate);
-    let winner = null;
-    let winnerBand = null;
-
-    for (const band of bands) {
-      const r = scoreHypothesis(pcm, fmt, { key, payloadId: opts.payloadId, sampleRate, band });
-      if (r) {
-        const isBandWinner =
-          !winner ||
-          (r.decoded.crcOk && !winner.decoded.crcOk) ||
-          (r.decoded.crcOk === winner.decoded.crcOk && r.confidence > winner.confidence);
-        if (isBandWinner) {
-          winner = r;
-          winnerBand = band;
-        }
-      }
-    }
-
-    if (!winner) {
-      throw new RangeError("Audio is too short for watermark detection at this sample rate");
-    }
-
-    const idMatches = opts.payloadId === undefined || winner.decoded.id === opts.payloadId;
-    const detected = winner.decoded.crcOk && idMatches && winner.confidence >= 0.5 && winner.mu > 0;
-
+    if (!AurealEngine) throw new Error("Watermark engine failed to load (/assets/aureal-engine.js).");
+    const r = AurealEngine.detectWatermark(
+      pcm,
+      { sampleRate: fmt.sampleRate, channels: fmt.channels },
+      { ...opts, band: opts.band ?? "auto" }
+    );
     return {
-      detected,
-      confidence: winner.confidence,
-      ber: winner.ber,
-      ebN0Db: winner.ebN0Db,
-      sqnrDb: winner.sqnrDb,
-      recoveredPayloadId: winner.decoded.crcOk ? winner.decoded.id : null,
-      crcOk: winner.decoded.crcOk,
-      reps: winner.reps,
-      bandUsed: winnerBand ? `${winnerBand.lowHz >= 14000 ? "High Band" : "Mid Band"} (${Math.round(winnerBand.lowHz)}–${Math.round(winnerBand.highHz)} Hz)` : null,
-      syncMethod: winner.isSyncPreamble ? "preamble" : "fractional_grid",
+      detected: r.detected,
+      confidence: r.confidence,
+      ber: r.ber,
+      ebN0Db: r.ebN0Db,
+      sqnrDb: r.sqnrDb,
+      recoveredPayloadId: r.recoveredPayloadId,
+      crcOk: r.crcOk,
+      reps: r.reps,
+      bandUsed: engineBandLabel(r.details && r.details.bandUsed),
+      syncMethod: r.details ? r.details.syncMethod : null,
+      details: r.details,
     };
   }
 
   function embedWatermarkCore(pcm, fmt, opts) {
-    const { sampleRate, channels } = fmt;
-    const key = typeof opts.key === "string" && opts.key.length ? opts.key : DEFAULT_KEY;
-    const bands = bandList(opts.band || "dual", sampleRate);
-
-    let strength = Number.isFinite(opts.strength) ? Math.min(1, Math.max(0.01, opts.strength)) : 0.5;
-    const amp = Math.min(MAX_AMPLITUDE, Math.max(0.001, strength) * MAX_AMPLITUDE) * (bands.length > 1 ? MULTI_BAND_SCALE : 1);
-
-    const perChannel = Math.floor(pcm.length / channels);
-    const geometry = deriveGeometry(sampleRate, perChannel);
-    const codeword = packCodeword(opts.payloadId);
-    const { slotLen, frameLen, reps, bits } = geometry;
-
-    const wm = new Float64Array(frameLen);
-    for (const band of bands) {
-      const isMid = band.lowHz < 14000;
-      const bandAmp = amp * (isMid ? MID_BAND_PERCEPTUAL_WEIGHT : 1.0);
-      const built = buildTemplate({ key, sampleRate, geometry, band });
-      const { template } = built;
-
-      for (let b = 0; b < bits; b++) {
-        const s = codeword[b];
-        const off = b * slotLen;
-        for (let n = 0; n < slotLen; n++) {
-          wm[off + n] += bandAmp * s * template[off + n];
-        }
-      }
-
-      // Embed deterministic stream synchronization preamble at frame boundary
-      const { chirpQ, syncLen } = buildSyncPreamble({ key, sampleRate, geometry, band });
-      const chirpScale = isMid ? 0.25 : 0.75;
-      for (let n = 0; n < syncLen; n++) {
-        wm[n] += bandAmp * chirpScale * chirpQ[n];
-      }
-    }
-
-    const out = new Float32Array(pcm.length);
-    out.set(pcm);
-
-    for (let r = 0; r < reps; r++) {
-      const base = r * frameLen * channels;
-      for (let ch = 0; ch < channels; ch++) {
-        for (let b = 0; b < bits; b++) {
-          const slotOffset = base + ch + b * slotLen * channels;
-          let sumSq = 0;
-          for (let n = 0; n < slotLen; n++) {
-            const s = pcm[slotOffset + n * channels];
-            sumSq += s * s;
-          }
-          const rms = Math.sqrt(sumSq / slotLen);
-          const mask = rms <= 0.002 ? 0.0 : Math.min(1.0, (rms - 0.002) / 0.08);
-          if (mask > 0) {
-            const wmSlotBase = b * slotLen;
-            let o = slotOffset;
-            for (let n = 0; n < slotLen; n++) {
-              out[o] += wm[wmSlotBase + n] * mask;
-              o += channels;
-            }
-          }
-        }
-      }
-    }
-
-    let maxPeak = 0;
-    for (let i = 0; i < out.length; i++) {
-      const abs = Math.abs(out[i]);
-      if (abs > maxPeak) maxPeak = abs;
-    }
-    if (maxPeak > 0.999) {
-      const headroomScale = 0.995 / maxPeak;
-      for (let i = 0; i < out.length; i++) {
-        out[i] *= headroomScale;
-      }
-    }
-
-    return out;
+    if (!AurealEngine) throw new Error("Watermark engine failed to load (/assets/aureal-engine.js).");
+    return AurealEngine.embedWatermark(pcm, { sampleRate: fmt.sampleRate, channels: fmt.channels }, opts);
   }
-
   function encodeWavArray(samples, sampleRate, channels, bitDepth = 16) {
     const bytesPerSample = bitDepth / 8;
     const frames = Math.floor(samples.length / channels);
@@ -1452,161 +986,118 @@ audio:not([src]) { display: none; }
     return new Blob(chunks, { type: "audio/mp3" });
   }
 
-  // --- DEDICATED WEB WORKER ENGINE (ZERO UI BLOCKING) ---
+  // --- Dedicated Web Worker (keeps the UI responsive) ------------------------
+  // The worker runs the same generated engine file the page loaded. Under file://
+  // (Desktop Studio) fetch() is unavailable, so the DSP runs on the main thread
+  // instead of timing out into a frozen tab.
   let dspWorkerInstance = null;
   let dspReqCounter = 0;
   const dspPendingReqs = new Map();
+  let engineSourcePromise = null;
 
-  function getDspWorker() {
-    if (typeof window !== "undefined" && window.location && window.location.protocol === "file:") {
+  function loadEngineSource() {
+    if (!engineSourcePromise) {
+      // Desktop (file://) resolves ./assets next to the page; on the web every route and
+      // alias uses the canonical /assets/ path.
+      const engineUrl = location.protocol === "file:"
+        ? new URL("assets/aureal-engine.js", document.baseURI)
+        : "/assets/aureal-engine.js";
+      engineSourcePromise = fetch(engineUrl, { cache: "force-cache" })
+        .then((r) => (r.ok ? r.text() : null))
+        .catch(() => null);
+    }
+    return engineSourcePromise;
+  }
+
+  async function getDspWorker() {
+    if (dspWorkerInstance) return dspWorkerInstance;
+    if (typeof Worker === "undefined") return null;
+    const engineSource = await loadEngineSource();
+    if (!engineSource) return null; // offline / file:// → main thread
+    try {
+      const adapter = [engineBandLabel, detectWatermarkCore, embedWatermarkCore, encodeWavArray]
+        .map((fn) => fn.toString())
+        .join("\n");
+      const workerScript = `${engineSource}
+${adapter}
+self.onmessage = function (e) {
+  const { id, action, pcm, fmt, opts } = e.data;
+  try {
+    if (action === "detect") {
+      self.postMessage({ id, success: true, res: detectWatermarkCore(pcm, fmt, opts) });
+    } else {
+      const watermarked = embedWatermarkCore(pcm, fmt, opts);
+      const wavArr = encodeWavArray(watermarked, fmt.sampleRate, fmt.channels, 16);
+      self.postMessage({ id, success: true, wavArr, watermarked }, [wavArr.buffer, watermarked.buffer]);
+    }
+  } catch (err) {
+    self.postMessage({ id, success: false, error: err.message || String(err) });
+  }
+};`;
+      dspWorkerInstance = new Worker(URL.createObjectURL(new Blob([workerScript], { type: "text/javascript" })));
+      dspWorkerInstance.onmessage = function (e) {
+        const { id, success, res, wavArr, error } = e.data;
+        const pending = dspPendingReqs.get(id);
+        if (!pending) return;
+        dspPendingReqs.delete(id);
+        if (success) pending.resolve({ res, wavArr });
+        else pending.reject(new Error(error));
+      };
+      dspWorkerInstance.onerror = function (err) {
+        console.warn("DSP worker error; falling back to the main thread:", err);
+        for (const req of dspPendingReqs.values()) req.reject(new Error((err && err.message) || "Web Worker error"));
+        dspPendingReqs.clear();
+        try { dspWorkerInstance.terminate(); } catch {}
+        dspWorkerInstance = null;
+      };
+      return dspWorkerInstance;
+    } catch (err) {
+      console.warn("Web Worker unavailable; using the main thread:", err);
+      dspWorkerInstance = null;
       return null;
     }
-    if (!dspWorkerInstance && typeof Worker !== "undefined") {
-      try {
-        const workerScript = `
-          ${hashSeed.toString()}
-          ${mix.toString()}
-          ${makeRng.toString()}
-          ${makeSymbolStream.toString()}
-          const hannCache = new Map();
-          ${hannWindow.toString()}
-          ${clampInt.toString()}
-          ${resolveBand.toString()}
-          ${bandList.toString()}
-          ${deriveGeometry.toString()}
-          ${buildTemplate.toString()}
-          ${crc16.toString()}
-          ${packCodeword.toString()}
-          ${unpackCodeword.toString()}
-          ${buildSyncPreamble.toString()}
-          ${findPreambleOffsets.toString()}
-          ${foldRepetitions.toString()}
-          ${scoreHypothesis.toString()}
-          ${detectWatermarkCore.toString()}
-          ${embedWatermarkCore.toString()}
-          ${encodeWavArray.toString()}
-
-          const DEFAULT_KEY = "aural-watermark-default-key";
-          const DEFAULT_BAND = Object.freeze({ lowHz: 16500, centerHz: 18000, highHz: 19500 });
-          const BITS_PER_CODEWORD = 48;
-          const CHIPS_PER_SLOT = 24;
-          const PAYLOAD_BITS = 32;
-          const CRC_BITS = 16;
-          const Z_FLOOR = 3.0;
-          const Z_FULL = 30.0;
-          const MAX_AMPLITUDE = 0.0075;
-          const MULTI_BAND_SCALE = 0.7;
-          const MID_BAND_PERCEPTUAL_WEIGHT = 0.22;
-          const RESYNC_FRACTIONS = [0, 1 / 16, 2 / 16, 4 / 16, -1 / 16, -2 / 16, -4 / 16];
-          const BAND_PRESETS = Object.freeze({
-            high: Object.freeze({ lowHz: 17000, highHz: 19500 }),
-            mid: Object.freeze({ lowHz: 8000, highHz: 13000 }),
-          });
-
-          self.onmessage = function(e) {
-            const { id, action, pcm, fmt, opts } = e.data;
-            try {
-              if (action === "detect") {
-                const res = detectWatermarkCore(pcm, fmt, opts);
-                self.postMessage({ id, success: true, res });
-              } else if (action === "embed") {
-                const watermarked = embedWatermarkCore(pcm, fmt, opts);
-                const wavArr = encodeWavArray(watermarked, fmt.sampleRate, fmt.channels, 16);
-                self.postMessage({ id, success: true, wavArr, watermarked }, [wavArr.buffer, watermarked.buffer]);
-              }
-            } catch (err) {
-              self.postMessage({ id, success: false, error: err.message || String(err) });
-            }
-          };
-        `;
-        const blob = new Blob([workerScript], { type: "application/javascript" });
-        dspWorkerInstance = new Worker(URL.createObjectURL(blob));
-        dspWorkerInstance.onmessage = function(e) {
-          const { id, success, res, wavArr, error } = e.data;
-          const pending = dspPendingReqs.get(id);
-          if (pending) {
-            dspPendingReqs.delete(id);
-            if (success) pending.resolve({ res, wavArr });
-            else pending.reject(new Error(error));
-          }
-        };
-        dspWorkerInstance.onerror = function(err) {
-          console.warn("DSP Web Worker encountered an error, falling back to main thread:", err);
-          for (const req of dspPendingReqs.values()) {
-            req.reject(new Error(err?.message || "Web Worker error"));
-          }
-          dspPendingReqs.clear();
-          try { dspWorkerInstance.terminate(); } catch {}
-          dspWorkerInstance = null;
-        };
-      } catch (err) {
-        console.warn("Web Worker creation blocked, falling back to main thread:", err);
-        dspWorkerInstance = null;
-      }
-    }
-    return dspWorkerInstance;
   }
 
   async function asyncDetect(pcm, fmt, opts) {
-    const worker = getDspWorker();
+    const worker = await getDspWorker();
     if (worker) {
       try {
         return await new Promise((resolve, reject) => {
           const id = ++dspReqCounter;
-          const timer = setTimeout(() => {
-            dspPendingReqs.delete(id);
-            reject(new Error("Worker timed out"));
-          }, 8000);
-          dspPendingReqs.set(id, {
-            resolve: (val) => { clearTimeout(timer); resolve(val.res); },
-            reject: (err) => { clearTimeout(timer); reject(err); }
-          });
-          const pcmCopy = new Float32Array(pcm);
-          worker.postMessage({ id, action: "detect", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
+          dspPendingReqs.set(id, { resolve: (v) => resolve(v.res), reject });
+          const copy = new Float32Array(pcm);
+          worker.postMessage({ id, action: "detect", pcm: copy, fmt, opts }, [copy.buffer]);
         });
       } catch (workerErr) {
-        console.warn("DSP Web Worker detect failed, falling back to main thread:", workerErr);
-        try { dspWorkerInstance?.terminate(); } catch {}
+        console.warn("DSP worker detect failed; using the main thread:", workerErr);
+        try { dspWorkerInstance && dspWorkerInstance.terminate(); } catch {}
         dspWorkerInstance = null;
       }
     }
+    await new Promise((r) => setTimeout(r, 0));
     return detectWatermarkCore(pcm, fmt, opts);
   }
 
   async function asyncEmbed(pcm, fmt, opts) {
-    const worker = getDspWorker();
+    const worker = await getDspWorker();
     if (worker) {
       try {
-        return await new Promise((resolve, reject) => {
+        const { wavArr, watermarked } = await new Promise((resolve, reject) => {
           const id = ++dspReqCounter;
-          const timer = setTimeout(() => {
-            dspPendingReqs.delete(id);
-            reject(new Error("Worker timed out"));
-          }, 8000);
-          const pcmCopy = new Float32Array(pcm);
-          dspPendingReqs.set(id, {
-            resolve: (val) => {
-              clearTimeout(timer);
-              resolve({
-                blob: new Blob([val.wavArr], { type: "audio/wav" }),
-                watermarked: val.watermarked || pcmCopy,
-              });
-            },
-            reject: (err) => { clearTimeout(timer); reject(err); }
-          });
-          worker.postMessage({ id, action: "embed", pcm: pcmCopy, fmt, opts }, [pcmCopy.buffer]);
+          dspPendingReqs.set(id, { resolve, reject });
+          const copy = new Float32Array(pcm);
+          worker.postMessage({ id, action: "embed", pcm: copy, fmt, opts }, [copy.buffer]);
         });
+        return { blob: new Blob([wavArr], { type: "audio/wav" }), watermarked: watermarked || pcm };
       } catch (workerErr) {
-        console.warn("DSP Web Worker embed failed, falling back to main thread:", workerErr);
-        try { dspWorkerInstance?.terminate(); } catch {}
+        console.warn("DSP worker embed failed; using the main thread:", workerErr);
+        try { dspWorkerInstance && dspWorkerInstance.terminate(); } catch {}
         dspWorkerInstance = null;
       }
     }
+    await new Promise((r) => setTimeout(r, 0));
     const watermarked = embedWatermarkCore(pcm, fmt, opts);
-    return {
-      blob: encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16),
-      watermarked,
-    };
+    return { blob: encodeWavBlob(watermarked, fmt.sampleRate, fmt.channels, 16), watermarked };
   }
 
   function parseWav(arrayBuffer) {
@@ -1807,7 +1298,7 @@ audio:not([src]) { display: none; }
     try {
       detectBtn.textContent = "Decoding audio...";
       const { pcm, sampleRate, channels } = await decodeAudio(detectBuffer);
-      detectBtn.textContent = getDspWorker() ? "Scanning frames (Worker)..." : "Scanning frames (DSP)...";
+      detectBtn.textContent = (dspWorkerInstance ? "Scanning frames (Worker)..." : "Scanning frames (DSP)...");
       const result = await asyncDetect(pcm, { sampleRate, channels }, {
         payloadId: expectedId,
         key,
@@ -1969,7 +1460,7 @@ audio:not([src]) { display: none; }
         embedPrecheckBox.innerHTML = `
           <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem; line-height: 1.45;">
             <div style="font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
-              <span>⚠ï¸ Existing Watermark Detected</span>
+              <span>⚠️ Existing Watermark Detected</span>
               <span style="font-family: ui-monospace, monospace; background: rgba(0,0,0,0.3); padding: 2px 7px; border-radius: 4px; color: #ffffff;">ID #${precheck.recoveredPayloadId} (${Math.round(precheck.confidence * 100)}% Match)</span>
             </div>
             <div>This audio already contains an active watermark! Stacking consecutive watermarks creates acoustic cross-talk and will corrupt recovery. We recommend using the original pristine master.</div>
@@ -2006,7 +1497,7 @@ audio:not([src]) { display: none; }
     const band = embedBandSelect.value;
 
     embedBtn.disabled = true;
-    embedBtn.textContent = getDspWorker() ? "Embedding watermark (Worker)..." : "Embedding watermark (DSP)...";
+    embedBtn.textContent = (dspWorkerInstance ? "Embedding watermark (Worker)..." : "Embedding watermark (DSP)...");
 
     try {
       const { pcm, sampleRate, channels } = await decodeAudio(embedBuffer);
@@ -2143,8 +1634,12 @@ audio:not([src]) { display: none; }
   const licenseFeedback = document.getElementById("license-feedback");
 
   function getClientLicense() {
-    if (window.__AUREAL_PRESEEDED_LICENSE__ && window.__AUREAL_PRESEEDED_LICENSE__.key) {
-      return window.__AUREAL_PRESEEDED_LICENSE__;
+    // The Desktop launcher injects a licence record that was stored by the CLI.
+    // That record deliberately has no `key` field (it is stripped before writing),
+    // so accept it on its status/display fields instead of requiring a key.
+    const preseeded = window.__AUREAL_PRESEEDED_LICENSE__;
+    if (preseeded && (preseeded.displayKey || preseeded.status === "granted" || preseeded.status === "active")) {
+      return preseeded;
     }
     try {
       const raw = localStorage.getItem(LICENSE_STORAGE_KEY);

@@ -310,7 +310,7 @@ body { padding: 0; }
   </p>
   <ul>
     <li><strong>Client-Side Audio Processing:</strong> All watermark embedding, frequency analysis, and matched-filter verification occur 100% locally in the memory of your browser or local device. No audio samples ever leave your machine.</li>
-    <li><strong>No Outbound Telemetry:</strong> Neither the CLI (`aureal-watermark.cjs`), the standalone executable (`aureal-watermark.exe`), nor the Web Studio (`/studio`) make network requests, phone-home checks, or analytics calls.</li>
+    <li><strong>No Outbound Telemetry:</strong> The CLI (`aureal-watermark.cjs`), the standalone executable (`aureal-watermark.exe`), and the Web Studio (`/studio`) perform no telemetry, phone-home checks, or analytics calls. The only outbound request any of them can make is the optional Polar.sh licence validation described above, which is sent when you enter a commercial licence key and contains nothing but the key.</li>
     <li><strong>No Tracking Cookies:</strong> This website does not use tracking cookies, advertising pixels, or third-party analytics scripts.</li>
   </ul>
 

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Commercial Licensing & Pricing — Aureal Watermark</title>
+  <link rel="canonical" href="https://aureal.kellersystems.dev/pricing">
 <meta name="description" content="Commercial production licenses, feature comparison, and enterprise terms for Aureal Watermark.">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="256x256" href="/assets/icon.png">
@@ -678,7 +679,7 @@ html { scroll-behavior: smooth; }
       <a href="/" class="nav-btn">Homepage</a>
       <a href="/studio" class="nav-btn">Studio</a>
       <a href="/docs" class="nav-btn">Docs</a>
-      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="nav-btn">GitHub</a>
+      <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="nav-btn" rel="noopener">GitHub</a>
     </div>
   </header>
 
@@ -686,7 +687,7 @@ html { scroll-behavior: smooth; }
   <section class="page-intro">
     <h1>Commercial Subscriptions &amp; Promo Licensing</h1>
     <p>
-      Acoustic watermark licensing tailored for independent producers, record labels, and audio distribution desks. Trace promo leaks with cryptographic confidence and Tardos anti-collusion protection.
+      Acoustic watermark licensing tailored for independent producers, record labels, and audio distribution desks. Trace promo leaks with recipient-keyed manifests and the one-click leak auditor.
     </p>
     <div class="dual-license-note">
       Non-commercial evaluation is 100% free. Commercial music releases, promo pool distributions, and automated pipelines require an active Creator, Label, or Platform subscription.
@@ -695,12 +696,20 @@ html { scroll-behavior: smooth; }
     <!-- Billing Interval Toggle -->
     <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin:2rem 0 0.5rem;">
       <span style="font-size:0.9rem;font-weight:600;color:var(--text);" id="lbl-monthly">Monthly</span>
-      <label style="position:relative;display:inline-block;width:52px;height:28px;">
-        <input type="checkbox" id="pricing-toggle" checked style="opacity:0;width:0;height:0;">
-        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--purple);border-radius:28px;transition:.3s;border:1px solid rgba(255,255,255,0.2);"></span>
+      <label for="pricing-toggle" style="position:relative;display:inline-block;width:52px;height:28px;flex-shrink:0;">
+        <input type="checkbox" id="pricing-toggle" checked aria-label="Bill yearly instead of monthly" style="opacity:0;width:0;height:0;position:absolute;">
+        <span class="billing-track" aria-hidden="true"></span>
       </label>
       <span style="font-size:0.9rem;font-weight:600;color:var(--cyan);" id="lbl-yearly">Yearly <span style="background:rgba(56,189,248,0.15);padding:0.2rem 0.5rem;border-radius:12px;font-size:0.75rem;border:1px solid var(--cyan);">Save ~17%</span></span>
     </div>
+    <style>
+      .billing-track { position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:28px; transition:background-color .2s ease; }
+      .billing-track::after { content:""; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s ease; }
+      #pricing-toggle:checked + .billing-track { background-color: var(--purple); }
+      #pricing-toggle:checked + .billing-track::after { transform: translateX(24px); }
+      #pricing-toggle:focus-visible + .billing-track { outline:2px solid var(--cyan); outline-offset:2px; }
+      @media (prefers-reduced-motion: reduce) { .billing-track, .billing-track::after { transition:none; } }
+    </style>
   </section>
 
   <!-- Tiers Grid -->
@@ -731,13 +740,13 @@ html { scroll-behavior: smooth; }
       <div class="tier-tag">[ LABEL &amp; PROMO DESK ]</div>
       <div class="tier-title">Promo Leak Suite</div>
       <div class="tier-price" id="price-label">€290 <span>/ year</span></div>
-      <div class="tier-desc">Complete pre-release leak tracking and Tardos anti-collusion attribution suite for record labels and promo distributors.</div>
+      <div class="tier-desc">Complete pre-release leak tracking: individually tagged promo copies, a private recipient manifest, and the one-click leak auditor.</div>
       <ul class="tier-specs">
         <li>Everything in Creator Studio</li>
         <li><strong>Unlimited</strong> promo pool distributions &amp; album campaigns</li>
-        <li><strong>Tardos Anti-Collusion Accuser</strong> (unmasks 2-to-5 leaker average attacks)</li>
+        <li><strong>Batch distribution</strong> &mdash; one uniquely tagged copy per recipient</li>
         <li>Automated 1-Click Forensic Leak Auditor (<code>audit_leak.js</code>)</li>
-        <li>Cryptographic Recipient Manifests &amp; Audit Logs</li>
+        <li>Private recipient manifests (IDs, per-file hashes, watermark key)</li>
         <li>Priority Founder &amp; Pipeline Integration Support</li>
       </ul>
       <a href="https://buy.polar.sh/polar_cl_yJRWpGLnbQTA8xrpZcnxaqssxDdjegF3RGkea1ClCZG" class="btn-tier btn-checkout">
@@ -772,6 +781,10 @@ html { scroll-behavior: smooth; }
       const pLabel = document.getElementById("price-label");
       const btnCreator = document.getElementById("btn-text-creator");
       const btnLabel = document.getElementById("btn-text-label");
+      const lblMonthly = document.getElementById("lbl-monthly");
+      const lblYearly = document.getElementById("lbl-yearly");
+      const thCreator = document.getElementById("th-creator");
+      const thLabel = document.getElementById("th-label");
 
       function updatePricing() {
         const isYearly = toggle.checked;
@@ -786,6 +799,11 @@ html { scroll-behavior: smooth; }
           btnCreator.innerText = "Subscribe • €9 / mo";
           btnLabel.innerText = "Subscribe • €29 / mo";
         }
+        // Keep the comparison matrix in step with the cards on screen.
+        if (thCreator) thCreator.textContent = `€${isYearly ? "89/yr" : "9/mo"}`;
+        if (thLabel) thLabel.textContent = `€${isYearly ? "290/yr" : "29/mo"}`;
+        if (lblMonthly) lblMonthly.style.color = isYearly ? "var(--text-muted, #94a3b8)" : "var(--text)";
+        if (lblYearly) lblYearly.style.color = isYearly ? "var(--cyan)" : "var(--text-muted, #94a3b8)";
       }
 
       if (toggle) {
@@ -797,7 +815,7 @@ html { scroll-behavior: smooth; }
 
   <!-- Technical Feature Comparison Matrix -->
   <section>
-    <div class="section-title">Technical Capability Matrix</div>
+    <h2 class="section-title">Technical Capability Matrix</h2>
     <div class="section-desc">Comparison of technical rights, DSP components, and operational tooling across licenses.</div>
 
     <div class="matrix-wrapper">
@@ -806,8 +824,8 @@ html { scroll-behavior: smooth; }
           <tr>
             <th>Feature / Capability</th>
             <th>Non-Commercial (Free)</th>
-            <th>Creator Studio (€9/mo)</th>
-            <th>Label &amp; A&amp;R (€29/mo)</th>
+            <th>Creator Studio (<span id="th-creator">€89/yr</span>)</th>
+            <th>Label &amp; A&amp;R (<span id="th-label">€290/yr</span>)</th>
             <th>Platform / API</th>
           </tr>
         </thead>
@@ -848,11 +866,11 @@ html { scroll-behavior: smooth; }
             <td><span class="val-yes">YES</span></td>
           </tr>
           <tr>
-            <td>Tardos Anti-Collusion Accuser (Multi-Leaker)</td>
+            <td>Collusion-resistant fingerprinting (averaging attacks)</td>
             <td><span class="val-no">NO</span></td>
             <td><span class="val-no">NO</span></td>
-            <td><span class="val-yes">YES</span></td>
-            <td><span class="val-yes">YES</span></td>
+            <td><span class="val-no">NO</span></td>
+            <td><span class="val-no">NO</span></td>
           </tr>
           <tr>
             <td>Forensic Leak Auditor &amp; Attribution</td>
@@ -921,7 +939,10 @@ html { scroll-behavior: smooth; }
   <!-- Footer -->
   <footer class="footer">
     <div>
-      Licensed under <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/LICENSE.md" target="_blank">PolyForm Noncommercial 1.0.0</a> &bull; Full terms in <a href="https://kellersystems.dev/legal/" target="_blank" rel="noopener noreferrer">Commercial EULA</a>
+      <a href="/">Home</a> &bull; <a href="/studio">Studio</a> &bull; <a href="/docs">Documentation</a> &bull; <a href="/verifier">Audio Verifier</a>
+    </div>
+    <div>
+      Licensed under <a href="https://github.com/KELLERBABG/Aureal-Watermark/blob/main/LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> &bull; Full terms in <a href="https://kellersystems.dev/legal/" target="_blank" rel="noopener noreferrer">Commercial EULA</a>
     </div>
     <div>
       <a href="https://kellersystems.dev/impressum/" target="_blank" rel="noopener noreferrer">Impressum</a> &bull; <a href="https://kellersystems.dev/privacy/" target="_blank" rel="noopener noreferrer">Datenschutz</a> &bull; <a href="https://kellersystems.dev/legal/" target="_blank" rel="noopener noreferrer">Terms of Sale</a> &bull; Direct inquiries: <a href="mailto:info@kellersystems.dev">info@kellersystems.dev</a>

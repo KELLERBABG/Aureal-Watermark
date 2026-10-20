@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aureal Watermark &mdash; Invisible Audio Watermarking for Leak Attribution &amp; Anti-Theft</title>
+  <title>Aureal Watermark — audio watermarking for leak investigation</title>
+  <link rel="canonical" href="https://aureal.kellersystems.dev/">
   <meta name="description" content="Aureal Watermark embeds subtle audio IDs for leak investigations. Detection depends on source audio and transformations.">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="256x256" href="/assets/icon.png">
@@ -1260,7 +1261,7 @@ html { scroll-behavior: smooth; }
         <a href="/studio" class="nav-link">Studio</a>
         <a href="/pricing" class="nav-link">Pricing</a>
         <a href="/docs" class="nav-link">Documentation</a>
-        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="btn-repo">
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" class="btn-repo" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           Repository
         </a>
@@ -1345,7 +1346,7 @@ html { scroll-behavior: smooth; }
                 <select id="demo-band-select">
                   <option value="high" selected>High Band (17–19.5 kHz) &mdash; Archival &amp; Inaudible Master (0.0 dB BS.1116)</option>
                   <option value="dual">Dual Band (8–19.5 kHz) &mdash; MP3 / AAC Transcode Resilient</option>
-                  <option value="mid">Mid Band (8–13 kHz) &mdash; Aggressive 64kbps Compression</option>
+                  <option value="mid">Mid Band (4.5–13.5 kHz) &mdash; Aggressive 64kbps Compression</option>
                 </select>
               </div>
 
@@ -1376,7 +1377,7 @@ html { scroll-behavior: smooth; }
                     </span>
                   </div>
                   <div style="position: relative; margin-bottom: 0.6rem;">
-                    <select id="demo-export-format" style="width: 100%; box-sizing: border-box; background: #0c1017; border: 1px solid var(--border); color: #f1f5f9; border-radius: 6px; padding: 0.55rem 2rem 0.55rem 0.7rem; font-size: 0.8rem; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%2394a3b8\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 0.6rem center;">
+                    <select id="demo-export-format" style="width: 100%; box-sizing: border-box; background: #0c1017; border: 1px solid var(--border); color: #f1f5f9; border-radius: 6px; padding: 0.55rem 2rem 0.55rem 0.7rem; font-size: 0.8rem; font-family: inherit; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2720%27%20height=%2720%27%20viewBox=%270%200%2024%2024%27%20fill=%27%2394a3b8%27%3E%3Cpath%20d=%27M7%2010l5%205%205-5z%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.6rem center;">
                       <option value="wav-16" selected>WAV — 16-bit PCM (Lossless CD Master)</option>
                       <option value="wav-24">WAV — 24-bit PCM (High-Res Studio Master)</option>
                       <option value="mp3-320">MP3 — 320 kbps (Studio Quality / Highest)</option>
@@ -1745,10 +1746,11 @@ assert.equal(detectedId.valid, true);
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing &amp; Licenses</a>
         <a href="/docs">Documentation</a>
+        <a href="/verifier">Audio Verifier</a>
         <a href="https://kellersystems.dev/legal/" target="_blank" rel="noopener noreferrer">Terms of Service</a>
         <a href="https://kellersystems.dev/privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
         <a href="https://kellersystems.dev/impressum/" target="_blank" rel="noopener noreferrer">Impressum</a>
-        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank">GitHub</a>
+        <a href="https://github.com/KELLERBABG/Aureal-Watermark" target="_blank" rel="noopener">GitHub</a>
       </div>
       <p>&copy; 2026 Keller Systems &bull; Imperceptible Acoustic Provenance &bull; <a href="https://kellersystems.dev">Main Portal</a></p>
     </div>
@@ -1779,7 +1781,8 @@ assert.equal(detectedId.valid, true);
     </div>
   </div>
 
-  <!-- Live In-Browser DSP Engine Integration -->
+  <!-- Live In-Browser DSP Engine Integration (engine generated from src/ by scripts/build-engine.js) -->
+  <script src="/assets/aureal-engine.js"></script>
   <script src="/assets/demo-engine.js"></script>
   <script>
     // Developer Tab Switching
@@ -2239,7 +2242,7 @@ Attribution: Illustrative sample output only; a watermark match does not by itse
 
             if (res.detected) {
               const bandLabel = res.bandUsed === 'mid' 
-                ? 'Mid Band (8–13 kHz, Compression Resilient)' 
+                ? 'Mid Band (4.5–13.5 kHz, Compression Resilient)' 
                 : (res.bandUsed === 'dual' 
                     ? 'Dual Band (Hybrid Multi-Tier)' 
                     : 'High Band (17–19.5 kHz, Ultrasonic Inaudible)');
