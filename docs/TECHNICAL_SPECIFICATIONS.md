@@ -12,10 +12,10 @@ Frequency (Hz)
           ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- High Band DSSS (17.0–19.5 kHz)
 17.00 kHz ─────────────────────────────────────────────────────────────      (Near-ultrasonic, strictly inaudible)
           [ High-frequency air, harmonics, percussion sizzle ]
-13.00 kHz ─────────────────────────────────────────────────────────────
-          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- Mid Band DSSS (8.0–13.0 kHz)
- 8.00 kHz ─────────────────────────────────────────────────────────────      (A-weighted equal-loudness resilience)
-          [ Speech Formants, Vocals, Bass, Fundamentals: 20 Hz - 8 kHz ]   (Completely untouched)
+13.50 kHz ─────────────────────────────────────────────────────────────
+          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- Mid Band DSSS (4.5–13.5 kHz)
+ 4.50 kHz ─────────────────────────────────────────────────────────────      (A-weighted equal-loudness resilience)
+          [ Speech Formants, Vocals, Bass, Fundamentals: 20 Hz - 4.5 kHz ]   (Completely untouched)
  0.00 kHz ─────────────────────────────────────────────────────────────
 ```
 
@@ -25,14 +25,14 @@ Frequency (Hz)
 | :--- | :--- | :--- |
 | **Modulation Scheme** | Direct-Sequence Spread Spectrum (DSSS) | 48 BPSK symbols per repetition |
 | **Codeword Structure** | 32 data bits + 16-bit CRC-16/CCITT-FALSE | $2^{32} = 4,294,967,296$ unique IDs |
-| **Carrier Bands** | `High` (17.0–19.5 kHz, Ultrasonic)<br>`Mid` (8.0–13.0 kHz, A-Weighted)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
+| **Carrier Bands** | `High` (17.0–19.5 kHz, Ultrasonic)<br>`Mid` (4.5–13.5 kHz, centre 9.0 kHz)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
 | **Window Shaping** | Continuous periodic Hann window | Zero DC offset, continuous phase transitions across chip boundaries |
 | **Dynamic Psychoacoustic Masking** | Continuous proportional RMS tracking | Carrier tracks local energy; nominal embedding target $\ge 32\text{--}36\text{ dB}$ below host audio, subject to source material and `strength` setting; muted on silence ($\le -54\text{ dBFS}$) |
-| **Headroom Protection** | True-Peak Limiter ($\le 0.995$) | Designed to keep superposition below clipping on maximized $0\text{ dBFS}$ masters |
-| **Embedding Level** | $-48.5\text{ dB}$ to $-55\text{ dBFS}$ (nominal) | Scaled by `strength` parameter ($0.01 \le s \le 1.0$) |
+| **Headroom Protection** | Sample-peak limiter ($\le 0.995$) | Only engages when the mixed output peak exceeds $0.999$, then scales the whole buffer so the sample peak is $\le 0.995$ |
+| **Embedding Level** | $\text{amp} = \text{strength} \times 0.0085$ (dual ×0.85, mid ×0.42) | `amp` is a nominal per-band level, not a peak bound; measured ≈ −41 dBFS peak / −57 dBFS RMS at strength 0.5 dual band on a speech-like fixture |
 | **Repetition Period** | ~1.0 second per frame | Integrates coherently over time ($S/N \propto \sqrt{N}$) |
 | **Stream Sync Preamble** | In-Phase / Quadrature (IQ) Chirp | Key-derived Linear Frequency Chirp at each frame boundary; fast single-pass lock on arbitrary crop offsets |
-| **Resampling Invariance** | 64-phase, 32-tap Windowed-Sinc Polyphase Resampler | Automatically normalizes between 44.1 kHz, 48 kHz, and 96 kHz without external dependencies |
+| **Resampling Invariance** | 64-phase, 32-tap Windowed-Sinc Polyphase Resampler | If native detection fails, retries after normalising to 44.1 kHz and 48 kHz (those two rates only) without external dependencies |
 | **Error Correction** | Reliability-ordered 2-bit permutation sweep | Evaluates lowest-confidence soft-decision candidate pairs on CRC mismatch (repairs up to 2 flipped bits) |
 
 ---
@@ -56,13 +56,13 @@ Verdict ◄── Z-Score ◄── Eb/N0 Metric ◄── Frame Folding (Modulo
    $$\frac{E_b}{N_0}\ (\text{dB}) = 10 \log_{10}\left(\max\left(10^{-4},\ \left(\frac{\mu}{\sigma}\right)^2\right)\right) = 20 \log_{10}\left(\frac{\mu}{\sigma}\right)$$
    $$\text{SQNR}\ (\text{dB}) = 10 \log_{10}\left(\max\left(10^{-4},\ \left(\frac{\mu}{\sigma}\right)^2 \times R\right)\right)$$
 7. **Statistical Confidence Verdict:**
-   $$\text{confidence} = \text{clamp}\left(\frac{z - 3.0}{4.0}, 0.0, 1.0\right) \quad \text{where} \quad z = \frac{\mu}{\sigma / \sqrt{48} + 10^{-3} \cdot \max(|s_i|)}$$
+   $$\text{confidence} = \text{clamp}\left(\frac{z - 3.0}{27.0}, 0.0, 1.0\right) \quad \text{where} \quad z = \frac{\mu}{\sigma / \sqrt{48} + 10^{-3} \cdot \max(|s_i|)}$$
 
 ---
 
 ### Lossy Codec Survival Benchmarks (Local Fixture Matrix)
 
-Measured across 42 automated test matrices including `ffmpeg` compression round-trips (synthetic & speech material, 20s, 44.1 kHz, strength 0.5). Results are limited to these fixtures and settings; they do not establish survival for all content, bitrates, encoders, or platforms:
+Measured by running the documented commands manually on local synthetic and speech-like fixtures including `ffmpeg` compression round-trips (20s, 44.1 kHz, strength 0.5). The shipped `node --test` suite covers correctness but not these fixtures, so these are fixture results rather than a regression-tested guarantee; they do not establish survival for all content, bitrates, encoders, or platforms:
 
 | Carrier Band | MP3 128 kbps | MP3 320 kbps | AAC 128 kbps | Additive Noise (−30 dBFS) | Gain Shift (0.5× / 2.0×) | Digital Silence |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -87,5 +87,8 @@ Measured across 42 automated test matrices including `ffmpeg` compression round-
 * **Multi-Tenant CDMA Coexistence:** Multiple independent studios can mark the same track using distinct private keys; all watermarks coexist and detect independently without destructive interference.
 
 ### Operational Boundaries & Known Limitations:
+* **Collusion / averaging attacks:** Averaging independently tagged copies of the same master defeats recovery. No collusion-resistant fingerprinting is implemented (`src/tardos.js` is a standalone scoring utility that the embed/detect pipeline does not feed), so collusion is a known limitation, not a protected threat.
+* **Very short excerpts:** Anything shorter than one frame (~1 s at 44.1 kHz) is never recovered; ~1.8 s excerpts recovered for roughly half of the start offsets swept on the local fixture.
+* **Reported carrier band can be wrong:** After filtering, the band named in the result/report may not be the band that carries the signal, because both band hypotheses reuse the same spreading sequence (the hypotheses are not orthogonal).
 * **Same-Key Overwrite Collisions:** Re-marking a file using the *same* private key with a conflicting ID causes destructive bit interference; the original ID is not reliably recoverable. Treat this as a limitation of the current design, not a security feature.
 * **32-Bit Payload Boundary:** 32 bits ($4.29 \times 10^9$ unique IDs) is intentionally designed as an ultra-lightweight pointer/ticket architecture (like an ISRC or database foreign key), not a multi-kilobyte metadata container.

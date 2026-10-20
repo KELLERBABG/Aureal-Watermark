@@ -11,7 +11,7 @@ While personal, hobby, and academic research use is completely free under the **
 | License Tier | Target Audience | Key Features Included | Price |
 | :--- | :--- | :--- | :--- |
 | **Solo Creator / Indie Studio** | Independent producers, artists, mixing engineers | • Unrestricted commercial rights on all personal releases & beats<br>• Full access to Universal CLI (`aureal-watermark.cjs`)<br>• Offline Web Studio with 60 FPS Web Worker engine<br>• Lifetime updates on major v0.x releases | **$249** *(one-time / perpetual)* |
-| **Boutique Label & A&R Desk** | Record labels, artist managers, DJ promo pools | • Everything in Indie Studio tier<br>• Automated Promo Leak Batch Generator (`batch_distribute.js`)<br>• One-Click Forensic Leak Audit Inspector (`audit_leak.js`)<br>• Tamper-proof `recipients.json` cryptographic manifest<br>• Priority email support for leak disputes | **$499** *(one-time / seat)* |
+| **Boutique Label & A&R Desk** | Record labels, artist managers, DJ promo pools | • Everything in Indie Studio tier<br>• Automated Promo Leak Batch Generator (`batch_distribute.js`)<br>• One-Click Forensic Leak Audit Inspector (`audit_leak.js`)<br>• `recipients.json` distribution manifest with per-file SHA-256 (unsigned JSON that also records the watermark key)<br>• Priority email support for leak disputes | **$499** *(one-time / seat)* |
 | **B2B Audio Marketplace** | Beat marketplaces, stem distribution, stock libraries | • Headless Node.js backend integration rights<br>• Commercial export hook SLA<br>• Unlimited automated watermarking loops<br>• Dual-band heavy lossy compression resilience | **$2,900 / yr** *(<50k tracks/mo)*<br>**$5,900 / yr** *(Unlimited)* |
 | **Voice AI & Speech Platform** | Text-to-Speech (TTS), AI voice cloning, AI podcasting | • Custom technical integration support<br>• Audio watermark embedding and detection workflows<br>• No regulatory or C2PA certification is included | **From $4,900 / yr** *(Growth)*<br>Custom Foundation Model scaling |
 | **Audio Forensics & Legal Lab** | Digital forensic labs, copyright lawyers, expert witnesses | • Client-side offline forensic audit suite (`verifier.html`)<br>• Raw $E_b/N_0$ and SQNR signal-to-noise ratio reports<br>• Custom branding & white-label verification inspector<br>• Detection reports for independent review; no court-admissibility claim | **$1,499** *(perpetual license)* |
@@ -33,6 +33,16 @@ Aureal does not create, validate, or recover C2PA manifests. Its ID may be used 
 ## License Enforcement & Air-Gapped Operation
 
 Commercial licenses do not require continuous internet connectivity or intrusive DRM phone-home servers. Enterprise clients operating in secure, air-gapped mastering facilities can run Aureal completely offline.
+
+---
+
+## Known Limitations
+
+These apply to every tier; they are properties of the watermark, not of the licence.
+
+* **Collusion / averaging attacks defeat recovery.** The product does not implement collusion-resistant fingerprinting: `batch_distribute.js` embeds only the per-recipient payload ID (there is no per-recipient codeword), and `src/tardos.js` is a standalone scoring utility that the embed/detect pipeline does not feed. Averaging copies from several recipients erases the recovered ID (measured).
+* **Very short excerpts are never recovered.** Anything shorter than one frame (~1 s at 44.1 kHz) cannot decode, and ~1.8 s excerpts recover for roughly half of the start offsets swept on our fixture.
+* **The reported carrier band can be wrong after filtering.** Both band hypotheses reuse the same spreading sequence, so a filtered signal may be attributed to the wrong band in the result and in the forensic report.
 
 ---
 

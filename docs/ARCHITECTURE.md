@@ -1,6 +1,6 @@
 # Aural Watermark — Architecture
 
-**Version:** 0.2.1 · ESM · Node ≥ 18 · zero npm dependencies (browser-safe core)
+**Version:** 0.2.7 · ESM · Node ≥ 18 · zero npm dependencies (browser-safe core)
 
 ## Module map
 
@@ -19,22 +19,20 @@ src/
   embed.js      embedWatermark(pcm, fmt, opts) → new Float32Array + watermarkMeta
                 validateFmt (shared with detect)
   detect.js     detectWatermark(pcm, fmt, opts): fold → resync → matched filter
-                → CRC decode (+1-bit correction) → z-statistic confidence
+                → CRC decode (+1-bit, then 2-bit correction) → z-statistic confidence
   wav.js        parseWav/writeWav (buffers), readWavFile/writeWavFile (async fs)
   synth.js      synthesizeSpeechLike({seconds, sampleRate, channels})
   index.js      public API re-exports
   browser/
     aural-watermark-verify.js   verifyWav(arrayBuffer, expectedId, key, opts)
                                 DataView RIFF parser, PCM 8/16/24/32-int + float32
-demo/
+site/
   studio.html / verifier.html  offline browser studio & verifier (pure client-side)
 docs/
   CODEBASE_WIKI.md             detailed file-by-file functions and algorithm reference
-test/
-  wav.test.js watermark.test.js cli.test.js   v0.1 behavior (29 tests)
-  codec.test.js   ffmpeg MP3/AAC round-trips (11 tests, auto-skip w/o ffmpeg)
-  browser.test.js verifier module against generated WAVs (2 tests)
 ```
+
+The `test/` directory holds the `node --test` suite: payload/CRC, WAV I/O, embed/detect round-trip and band handling, the forensic seal, the CLI contract, the REST service, the generated browser engine plus page adapters, and the batch-distribution/leak-audit scripts. It does not contain the historical benchmark fixtures, so the survival figures quoted in [TECHNICAL_SPECIFICATIONS.md](TECHNICAL_SPECIFICATIONS.md) were measured by running the documented commands manually against local synthetic fixtures.
 
 ## Embedding pipeline
 
@@ -42,8 +40,9 @@ test/
 opts {payloadId(uint32), key, strength=0.5, band="high"|"mid"|"dual"|{lowHz,highHz}}
   │
   ├─ validateFmt: sampleRate 8k..768k int, channels 1..8, length divisible
-  ├─ bands = bandList(band)            dual → [high, mid], else single
-  ├─ amp = strength × MAX_AMPLITUDE(0.12); multi-band ⇒ ×0.7 each
+  ├─ bands = bandList(band)            dual → presets that fit, else the requested band
+  ├─ amp = strength × MAX_AMPLITUDE(0.0085); multi-band ⇒ ×0.85 each, mid band ⇒ ×0.42
+  │    (amp is a nominal per-band level, not a peak bound)
   ├─ geometry = deriveGeometry(rate, perChannel):
   │    frameSeconds 1.0 → slotLen ≈ rate/48 rounded to chip multiple
   │    chipLen = slotLen/24 ≥ 4, frameLen = slotLen×48, reps = ⌊len/frameLen⌋ ≥ 1
@@ -84,7 +83,7 @@ templates from `(key, sampleRate, geometry, band)` alone.
 opts {key, payloadId?, band="high"|"mid"|"dual"|"auto"|{lowHz,highHz}}
   │
   ├─ keysToTry = [key, key + "|side"]     // tests both Mid and Side channels
-  ├─ bands = bandList(band); "auto"/"dual" try both presets
+  ├─ bands = bandList(band); "auto"/"dual" try both presets that fit
   │
   │ for each key in keysToTry:
   │   for each band:
@@ -123,9 +122,14 @@ changes cancel exactly.
 | Preset | lowHz–highHz | center | Rationale |
 |---|---|---|---|
 | `high` | 17000–19500 | 18250 | strictly near-ultrasonic and inaudible to human ears; survives lossless/high-bitrate |
-| `mid` | 8000–13000 | 10500 | survives aggressive lossy low-pass filters; A-weighted for transparent masking |
+| `mid` | 4500–13500 | 9000 | survives aggressive lossy low-pass filters; A-weighted for transparent masking |
 
-Custom bands via `{lowHz, highHz}` are clamped to Nyquist−100 Hz.
+Custom bands via `{lowHz, highHz}` are honoured as the only band and clamped by
+`resolveBand()` to `[1000 Hz, sampleRate/2 − 100 Hz]`; a range that cannot fit
+under Nyquist (or is narrower than 200 Hz) throws a `RangeError` instead of
+collapsing to a tone. When a preset cannot fit (e.g. the 17–19.5 kHz high band
+below ~32 kHz), a single wide fallback band in the available spectrum is used,
+and `dual` degrades to whichever presets fit.
 
 ## Browser verifier
 
@@ -141,7 +145,7 @@ const r = verifyWav(arrayBuffer, 1234567, "key", { band: "auto" });
 // { detected, confidence, ber, bandUsed, reps }
 ```
 
-`demo/verifier.html` is a zero-build static page using this module — works
+`site/verifier.html` is a zero-build static page using this module — works
 from `file://`, all processing stays in the tab.
 
 ## CLI

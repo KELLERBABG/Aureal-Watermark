@@ -42,7 +42,7 @@ node bin/auralwatermark.js detect unknown.wav --key secret --json
 ### `gen <out.wav> [--seconds N] [--rate R] [--channels C] [--bits 16|24]`
 Synthesizes speech-like audio with harmonic formants and amplitude envelope for testing and benchmarking.
 
-### `embed <in.wav> <out.wav> --id <uint32> [--key s] [--strength 0..1] [--band dual|high|mid]`
+### `embed <in.wav> <out.wav> --id <uint32> [--key s] [--strength 0..1] [--band dual|high|mid|lowHz:highHz]`
 Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** (via automatic FFmpeg fallback).
 
 | Option | Default | Description |
@@ -50,9 +50,9 @@ Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** 
 | `--id` | **Required** | Unsigned 32-bit tracking ID (`0` to `4294967295`). |
 | `--key` | `aural-watermark-default-key` | Secret salt used for PRNG sequence generation. Must match at detection time. |
 | `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Nominal target is $\ge 32\text{--}36\text{ dB}$ below host audio; audibility depends on source material, playback system, and listener. |
-| `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
+| `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (4.5–13.5 kHz), `dual` (both bands that fit), or a custom `lowHz:highHz` band (clamped to `[1000, sampleRate/2−100] Hz`; rejected with an error if it cannot fit). |
 
-### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json] [--report proof.json] [--report-txt cert.txt]`
+### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid|lowHz:highHz] [--json] [--report proof.json] [--report-txt cert.txt]`
 
 | Option | Default | Description |
 |---|---|---|
@@ -172,7 +172,7 @@ auralwatermark detect leak.mp3 --id 1234567 --report proof.json --report-txt cer
 The resulting `proof.json` includes:
 * **Cryptographic Hashes:** SHA-256 and SHA-512 over the investigated file bytes.
 * **Detection Status:** `WATERMARK_ID_MATCH`, `WATERMARK_DETECTED`, `PAYLOAD_MISMATCH`, `DETECTION_UNCERTAIN`, or `NO_WATERMARK_FOUND`.
-* **Forensic Layer Metrics:** Raw $E_b/N_0$ (dB), SQNR (dB), Z-score, carrier bands, and CRC32 verification.
+* **Forensic Layer Metrics:** Raw $E_b/N_0$ (dB), SQNR (dB), Z-score, carrier bands, and CRC-16 verification.
 * **Report Integrity Seal:** HMAC-SHA256 over the report payload, using a shared key. This is not a public-key signature or identity authentication; the default key is public in the source.
 
 ---
@@ -183,19 +183,31 @@ The resulting `proof.json` includes:
 | :--- | :--- | :--- |
 | **Archival Masters / Lossless Distribution** | `high` | Places most watermark energy in the 17.0–19.5 kHz band; audibility depends on source, hardware, and listener. |
 | **Podcasts, Streaming, Social Media (MP3/AAC)** | `dual` (embed) + `auto` (detect) | Redundant encoding across mid and high bands survives encoder low-passes. |
-| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (8–13 kHz) masked under speech sibilants and music transients. |
+| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (4.5–13.5 kHz) masked under speech sibilants and music transients. |
+
+At low sample rates (e.g. 8–16 kHz) the 17–19.5 kHz high band cannot fit below Nyquist: the engine then uses a single wide band inside the available spectrum, and `dual` degrades to whichever presets fit.
 
 ---
 
-## 8. Running Tests
+## 8. Running Tests & Benchmarks
+
+The repository ships a `node --test` suite in `test/`:
+
+```bash
+npm test          # or: node --test
+```
+
+It covers the payload/CRC layer, WAV I/O, the embed/detect round-trip (bands, sample rates, custom bands, negative controls), the forensic report seal and its verification, the CLI contract (commands, flags, exit codes, JSON, reports), the REST microservice (health, embed/detect, format allow-list, error semantics), the generated browser engine and page adapters, and the batch-distribution + leak-audit scripts. It runs on Node 18+ with no dependencies; ffmpeg is not required (codec fixtures are covered by the audit scripts, not by `npm test`).
+
+The benchmark figures in [TECHNICAL_SPECIFICATIONS.md](TECHNICAL_SPECIFICATIONS.md) and [WHITEPAPER.md](WHITEPAPER.md) are fixture measurements, not part of the automated suite. Reproduce them with:
 
 ```powershell
-# Run the complete test suite (unit DSP, codecs, CLI, REST server, and forensic proofs)
-node --test
+# Reproduce a lossless round-trip fixture
+node bin/auralwatermark.js gen t.wav --seconds 20 --rate 44100
+node bin/auralwatermark.js embed t.wav wm.wav --id 1234567 --key geheim
+node bin/auralwatermark.js detect wm.wav --id 1234567 --key geheim --json
 
-# Run only the CLI and report suites
-node --test test/cli.test.js test/report.test.js
-
-# Run the REST microservice integration suite
-node --test test/server.test.js
+# Reproduce a codec fixture (requires ffmpeg on PATH)
+ffmpeg -y -i wm.wav -c:a libmp3lame -b:a 128k wm_mp3.wav
+node bin/auralwatermark.js detect wm_mp3.wav --key geheim
 ```

@@ -1,7 +1,7 @@
 # Aural Watermark — Payload & Signal Format
 
-Normative reference for everything a second implementation (e.g. the WASM
-verifier) must reproduce bit-exactly. Version 0.2.1.
+Normative reference for everything a second implementation must reproduce
+bit-exactly. Version 0.2.7.
 
 ## 1. Payload codeword
 
@@ -16,8 +16,10 @@ bit layout (MSB first):  [ payloadId: 32 bits ][ CRC-16: 16 bits ] = 48 bits
   (`packCodeword` / `unpackCodeword` in `src/payload.js`).
 
 Error correction at detection: if the CRC of the hard-decided codeword fails,
-bits are flipped one at a time in ascending |soft amplitude| order until the
-CRC passes (single-error correction). Multi-bit errors fail cleanly.
+it first flips bits one at a time in ascending |soft amplitude| order until the
+CRC passes (1-bit correction). If that fails, it sweeps all pairs drawn from the
+8 lowest-confidence symbols (28 trials) and accepts the first pair whose CRC
+passes (2-bit correction). Errors beyond that are not corrected.
 
 ## 2. Keys and PN sequences
 
@@ -48,10 +50,14 @@ Given sample rate `R`, per-channel length `N`:
 | Preset | lowHz–highHz | center used for carrier |
 |---|---|---|
 | high | 17000–19500 | 18250 |
-| mid | 8000–13000 | 10500 |
+| mid | 4500–13500 | 9000 |
 
-Custom `{lowHz, highHz}` is clamped to `[1000, R/2−100]`. The carrier sits
-at the band center; Hann-windowed chips confine energy well inside the band.
+Custom `{lowHz, highHz}` is honoured as the only band and clamped by
+`resolveBand()` to `[1000, R/2−100]`; it throws a `RangeError` when it cannot fit
+under Nyquist or is narrower than 200 Hz. Presets that do not fit at low sample
+rates fall back to one wide band (`dual` degrades to the presets that fit). The
+carrier sits at the band center; Hann-windowed chips confine energy well inside
+the band.
 
 ## 5. Watermark signal
 
@@ -64,9 +70,11 @@ symbol_b          = ±1 from keyed PN stream "bit"+b
 
 Embedding adds this frame repeatedly (`reps`) across channels with Mid/Side
 decorrelation. Adaptive proportional masking tracks slot RMS, burying the signal
-≥32–36 dB below host audio and muting completely on silence (≤ -54 dBFS). Peak
-amplitude bound: `amp = strength × 0.0075` (linear amplitude ~0.00375 at strength 0.5),
-multi-band ×0.7 each with A-weighted mid scaling (×0.22).
+≥32–36 dB below host audio and muting completely on silence (≤ -54 dBFS). Scale
+factor: `amp = max(0.001, strength) × 0.0085`, ×0.85 when
+both bands are used, and the mid-band copy is additionally ×0.42. `amp` is a
+nominal per-band level, not a peak bound: at strength 0.5 dual band the measured
+output was ≈ −41 dBFS peak / −57 dBFS RMS on a speech-like fixture.
 
 ## 6. Detection statistics
 
@@ -74,8 +82,12 @@ multi-band ×0.7 each with A-weighted mid scaling (×0.22).
   `s ∈ {0, ±F/16, ±F/8, ±F/4}` clamped to `[0, F/4]`.
 - Soft symbol: `soft[b] = ⟨folded_b, template_b⟩ / (reps · channels · ‖template_b‖²)`.
 - Confidence: `clamp((z − 3)/27, 0, 1)` with z from mean/spread of
-  `soft[b]·ref[b]`; detection threshold 0.5 plus positive alignment.
-- Winner across bands = highest confidence.
+  `soft[b]·ref[b]`. `detected` requires a valid CRC, an ID match (in verify
+  mode) and `mu > 0`; the confidence threshold applied is 0.35 when the CRC is
+  valid (0.5 is the fallback when it is not, which can never yield `detected`).
+- Winner across bands/keys = the CRC-valid hypothesis if one exists, otherwise
+  the highest-confidence one (a CRC-failing hypothesis with a higher confidence
+  never beats a CRC-valid one).
 
 A compatible implementation reproduces `detected`, `confidence`, `ber`,
 and `recoveredPayloadId` exactly for any given WAV and key.
