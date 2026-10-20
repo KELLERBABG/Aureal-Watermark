@@ -2,7 +2,7 @@
 // auralwatermark — Desktop App & CLI Suite for Aureal Watermark.
 
 import { argv, exit } from "node:process";
-import { spawn, exec, execSync } from "node:child_process";
+import { spawn, execFile, execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, unlinkSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
@@ -14,7 +14,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 import { getLicenseStatus, activatePolarKey, clearLocalLicense, loadLocalLicense } from "../src/license.js";
-import { generateForensicReport, formatForensicReportText } from "../src/report.js";
+import { generateForensicReport, formatForensicReportText, verifyForensicReport } from "../src/report.js";
 
 const HELP = `Aureal Watermark v0.2.7 — Audio watermarking for anti-theft and AI detection
 
@@ -41,7 +41,11 @@ Command Line Interface:
       auralwatermark license <POLAR_KEY>          Activate commercial license (offline ready)
       auralwatermark license --remove             Deactivate / remove local license
 
-Exit codes: 0 success/detected · 1 not detected · 2 error`;
+  auralwatermark verify-report <proof.json> [--key secret]
+      Recompute the HMAC seal of a report produced by --report and confirm
+      that the report body (hashes, verdict, payload ID, metrics) is unmodified.
+
+Exit codes: 0 success/detected/report valid · 1 not detected/report invalid · 2 error`;
 
 function parseArgs(rest) {
   const pos = [];
@@ -108,8 +112,15 @@ function adaptHtmlForOffline(html) {
   // 2. Homepage link: href="/" cannot resolve offline -> stay on this page.
   html = html.replace(/(href\s*=\s*")(\/)("|')/g, "$1#$3");
 
-  // 3. Remaining site-absolute links (docs, legal, verifier, asset favicons)
-  //    have no offline equivalent. Point them at the upstream site so the
+  // 3. Asset references (`src="/assets/…"`) ARE available offline: writeEmbeddedIcons()
+  //    places them in ./assets/ next to the page. Strip the leading slash so they
+  //    resolve relative to the file:// document instead of the filesystem root.
+  //    This is what makes the offline MP3 encoder (lame.min.js) and the DSP engine
+  //    (aureal-engine.js) actually load in the Desktop Studio.
+  html = html.replace(/(\bsrc\s*=\s*")\/((?:assets\/)[^"']*)("|')/g, "$1$2$3");
+
+  // 4. Remaining site-absolute links (docs, legal, verifier, asset favicons that are
+  //    not copied) have no offline equivalent. Point them at the upstream site so the
   //    user gets the real page instead of a file:// error. If no site URL is
   //    configured, strip the href so they render as inert text.
   const siteBase = process.env.AUREAL_SITE_BASE_URL;
@@ -169,7 +180,7 @@ function getPricingHtml() {
 
 function hasFfmpeg() {
   try {
-    execSync("ffmpeg -version", { stdio: "ignore" });
+    execFileSync(process.env.FFMPEG_BIN || "ffmpeg", ["-version"], { stdio: "ignore", timeout: 15000 });
     return true;
   } catch {
     return false;
@@ -189,9 +200,10 @@ async function loadAudioInput(filePath) {
     }
     const tempWav = join(tmpdir(), `aureal-in-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
     try {
-      execSync(`ffmpeg -hide_banner -loglevel error -y -i "${filePath}" -c:a pcm_s16le "${tempWav}"`, {
-        stdio: ["ignore", "pipe", "pipe"]
-      });
+      // execFileSync: no shell, so paths containing quotes/shell metacharacters are inert.
+      execFileSync(process.env.FFMPEG_BIN || "ffmpeg", [
+        "-hide_banner", "-loglevel", "error", "-y", "-i", filePath, "-c:a", "pcm_s16le", tempWav,
+      ], { stdio: ["ignore", "pipe", "pipe"], timeout: 10 * 60 * 1000 });
       const wav = await readWavFile(tempWav);
       return {
         wav,
@@ -223,23 +235,22 @@ async function saveAudioOutput(outputPath, pcmSamples, fmt, bitDepth) {
   const tempWav = join(tmpdir(), `aureal-out-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
   try {
     await writeWavFile(tempWav, pcmSamples, { sampleRate: fmt.sampleRate, channels: fmt.channels, bitDepth });
-    let codecArgs = "";
-    if (ext === "mp3") {
-      codecArgs = "-c:a libmp3lame -b:a 320k";
-    } else if (ext === "flac") {
-      codecArgs = "-c:a flac";
-    } else if (ext === "aac" || ext === "m4a") {
-      codecArgs = "-c:a aac -b:a 256k";
-    } else if (ext === "ogg") {
-      codecArgs = "-c:a libvorbis -q:a 8";
-    } else if (ext === "opus") {
-      codecArgs = "-c:a libopus -b:a 192k";
-    } else if (ext === "aiff" || ext === "aif") {
-      codecArgs = "-c:a pcm_s24be";
-    }
-    execSync(`ffmpeg -hide_banner -loglevel error -y -i "${tempWav}" ${codecArgs} "${outputPath}"`, {
-      stdio: ["ignore", "pipe", "pipe"]
-    });
+    const codecs = {
+      mp3: ["-c:a", "libmp3lame", "-b:a", "320k"],
+      flac: ["-c:a", "flac"],
+      aac: ["-c:a", "aac", "-b:a", "256k"],
+      m4a: ["-c:a", "aac", "-b:a", "256k"],
+      ogg: ["-c:a", "libvorbis", "-q:a", "8"],
+      opus: ["-c:a", "libopus", "-b:a", "192k"],
+      aiff: ["-c:a", "pcm_s24be"],
+      aif: ["-c:a", "pcm_s24be"],
+    };
+    const codecArgs = codecs[ext];
+    if (!codecArgs) throw new Error(`Unsupported output extension '.${ext}'.`);
+    // execFileSync: no shell, so the output path cannot inject commands.
+    execFileSync(process.env.FFMPEG_BIN || "ffmpeg", [
+      "-hide_banner", "-loglevel", "error", "-y", "-i", tempWav, ...codecArgs, outputPath,
+    ], { stdio: ["ignore", "pipe", "pipe"], timeout: 10 * 60 * 1000 });
   } finally {
     try { unlinkSync(tempWav); } catch {}
   }
@@ -275,6 +286,10 @@ function writeEmbeddedIcons(targetDir) {
         }
         if (existsSync(join(c, "lame.min.js"))) {
           copyFileSync(join(c, "lame.min.js"), join(assetsDir, "lame.min.js"));
+        }
+        // The Studio page loads its DSP engine from ./assets/aureal-engine.js.
+        if (existsSync(join(c, "aureal-engine.js"))) {
+          copyFileSync(join(c, "aureal-engine.js"), join(assetsDir, "aureal-engine.js"));
         }
         break;
       } catch {}
@@ -363,14 +378,12 @@ function launchDesktopApp() {
     }
   }
 
-  // Universal browser fallback
-  const opener =
-    process.platform === "darwin"
-      ? "open"
-      : process.platform === "win32"
-      ? "start"
-      : "xdg-open";
-  exec(`${opener} "${fileUrl}"`);
+  // Universal browser fallback (execFile: no shell interpretation of the path)
+  if (process.platform === "win32") {
+    execFile("cmd", ["/d", "/c", "start", "", fileUrl]);
+  } else {
+    execFile(process.platform === "darwin" ? "open" : "xdg-open", [fileUrl]);
+  }
 }
 
 async function main() {
@@ -436,9 +449,13 @@ async function main() {
       const ms = Date.now() - t0;
 
       const peakDb = (20 * Math.log10(meta.peakWatermark + 1e-12)).toFixed(1);
-      const bandStr = Array.isArray(meta.bands)
-        ? `dual (${meta.bands.map((b) => `${b.lowHz >= 14000 ? "high" : "mid"} ${b.lowHz / 1000}-${b.highHz / 1000} kHz`).join(" + ")})`
-        : `${meta.band.lowHz / 1000}-${meta.band.highHz / 1000} kHz`;
+      const fmtBand = (b) =>
+        `${b.lowHz >= 14000 ? "high" : "mid"} ${(b.lowHz / 1000).toFixed(1).replace(/\.0$/, "")}-${(b.highHz / 1000).toFixed(1).replace(/\.0$/, "")} kHz`;
+      const bandStr = Array.isArray(meta.bands) && meta.bands.length > 1
+        ? `dual (${meta.bands.map(fmtBand).join(" + ")})`
+        : Array.isArray(meta.bands) && meta.bands.length === 1
+          ? `${meta.bands[0].lowHz}-${meta.bands[0].highHz} Hz`
+          : `${meta.band.lowHz}-${meta.band.highHz} Hz`;
       const lic = getLicenseStatus();
       const licenseBadge = lic.isLicensed ? `[Commercial Pro: ${lic.customer}]` : `[Community Evaluation]`;
       console.log(`embed: id=${payloadId} key='${meta.key}' strength=${strength} -> ${out} ${licenseBadge}`);
@@ -523,6 +540,26 @@ async function main() {
     } finally {
       cleanup();
     }
+  }
+
+  if (cmd === "verify-report") {
+    const file = pos[0];
+    if (!file) die("verify-report requires a path: auralwatermark verify-report proof.json [--key secret]");
+    if (!existsSync(file)) die(`report not found: ${file}`);
+    let report;
+    try {
+      report = JSON.parse(readFileSync(file, "utf8"));
+    } catch (err) {
+      die(`cannot parse report '${file}': ${err.message}`);
+    }
+    const res = verifyForensicReport(report, { secret: key });
+    console.log(`verify-report: ${file}`);
+    console.log(`  schema:  ${report.schemaVersion ?? "unknown"}`);
+    console.log(`  engine:  ${report.engine ? `${report.engine.name} v${report.engine.version}` : "unknown"}`);
+    console.log(`  verdict: ${res.valid ? "SEAL VALID" : "SEAL INVALID"}`);
+    console.log(`  detail:  ${res.reason}`);
+    process.exitCode = res.valid ? 0 : 1;
+    return;
   }
 
   if (cmd === "license") {

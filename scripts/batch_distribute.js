@@ -19,7 +19,6 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { readWavFile, writeWavFile } from "../src/wav.js";
 import { embedWatermark } from "../src/embed.js";
-import { generateTardosCodebook } from "../src/tardos.js";
 
 function printHelp() {
   console.log(`
@@ -131,6 +130,7 @@ async function main() {
   const masterBase = path.basename(masterPath, path.extname(masterPath));
 
   const manifest = {
+    schema: "aureal-recipients/1",
     masterFile: path.basename(masterPath),
     masterSampleRate: wav.sampleRate,
     masterChannels: wav.channels,
@@ -138,21 +138,12 @@ async function main() {
     generatedAt: new Date().toISOString(),
     band,
     strength,
-    tardos: null,
+    // The watermark key is required to re-derive the spreading sequence when a leak is
+    // audited. This manifest is the distributor's PRIVATE mapping file: anyone who holds
+    // it can embed a matching ID, so treat it like the promos themselves.
+    key: key ?? null,
+    keyDefault: key ? false : true,
     recipients: []
-  };
-
-  // Generate Tardos anti-collusion codebook
-  const tardosScheme = generateTardosCodebook({
-    numRecipients: recipientNames.length,
-    codeLength: 48,
-    maxCoalition: Math.min(5, recipientNames.length),
-    seedKey: key || "tardos-seed-" + path.basename(masterPath),
-  });
-  manifest.tardos = {
-    biases: tardosScheme.biases,
-    cutoff: tardosScheme.cutoff,
-    codeLength: tardosScheme.codeLength,
   };
 
   console.log(`Generating individually tagged audio copies:\n`);
@@ -189,7 +180,6 @@ async function main() {
       name,
       filename: outFilename,
       sha256: hash,
-      tardosCodeword: Array.from(tardosScheme.codebook[i]),
     });
 
     console.log(`DONE -> ${outFilename}`);
@@ -204,7 +194,11 @@ async function main() {
   console.log(`======================================================`);
   console.log(`Manifest created: ${manifestPath}`);
   console.log(`\nIf a copy leaks online, identify the source with:`);
-  console.log(`  node aureal-watermark.cjs detect leaked_audio.wav --json\n`);
+  console.log(`  node scripts/audit_leak.js leaked_audio.wav --manifest ${manifestPath}\n`);
+  console.log(`NOTE: this manifest maps IDs to recipients and records the watermark key.`);
+  console.log(`Keep it private — treating it as public gives away the whole distribution.`);
+  console.log(`NOTE: an attacker who averages copies from several recipients can defeat`);
+  console.log(`single-ID recovery; collusion resistance is not implemented.\n`);
 }
 
 main().catch((err) => {

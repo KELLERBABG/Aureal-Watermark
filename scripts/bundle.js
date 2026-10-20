@@ -42,6 +42,8 @@ const rawIconIcoBase64 = JSON.stringify(readFileSync("assets/icon.ico").toString
 const rawIconPngBase64 = JSON.stringify(readFileSync("assets/icon.png").toString("base64"));
 const rawIconSvgBase64 = JSON.stringify(readFileSync("assets/icon.svg").toString("base64"));
 const rawFaviconSvgBase64 = JSON.stringify(readFileSync("assets/favicon.svg").toString("base64"));
+const rawEngineBase64 = JSON.stringify(readFileSync("assets/aureal-engine.js").toString("base64"));
+const rawLameBase64 = JSON.stringify(readFileSync("assets/lame.min.js").toString("base64"));
 
 cliCode = cliCode.replace(
   /function getStudioHtml\(\)\s*{[\s\S]*?return `[\s\S]*?`;\s*}/,
@@ -70,6 +72,9 @@ cliCode = cliCode.replace(
     writeFileSync(join(assetsDir, "icon.svg"), iconSvgBuf);
     writeFileSync(join(assetsDir, "favicon.svg"), svgBuf);
     writeFileSync(join(assetsDir, "logo.svg"), iconSvgBuf);
+    // The offline Studio loads its DSP engine and MP3 encoder from ./assets/.
+    writeFileSync(join(assetsDir, "aureal-engine.js"), Buffer.from(${rawEngineBase64}, "base64"));
+    writeFileSync(join(assetsDir, "lame.min.js"), Buffer.from(${rawLameBase64}, "base64"));
   } catch {}
 }`
 );
@@ -82,6 +87,7 @@ const os = require("node:os");
 const { spawn, exec, execSync } = require("node:child_process");
 const { createServer } = require("node:http");
 const { join, dirname } = require("node:path");
+const path = require("node:path");
 const { createHash, createHmac } = require("node:crypto");
 
 const { argv, exit, stdin, stdout } = process;

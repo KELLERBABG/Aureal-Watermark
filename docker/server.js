@@ -1,25 +1,44 @@
 // docker/server.js — High-performance, zero-dependency HTTP REST Microservice for Aureal Watermark
+//
+// SECURITY: every external process is spawned with execFileSync(program, args[]) so no
+// caller-controlled value is ever parsed by a shell. Caller-supplied output formats are
+// validated against OUTPUT_FORMATS before use.
 import { createServer } from "node:http";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { writeFileSync, readFileSync, unlinkSync, existsSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 
-import { embedWatermark } from "../src/embed.js";
+import { embedWatermark, validateFmt } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
-import { parseWav, writeWav, WavError } from "../src/wav.js";
+import { parseWav, writeWav } from "../src/wav.js";
 import { generateForensicReport, formatForensicReportText } from "../src/report.js";
-import { DEFAULT_BAND } from "../src/signal.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
 const MAX_BODY_BYTES = (Number(process.env.MAX_BODY_SIZE_MB) || 100) * 1024 * 1024;
+const FFMPEG_TIMEOUT_MS = Number(process.env.FFMPEG_TIMEOUT_MS) || 120_000;
+const FFMPEG_BIN = process.env.FFMPEG_BIN || "ffmpeg";
+const CORS_ALLOW_HEADERS =
+  "Content-Type, Authorization, X-Aureal-Payload-Id, X-Aureal-Key, X-Aureal-Strength, X-Aureal-Band, X-Aureal-Format, X-Aureal-Report";
+
+/** Output container allow-list. Anything else is rejected with 400. */
+export const OUTPUT_FORMATS = Object.freeze(["wav", "mp3", "flac", "aac", "m4a", "ogg"]);
+
+/** Error carrying the HTTP status the handler should return. */
+export class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
 
 let cachedFfmpeg = null;
 export function hasFfmpeg() {
   if (cachedFfmpeg !== null) return cachedFfmpeg;
   try {
-    execSync("ffmpeg -version", { stdio: "ignore" });
+    execFileSync(FFMPEG_BIN, ["-version"], { stdio: "ignore", timeout: 15_000 });
     cachedFfmpeg = true;
   } catch {
     cachedFfmpeg = false;
@@ -28,20 +47,35 @@ export function hasFfmpeg() {
 }
 
 /**
+ * Normalise a caller-supplied output format. Returns a member of OUTPUT_FORMATS or null.
+ * Only this allow-list value is ever used to build a filename or an ffmpeg argument.
+ */
+export function normalizeOutputFormat(value) {
+  const raw = String(value ?? "wav").trim().toLowerCase().replace(/^\./, "");
+  return OUTPUT_FORMATS.includes(raw) ? raw : null;
+}
+
+/**
  * Transcode arbitrary audio buffer to in-memory 16-bit PCM WAV.
  */
 export function transcodeToWavBuffer(inputBuffer, ext = ".audio") {
   if (!hasFfmpeg()) {
-    throw new Error("FFmpeg is required to process compressed audio formats in this microservice.");
+    throw new HttpError(415, "FFmpeg is required to process compressed audio formats in this microservice.");
   }
   const id = randomBytes(8).toString("hex");
-  const tempIn = join(tmpdir(), `aureal_srv_in_${id}${ext}`);
+  const safeExt = /^\.[a-z0-9]{1,8}$/.test(String(ext)) ? String(ext) : ".audio";
+  const tempIn = join(tmpdir(), `aureal_srv_in_${id}${safeExt}`);
   const tempOut = join(tmpdir(), `aureal_srv_out_${id}.wav`);
 
   try {
     writeFileSync(tempIn, inputBuffer);
-    execSync(`ffmpeg -y -v error -i "${tempIn}" -vn -acodec pcm_s16le "${tempOut}"`, { stdio: "pipe" });
+    execFileSync(FFMPEG_BIN, ["-y", "-v", "error", "-i", tempIn, "-vn", "-acodec", "pcm_s16le", tempOut], {
+      stdio: "pipe",
+      timeout: FFMPEG_TIMEOUT_MS,
+    });
     return readFileSync(tempOut);
+  } catch (err) {
+    throw new HttpError(415, `Audio input could not be decoded: ${err.message.split("\n")[0]}`);
   } finally {
     try { if (existsSync(tempIn)) unlinkSync(tempIn); } catch {}
     try { if (existsSync(tempOut)) unlinkSync(tempOut); } catch {}
@@ -49,41 +83,42 @@ export function transcodeToWavBuffer(inputBuffer, ext = ".audio") {
 }
 
 /**
- * Transcode WAV buffer to target compressed container (e.g. mp3, flac, aac).
+ * Transcode WAV buffer to target compressed container. `targetFormat` is validated
+ * against OUTPUT_FORMATS; unknown values throw HttpError(400).
  */
 export function transcodeFromWavBuffer(wavBuffer, targetFormat = "wav") {
-  const fmt = targetFormat.toLowerCase().replace(/^\./, "");
+  const fmt = normalizeOutputFormat(targetFormat);
+  if (!fmt) {
+    throw new HttpError(400, `Unsupported output format. Use one of: ${OUTPUT_FORMATS.join(", ")}.`);
+  }
   if (fmt === "wav") return { buffer: wavBuffer, contentType: "audio/wav" };
 
   if (!hasFfmpeg()) {
-    throw new Error(`FFmpeg is required to transcode output to '${fmt}'.`);
+    throw new HttpError(501, `FFmpeg is required to transcode output to '${fmt}'.`);
   }
 
   const id = randomBytes(8).toString("hex");
   const tempWav = join(tmpdir(), `aureal_srv_trans_${id}.wav`);
   const tempOut = join(tmpdir(), `aureal_srv_trans_${id}.${fmt}`);
 
+  const CODECS = {
+    mp3: ["-c:a", "libmp3lame", "-b:a", "320k", "audio/mpeg"],
+    flac: ["-c:a", "flac", "audio/flac"],
+    aac: ["-c:a", "aac", "-b:a", "256k", "audio/aac"],
+    m4a: ["-c:a", "aac", "-b:a", "256k", "audio/mp4"],
+    ogg: ["-c:a", "libvorbis", "-q:a", "7", "audio/ogg"],
+  };
+  const [codecArgs, contentType] = [CODECS[fmt].slice(0, -1), CODECS[fmt].slice(-1)[0]];
+
   try {
     writeFileSync(tempWav, wavBuffer);
-    let ffmpegArgs = `-y -v error -i "${tempWav}" -vn`;
-    let contentType = "application/octet-stream";
-
-    if (fmt === "mp3") {
-      ffmpegArgs += " -c:a libmp3lame -b:a 320k";
-      contentType = "audio/mpeg";
-    } else if (fmt === "flac") {
-      ffmpegArgs += " -c:a flac";
-      contentType = "audio/flac";
-    } else if (fmt === "aac" || fmt === "m4a") {
-      ffmpegArgs += " -c:a aac -b:a 256k";
-      contentType = fmt === "aac" ? "audio/aac" : "audio/mp4";
-    } else if (fmt === "ogg") {
-      ffmpegArgs += " -c:a libvorbis -q:a 7";
-      contentType = "audio/ogg";
-    }
-
-    execSync(`ffmpeg ${ffmpegArgs} "${tempOut}"`, { stdio: "pipe" });
+    execFileSync(FFMPEG_BIN, ["-y", "-v", "error", "-i", tempWav, "-vn", ...codecArgs, tempOut], {
+      stdio: "pipe",
+      timeout: FFMPEG_TIMEOUT_MS,
+    });
     return { buffer: readFileSync(tempOut), contentType };
+  } catch (err) {
+    throw new HttpError(500, `Output transcode to '${fmt}' failed: ${err.message.split("\n")[0]}`);
   } finally {
     try { if (existsSync(tempWav)) unlinkSync(tempWav); } catch {}
     try { if (existsSync(tempOut)) unlinkSync(tempOut); } catch {}
@@ -92,12 +127,19 @@ export function transcodeFromWavBuffer(wavBuffer, targetFormat = "wav") {
 
 function parseBandParam(band) {
   if (!band) return "dual";
-  if (band === "high" || band === "mid" || band === "dual" || band === "auto") return band;
-  const parts = String(band).split(":").map(Number);
-  if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
+  if (typeof band === "object") {
+    const low = Number(band.lowHz);
+    const high = Number(band.highHz);
+    if (Number.isFinite(low) && Number.isFinite(high) && high > low && low > 0) return { lowHz: low, highHz: high };
+    throw new HttpError(400, "band object must be {lowHz, highHz} with 0 < lowHz < highHz.");
+  }
+  const s = String(band).trim().toLowerCase();
+  if (s === "high" || s === "mid" || s === "dual" || s === "auto") return s;
+  const parts = s.split(":").map(Number);
+  if (parts.length === 2 && parts.every(Number.isFinite) && parts[0] > 0 && parts[1] > parts[0]) {
     return { lowHz: parts[0], highHz: parts[1] };
   }
-  return "dual";
+  throw new HttpError(400, "band must be high|mid|dual|auto or lowHz:highHz (0 < low < high).");
 }
 
 function sendJson(res, statusCode, data) {
@@ -107,26 +149,51 @@ function sendJson(res, statusCode, data) {
     "Content-Length": Buffer.byteLength(body),
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Aureal-Payload-Id, X-Aureal-Key, X-Aureal-Strength, X-Aureal-Band, X-Aureal-Format"
+    "Access-Control-Allow-Headers": CORS_ALLOW_HEADERS
   });
   res.end(body);
 }
 
 function readRequestBody(req) {
   return new Promise((resolve, reject) => {
+    const declared = Number(req.headers["content-length"]);
+    if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) {
+      reject(new HttpError(413, `Payload exceeds maximum size of ${MAX_BODY_BYTES / (1024 * 1024)}MB`));
+      return;
+    }
     const chunks = [];
     let bytes = 0;
+    let settled = false;
     req.on("data", (chunk) => {
+      if (settled) return;
       bytes += chunk.length;
       if (bytes > MAX_BODY_BYTES) {
-        reject(new Error(`Payload exceeds maximum size of ${MAX_BODY_BYTES / (1024 * 1024)}MB`));
+        settled = true;
+        chunks.length = 0;
+        req.pause();
+        reject(new HttpError(413, `Payload exceeds maximum size of ${MAX_BODY_BYTES / (1024 * 1024)}MB`));
       } else {
         chunks.push(chunk);
       }
     });
-    req.on("end", () => resolve(Buffer.concat(chunks)));
-    req.on("error", reject);
+    req.on("end", () => { if (!settled) { settled = true; resolve(Buffer.concat(chunks)); } });
+    req.on("error", (err) => { if (!settled) { settled = true; reject(err); } });
   });
+}
+
+function parseJsonBody(rawBody) {
+  try {
+    return JSON.parse(rawBody.toString("utf8"));
+  } catch {
+    throw new HttpError(400, "Request body is not valid JSON.");
+  }
+}
+
+function numberParam(raw, name) {
+  if (raw === undefined || raw === null || raw === "") return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) throw new HttpError(400, `'${name}' must be a number, got '${raw}'.`);
+  return n;
 }
 
 export function createAurealServer(options = {}) {
@@ -138,7 +205,7 @@ export function createAurealServer(options = {}) {
       res.writeHead(204, {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Aureal-Payload-Id, X-Aureal-Key, X-Aureal-Strength, X-Aureal-Band, X-Aureal-Format"
+        "Access-Control-Allow-Headers": CORS_ALLOW_HEADERS
       });
       return res.end();
     }
@@ -189,14 +256,14 @@ export function createAurealServer(options = {}) {
 
         if (contentType.includes("application/json")) {
           isJsonMode = true;
-          const json = JSON.parse(rawBody.toString("utf8"));
+          const json = parseJsonBody(rawBody);
           if (!json.audioBase64) {
             return sendJson(res, 400, { error: "Missing required 'audioBase64' in JSON payload." });
           }
-          audioBytes = Buffer.from(json.audioBase64, "base64");
+          audioBytes = Buffer.from(String(json.audioBase64), "base64");
           if (json.id !== undefined) payloadId = Number(json.id);
-          if (json.key !== undefined) key = json.key;
-          if (json.strength !== undefined) strength = Number(json.strength);
+          if (json.key !== undefined) key = String(json.key);
+          if (json.strength !== undefined) strength = numberParam(json.strength, "strength");
           if (json.band !== undefined) bandParam = json.band;
           if (json.format !== undefined) outputFormat = json.format;
         }
@@ -204,18 +271,23 @@ export function createAurealServer(options = {}) {
         if (payloadId === null || !Number.isInteger(payloadId) || payloadId < 0 || payloadId > 0xFFFFFFFF) {
           return sendJson(res, 400, { error: "Query parameter, header, or JSON field 'id' must be an unsigned 32-bit integer (0..4294967295)." });
         }
+        if (!Number.isFinite(strength)) {
+          return sendJson(res, 400, { error: "'strength' must be a number between 0.01 and 1." });
+        }
+        const outFormat = normalizeOutputFormat(outputFormat);
+        if (!outFormat) {
+          return sendJson(res, 400, { error: `Unsupported output format. Use one of: ${OUTPUT_FORMATS.join(", ")}.` });
+        }
 
         // Parse input to PCM
         let wav;
         try {
           wav = parseWav(audioBytes);
         } catch (err) {
-          // Fallback to FFmpeg transcoding
           if (hasFfmpeg()) {
-            const wavBuf = transcodeToWavBuffer(audioBytes);
-            wav = parseWav(wavBuf);
+            wav = parseWav(transcodeToWavBuffer(audioBytes));
           } else {
-            return sendJson(res, 400, { error: `Audio input could not be parsed: ${err.message}` });
+            throw new HttpError(400, `Audio input could not be parsed: ${err.message}`);
           }
         }
 
@@ -230,19 +302,20 @@ export function createAurealServer(options = {}) {
         const markedWavBuffer = writeWav(markedSamples, {
           sampleRate: wav.sampleRate,
           channels: wav.channels,
-          bitDepth: wav.bitDepth || 16
+          bitDepth: wav.bitsPerSample === 24 ? 24 : wav.bitsPerSample === 32 ? 32 : 16
         });
 
-        const { buffer: finalBuffer, contentType: outContentType } = transcodeFromWavBuffer(markedWavBuffer, outputFormat);
+        const { buffer: finalBuffer, contentType: outContentType } = transcodeFromWavBuffer(markedWavBuffer, outFormat);
 
         if (isJsonMode) {
           return sendJson(res, 200, {
             success: true,
             payloadId,
-            format: outputFormat,
+            format: outFormat,
             durationSec: wav.durationSec,
             sampleRate: wav.sampleRate,
             channels: wav.channels,
+            bitDepth: wav.bitsPerSample,
             audioBase64: finalBuffer.toString("base64"),
             metadata: markedSamples.watermarkMeta || null
           });
@@ -271,15 +344,19 @@ export function createAurealServer(options = {}) {
         let withReport = query.report === "true" || req.headers["x-aureal-report"] === "true";
 
         if (contentType.includes("application/json")) {
-          const json = JSON.parse(rawBody.toString("utf8"));
+          const json = parseJsonBody(rawBody);
           if (!json.audioBase64) {
             return sendJson(res, 400, { error: "Missing required 'audioBase64' in JSON payload." });
           }
-          audioBytes = Buffer.from(json.audioBase64, "base64");
+          audioBytes = Buffer.from(String(json.audioBase64), "base64");
           if (json.id !== undefined) expectedId = Number(json.id);
-          if (json.key !== undefined) key = json.key;
+          if (json.key !== undefined) key = String(json.key);
           if (json.band !== undefined) bandParam = json.band;
           if (json.report !== undefined) withReport = Boolean(json.report);
+        }
+
+        if (expectedId !== null && (!Number.isInteger(expectedId) || expectedId < 0 || expectedId > 0xFFFFFFFF)) {
+          return sendJson(res, 400, { error: "'id' must be an unsigned 32-bit integer (0..4294967295)." });
         }
 
         let wav;
@@ -287,10 +364,9 @@ export function createAurealServer(options = {}) {
           wav = parseWav(audioBytes);
         } catch (err) {
           if (hasFfmpeg()) {
-            const wavBuf = transcodeToWavBuffer(audioBytes);
-            wav = parseWav(wavBuf);
+            wav = parseWav(transcodeToWavBuffer(audioBytes));
           } else {
-            return sendJson(res, 400, { error: `Audio input could not be parsed: ${err.message}` });
+            throw new HttpError(400, `Audio input could not be parsed: ${err.message}`);
           }
         }
 
@@ -333,7 +409,13 @@ export function createAurealServer(options = {}) {
       return sendJson(res, 404, { error: `Endpoint not found: ${req.method} ${pathname}` });
 
     } catch (err) {
-      return sendJson(res, 500, { error: err.message || "Internal server error" });
+      const status = err instanceof HttpError
+        ? err.status
+        : err instanceof RangeError
+          ? 400 // e.g. "audio too short for watermarking"
+          : 500;
+      if (!res.headersSent) return sendJson(res, status, { error: err.message || "Internal server error" });
+      try { res.end(); } catch {}
     }
   });
 

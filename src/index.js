@@ -18,6 +18,8 @@ export {
 } from "./license.js";
 export {
   generateForensicReport,
+  verifyForensicReport,
+  canonicalReportBody,
   formatForensicReportText,
   REPORT_SCHEMA_VERSION,
   ENGINE_NAME,

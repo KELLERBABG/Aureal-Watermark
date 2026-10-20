@@ -16,10 +16,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readWavFile } from "../src/wav.js";
 import { detectWatermark } from "../src/detect.js";
-import { accuseCoalition } from "../src/tardos.js";
 
 function printHelp() {
   console.log(`
@@ -49,9 +48,13 @@ function decodeAudioToWav(inputPath) {
   // Check ffmpeg for compressed audio (MP3, AAC, M4A, etc.)
   const tempWav = path.join(os.tmpdir(), `aureal_audit_${Date.now()}_${Math.random().toString(36).slice(2)}.wav`);
   try {
-    execSync(`ffmpeg -v error -y -i "${inputPath}" -acodec pcm_s16le -ar 44100 "${tempWav}"`, { stdio: "pipe" });
+    // execFileSync: no shell, so paths with quotes/metacharacters cannot inject commands.
+    execFileSync(process.env.FFMPEG_BIN || "ffmpeg", [
+      "-v", "error", "-y", "-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", tempWav,
+    ], { stdio: "pipe", timeout: 10 * 60 * 1000 });
     return { wavPath: tempWav, isTemp: true };
   } catch (err) {
+    try { fs.unlinkSync(tempWav); } catch (_) {}
     throw new Error(`Failed to decode non-WAV audio (${ext}). Ensure ffmpeg is installed, or convert to WAV first.`);
   }
 }
@@ -140,19 +143,6 @@ async function main() {
   const recoveredId = res.recoveredPayloadId;
   const matchedRecipient = recoveredId != null ? idMap.get(recoveredId) : null;
 
-  // Run Tardos anti-collusion accusation if manifest has Tardos metadata
-  let tardosReport = null;
-  if (manifest.tardos && res.details && res.details.softSymbols) {
-    const recipientsWithCodewords = manifest.recipients.filter((r) => r.tardosCodeword);
-    if (recipientsWithCodewords.length > 0) {
-      tardosReport = accuseCoalition(
-        res.details.softSymbols,
-        recipientsWithCodewords.map((r) => ({ id: r.id, name: r.name, codeword: r.tardosCodeword })),
-        manifest.tardos.biases
-      );
-    }
-  }
-
   if (flags.json) {
     console.log(JSON.stringify({
       auditTarget: audioFile,
@@ -163,26 +153,27 @@ async function main() {
       },
       detection: res,
       leakMatch: matchedRecipient || null,
-      tardosCollusion: tardosReport,
       verdict: matchedRecipient
         ? `Audio leaked from recipient "${matchedRecipient.name}" (ID #${matchedRecipient.id})`
-        : (tardosReport && tardosReport.isCollusion
-            ? `Collusion detected! Accused coalition: ${tardosReport.accused.map(a => a.name).join(", ")}`
-            : (res.detected ? "Watermark detected but ID not found in manifest" : "No watermark detected"))
+        : (res.detected ? "Watermark detected but ID not found in this manifest" : "No watermark detected")
     }, null, 2));
-    process.exit(res.detected || (tardosReport && tardosReport.accused.length > 0) ? 0 : 1);
+    process.exit(res.detected ? 0 : 1);
   }
 
   console.log(`\n======================================================`);
-  console.log(`AUREAL FORENSIC AUDIT REPORT`);
+  console.log(`AUREAL LEAK AUDIT REPORT`);
   console.log(`======================================================`);
   console.log(`Target File:      ${audioFile}`);
   console.log(`Audio Format:     ${wav.sampleRate} Hz, ${wav.channels}ch, ${wav.durationSec.toFixed(1)}s`);
 
-  if (!res.detected && (!tardosReport || tardosReport.accused.length === 0)) {
+  if (!res.detected) {
     console.log(`Status:           NO WATERMARK DETECTED`);
     console.log(`Confidence:       ${(res.confidence * 100).toFixed(1)}%`);
-    console.log(`======================================================\n`);
+    console.log(`======================================================`);
+    console.log(`No recoverable ID. Common causes: heavy processing, a different key,`);
+    console.log(`audio shorter than one frame, or a MIX/AVERAGE of several recipients'`);
+    console.log(`copies. Collusion resistance is NOT implemented — averaging copies can`);
+    console.log(`erase the ID entirely.\n`);
     process.exit(1);
   }
 
@@ -214,13 +205,9 @@ async function main() {
       console.log(`  Distributed At:   ${manifest.generatedAt}`);
     }
     console.log(`======================================================`);
-    console.log(`VERDICT: Leak traced directly to "${matchedRecipient.name}".\n`);
-  } else if (tardosReport && tardosReport.accused.length > 0) {
-    console.log(`COLLUSION ANALYSIS (Tardos Anti-Collusion Accuser):`);
-    console.log(`  Accused Coalition: ${tardosReport.accused.map(a => `"${a.name}" (score ${a.score.toFixed(2)})`).join(", ")}`);
-    console.log(`  Threshold:         ${tardosReport.threshold.toFixed(2)} (Population mean: ${tardosReport.meanScore.toFixed(2)})`);
-    console.log(`======================================================`);
-    console.log(`VERDICT: Multi-recipient collusion detected! Leaked via joint copies from: ${tardosReport.accused.map(a => a.name).join(" & ")}.\n`);
+    console.log(`VERDICT: Recovered ID matches recipient "${matchedRecipient.name}".`);
+    console.log(`         One of that recipient's copies was the source — or someone`);
+    console.log(`         re-used that ID. A match is not proof of who leaked it.\n`);
   } else {
     console.log(`MANIFEST LOOKUP:`);
     console.log(`  No recipient found in manifest matching ID #${recoveredId}.`);

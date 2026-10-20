@@ -12,9 +12,13 @@
   "scripts": {
     "test": "node --test",
     "demo": "node bin/auralwatermark.js",
-    "sync:site": "node scripts/sync-site.js",
-    "sync:site:check": "node scripts/sync-site.js --check",
+    "build:engine": "node scripts/build-engine.js",
+    "sync:site": "node scripts/sync-site.js && node scripts/build-engine.js",
+    "sync:site:check": "node scripts/sync-site.js --check && node scripts/build-engine.js --check",
     "bundle": "node scripts/bundle.js"
+  },
+  "devDependencies": {
+    "rcedit": "^4.0.1"
   },
   "keywords": [
     "audio",
@@ -43,8 +47,8 @@
   "files": [
     "src/",
     "bin/",
-    "demo/",
     "site/",
+    "assets/",
     "types/",
     "LICENSE.md",
     "README.md"

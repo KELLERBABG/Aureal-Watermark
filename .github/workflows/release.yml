@@ -41,6 +41,9 @@ jobs:
         with:
           node-version: 22.x
 
+      - name: Install build-only dependencies (rcedit)
+        run: npm install --no-audit --no-fund
+
       - name: Setup ffmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
         with:

@@ -70,24 +70,80 @@ function clampInt(v, lo, hi, name) {
   return Math.min(hi, Math.max(lo, Math.round(n)));
 }
 
+/**
+ * Resolve a band spec to concrete, Nyquist-safe low/high frequencies.
+ * Values are clamped into [1000 Hz, sampleRate/2 − 100 Hz].
+ */
 export function resolveBand(band, sampleRate) {
   const preset = band === "high" || band === "mid" ? bandPreset(band) : null;
-  const b = { ...DEFAULT_BAND, ...(preset || band || {}) };
-  let { lowHz, highHz } = b;
-  lowHz = clampInt(lowHz, 1000, sampleRate / 2 - 100, "band.lowHz");
-  highHz = clampInt(highHz, lowHz + 100, sampleRate / 2 - 100, "band.highHz");
+  const b = { ...DEFAULT_BAND, ...(preset || (band && typeof band === "object" ? band : {})) };
+  const limit = Math.floor(sampleRate / 2) - 100;
+  if (!Number.isFinite(limit) || limit < 1200) {
+    throw new RangeError(
+      `sampleRate ${sampleRate} Hz is too low for watermarking: need at least ~2.6 kHz (Nyquist must exceed 1.3 kHz)`
+    );
+  }
+  const lowHz = clampInt(b.lowHz, 1000, limit - 100, "band.lowHz");
+  const highHz = clampInt(b.highHz, lowHz + 100, limit, "band.highHz");
   return { lowHz, highHz, centerHz: (lowHz + highHz) / 2 };
 }
 
+const MIN_BAND_WIDTH = 200;
+
+/** True when a resolved band is wide enough to carry a signal and sits under Nyquist. */
+function usableBand(b, sampleRate) {
+  return b.highHz - b.lowHz >= MIN_BAND_WIDTH && b.highHz <= Math.floor(sampleRate / 2) - 100;
+}
+
+/**
+ * Choose a single wide band inside the available spectrum when a preset cannot fit
+ * under Nyquist (low sample rates such as 8 kHz or 16 kHz).
+ */
+function fallbackBand(sampleRate) {
+  const limit = Math.floor(sampleRate / 2) - 100;
+  const lowHz = Math.max(1000, Math.round(limit * 0.55));
+  const highHz = limit;
+  return { lowHz, highHz, centerHz: (lowHz + highHz) / 2 };
+}
+
+/**
+ * Resolve a band specification to the list of bands to embed/detect.
+ *
+ *  - "high"    → the high preset (or a wide fallback band if it cannot fit)
+ *  - "mid"     → the mid preset  (or a wide fallback band if it cannot fit)
+ *  - "dual"    → both presets that fit; if neither fits, one fallback band
+ *  - {lowHz, highHz} → exactly that band; throws if it cannot fit under Nyquist
+ *
+ * A band is never returned degenerate (lowHz === highHz), and the same list is
+ * never returned twice, so "dual" cannot silently double-embed one carrier.
+ */
 export function bandList(spec, sampleRate) {
-  if (spec === "high") {
-    return [resolveBand("high", sampleRate)];
+  if (spec && typeof spec === "object") {
+    if (!Number.isFinite(Number(spec.lowHz)) || !Number.isFinite(Number(spec.highHz))) {
+      throw new TypeError("band object requires numeric {lowHz, highHz}");
+    }
+    const band = resolveBand(spec, sampleRate);
+    if (!usableBand(band, sampleRate)) {
+      throw new RangeError(
+        `band ${spec.lowHz}-${spec.highHz} Hz does not fit below Nyquist for ${sampleRate} Hz ` +
+        `(usable range up to ${Math.floor(sampleRate / 2) - 100} Hz, minimum width ${MIN_BAND_WIDTH} Hz)`
+      );
+    }
+    return [band];
   }
-  if (spec === "mid") {
-    return [resolveBand("mid", sampleRate)];
+  if (spec === "high" || spec === "mid") {
+    const band = resolveBand(spec, sampleRate);
+    return [usableBand(band, sampleRate) ? band : fallbackBand(sampleRate)];
   }
-  // Default to dual-band for maximum lossy compression resilience (MP3/AAC/streaming)
-  return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
+  // Default and "auto"/"dual": every preset that actually fits at this rate.
+  const bands = [];
+  for (const name of ["high", "mid"]) {
+    const band = resolveBand(name, sampleRate);
+    if (usableBand(band, sampleRate) && !bands.some((b) => b.lowHz === band.lowHz && b.highHz === band.highHz)) {
+      bands.push(band);
+    }
+  }
+  return bands.length ? bands : [fallbackBand(sampleRate)];
 }
 
 export function deriveGeometry(sampleRate, perChannelSamples, opts = {}) {

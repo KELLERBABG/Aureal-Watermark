@@ -1,6 +1,18 @@
-// src/tardos.js — Tardos probabilistic anti-collusion fingerprinting & accusation engine.
-// Implements the Tardos (2003) & Skorić et al. (2008) symmetric fingerprinting code
-// to detect and pinpoint coalitions of recipients who average or splice copies together.
+// src/tardos.js — Tardos probabilistic fingerprinting code & accusation scorer.
+//
+// IMPORTANT SCOPE NOTE
+// --------------------
+// This module implements the *scoring half* of the Tardos (2003) / Skorić et al. (2008)
+// symmetric fingerprinting code: it can generate a codebook and score recipient
+// codewords against soft symbol observations. It is NOT wired to the audio signal:
+// embedWatermark() only ever embeds packCodeword(payloadId), so a Tardos codeword never
+// enters the carrier. To use this module you must supply your own signalling channel that
+// embeds a per-recipient codeword at the required length (Tardos needs m ≈ 20·c² symbols
+// for a coalition of c; the audio frame carries 48 symbol slots per ~1 s, which is far too
+// few for meaningful collusion security at c ≥ 3).
+//
+// Collusion is therefore a documented limitation of the watermark, not a protected threat:
+// averaging enough independently-tagged copies erases the recovered ID.
 
 import { makeRng } from "./signal.js";
 
