@@ -1344,8 +1344,8 @@ html { scroll-behavior: smooth; }
                 <label for="demo-band-select">Acoustic Carrier Band</label>
                 <select id="demo-band-select">
                   <option value="high" selected>High Band (17–19.5 kHz) &mdash; Archival &amp; Inaudible Master (0.0 dB BS.1116)</option>
-                  <option value="dual">Dual Band (8–19.5 kHz) &mdash; MP3 / AAC Transcode Resilient</option>
-                  <option value="mid">Mid Band (8–13 kHz) &mdash; Aggressive 64kbps Compression</option>
+                  <option value="dual">Dual Band (4.5–13.5 kHz & 17–19.5 kHz) &mdash; MP3 / AAC Transcode Resilient</option>
+                  <option value="mid">Mid Band (4.5–13.5 kHz) &mdash; Aggressive 64kbps Compression</option>
                 </select>
               </div>
 
@@ -2239,7 +2239,7 @@ Attribution: Illustrative sample output only; a watermark match does not by itse
 
             if (res.detected) {
               const bandLabel = res.bandUsed === 'mid' 
-                ? 'Mid Band (8–13 kHz, Compression Resilient)' 
+                ? 'Mid Band (4.5–13.5 kHz, Compression Resilient)' 
                 : (res.bandUsed === 'dual' 
                     ? 'Dual Band (Hybrid Multi-Tier)' 
                     : 'High Band (17–19.5 kHz, Ultrasonic Inaudible)');

@@ -13,8 +13,8 @@ Frequency (Hz)
 17.00 kHz ─────────────────────────────────────────────────────────────      (Near-ultrasonic, strictly inaudible)
           [ High-frequency air, harmonics, percussion sizzle ]
 13.00 kHz ─────────────────────────────────────────────────────────────
-          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- Mid Band DSSS (8.0–13.0 kHz)
- 8.00 kHz ─────────────────────────────────────────────────────────────      (A-weighted equal-loudness resilience)
+          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  <-- Mid Band DSSS (4.5–13.5 kHz)
+ 4.50 kHz ─────────────────────────────────────────────────────────────      (A-weighted equal-loudness resilience)
           [ Speech Formants, Vocals, Bass, Fundamentals: 20 Hz - 8 kHz ]   (Completely untouched)
  0.00 kHz ─────────────────────────────────────────────────────────────
 ```
@@ -25,7 +25,7 @@ Frequency (Hz)
 | :--- | :--- | :--- |
 | **Modulation Scheme** | Direct-Sequence Spread Spectrum (DSSS) | 48 BPSK symbols per repetition |
 | **Codeword Structure** | 32 data bits + 16-bit CRC-16/CCITT-FALSE | $2^{32} = 4,294,967,296$ unique IDs |
-| **Carrier Bands** | `High` (17.0–19.5 kHz, Ultrasonic)<br>`Mid` (8.0–13.0 kHz, A-Weighted)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
+| **Carrier Bands** | `High` (17.0–19.5 kHz, Ultrasonic)<br>`Mid` (4.5–13.5 kHz, A-Weighted)<br>`Dual` (Both simultaneously) | Configurable frequency bands for lossy compression survival |
 | **Window Shaping** | Continuous periodic Hann window | Zero DC offset, continuous phase transitions across chip boundaries |
 | **Dynamic Psychoacoustic Masking** | Continuous proportional RMS tracking | Carrier tracks local energy; nominal embedding target $\ge 32\text{--}36\text{ dB}$ below host audio, subject to source material and `strength` setting; muted on silence ($\le -54\text{ dBFS}$) |
 | **Headroom Protection** | True-Peak Limiter ($\le 0.995$) | Designed to keep superposition below clipping on maximized $0\text{ dBFS}$ masters |

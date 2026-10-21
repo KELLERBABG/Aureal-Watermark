@@ -43,7 +43,6 @@
   "files": [
     "src/",
     "bin/",
-    "demo/",
     "site/",
     "types/",
     "LICENSE.md",

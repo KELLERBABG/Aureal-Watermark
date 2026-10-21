@@ -96,7 +96,7 @@ Aureal-Watermark/
   * `hannWindow(n)`: Computes and caches a Hann window ($w[i] = 0.5 - 0.5 \cos(2\pi i / n)$) of length $n$ to guarantee smooth burst boundaries with zero transients.
   * `BAND_PRESETS`:
     * `high`: $17.0\text{ kHz} - 19.5\text{ kHz}$ (Center: $18.25\text{ kHz}$)
-    * `mid`: $8.0\text{ kHz} - 13.0\text{ kHz}$ (Center: $10.5\text{ kHz}$)
+    * `mid`: $4.5\text{ kHz} - 13.5\text{ kHz}$ (Center: $9.0\text{ kHz}$)
   * `deriveGeometry(sampleRate, perChannelSamples, opts)`:
     * Calculates slot length, chip length, frame length (~1.0s), and repetition count ($reps = \lfloor N / frameLen \rfloor$).
     * Ensures the embedder and detector construct bit-identical geometries.
@@ -240,7 +240,7 @@ Aureal-Watermark/
 3. Carrier Synthesis:
    • For each symbol slot (b = 0..47):
      - Generate 24 pseudo-random chips from seed `key|bit{b}`
-     - Multiply chips by Hann-windowed sine wave (f_center = 18.0 kHz / 10.5 kHz)
+     - Multiply chips by Hann-windowed sine wave (f_center = 18.25 kHz / 9.0 kHz)
      - Multiply slot by codeword symbol (+1 or -1)
    │
    ▼

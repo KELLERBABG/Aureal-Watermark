@@ -10,7 +10,7 @@
 
 With the proliferation of realistic voice-cloning models, deepfake audio and unauthorized voice scraping have become significant legal and commercial liabilities. High-profile podcast hosts, voice actors, musicians, and executives frequently find their voices cloned or leaked without consent. While regulatory frameworks like the EU AI Act mandate provenance transparency for synthetic media, this document describes one experimental approach to embedding identifiers; it does not authenticate a human creator or prove that a recording is original.
 
-Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across strictly near-ultrasonic bands (17.0–19.5 kHz) and A-weighted speech-masked mid-bands (8–13 kHz). The payload includes a CRC-16 checksum and uses repeated symbols and error correction. Recovery depends on audio content and transformations.
+Aureal Watermark embeds a 32-bit provenance tracking identifier directly into the audio waveform during recording, mastering, or distribution. The signal is modulated as a Direct-Sequence Spread Spectrum (DSSS) carrier across strictly near-ultrasonic bands (17.0–19.5 kHz) and A-weighted speech-masked mid-bands (4.5–13.5 kHz). The payload includes a CRC-16 checksum and uses repeated symbols and error correction. Recovery depends on audio content and transformations.
 
 Selected local `ffmpeg` fixtures exercise MP3/AAC transcodes and mismatched IDs. These tests do not guarantee recovery across all encoders, content, bitrates, or services.
 
@@ -49,7 +49,7 @@ For each symbol slot (24 chips), a Hann-windowed sinusoidal carrier burst at the
 | Mode | Carrier Band | Characteristics |
 | :--- | :--- | :--- |
 | `high` | 17.0–19.5 kHz | Places energy in a near-ultrasonic band; audibility and recovery depend on source material and playback equipment. |
-| `mid` | 8.0–13.0 kHz | Uses a mid-frequency band; recovery depends on the audio and the codec's frequency response. |
+| `mid` | 4.5–13.5 kHz | Uses a mid-frequency band; recovery depends on the audio and the codec's frequency response. |
 | `dual` | Both bands | Embeds in both configured bands; the detector scores the available bands. This does not guarantee recovery after processing. |
 
 In `dual` mode, the embedder scales each copy with configured attenuation to set $\times 0.7$ with A-weighted attenuation on the mid band to set configured band levels ($-51\text{--}-55\text{ dBFS}$ nominal level).

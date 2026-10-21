@@ -251,7 +251,7 @@ Aureal is exercised against a local adversarial fixture suite. Results are limit
 | **Stereo-to-Mono Downmix Fixture** | **YES** | Detected in the local fixture only. In-phase Mid component reconstructs with $+3\text{ dB}$ signal gain. |
 | **Short Snippet Crop (1.8s fixture)** | **Tested** | The local fixture passed; minimum reliable duration depends on band, sample rate, and audio content. |
 | **Playback Speed & Pitch Drift ($\pm1.0\%$)**<br>*(Analog tape wow/flutter, speed stretch)* | **YES** | Detected in local resampling fixtures; no general analog wow/flutter guarantee. |
-| **Low-Pass Filtering** | **Partial** | The local 16 kHz fixture passed; the 12 kHz and 7 kHz fixtures failed. Filtering below the watermark bands can erase detection data. |
+| **Low-Pass Filtering** | **Partial** | The local 16 kHz and 12 kHz fixtures passed; the 7 kHz fixture removed both bands. Filtering below the watermark bands can erase detection data. |
 | **High-Pass / Notch Fixtures (1 kHz / 18 kHz)** | **Tested** | The local synthetic fixtures passed; source-specific filtering can still remove the watermark. |
 | **Air-Gap Recording (Speaker to Mic)** | **Tested** | Detected in one local room-reverb simulation; this does not establish phone or room recording performance generally. |
 | **Extreme Overdrive (+12 dB hard clipping)** | **Tested** | Detected in the local synthetic fixture; results depend on content and processing. |

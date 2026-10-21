@@ -86,6 +86,7 @@ async function main() {
     if (raw.startsWith("[")) {
       try {
         const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) throw new Error("expected a JSON array");
         recipientNames = parsed.map((item) => (typeof item === "string" ? item : item.name || item.recipient));
       } catch (e) {
         console.error("Failed to parse JSON recipients file:", e.message);
@@ -112,9 +113,31 @@ async function main() {
     fs.mkdirSync(outDir, { recursive: true });
   }
 
-  const startId = Number.isInteger(Number(flags["start-id"])) ? Number(flags["start-id"]) : 100001;
-  const band = flags.band || "dual";
-  const strength = flags.strength ? Number(flags.strength) : 0.5;
+  let startId = 100001;
+  if (flags["start-id"] !== undefined) {
+    const parsed = Number(flags["start-id"]);
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed > 0xffffffff) {
+      console.error("Error: --start-id must be an integer between 0 and 4294967295.");
+      process.exit(1);
+    }
+    startId = parsed;
+  }
+  if (startId + recipientNames.length - 1 > 0xffffffff) {
+    console.error(`Error: --start-id ${startId} with ${recipientNames.length} recipients exceeds the 32-bit ID space.`);
+    process.exit(1);
+  }
+
+  const band = flags.band === undefined ? "dual" : String(flags.band);
+  if (!/^(dual|high|mid|auto|\d+\s*[:\-]\s*\d+)$/.test(band)) {
+    console.error(`Error: --band must be "dual", "high", "mid", "auto", or "lowHz:highHz" (got "${band}").`);
+    process.exit(1);
+  }
+
+  const strength = flags.strength === undefined ? 0.5 : Number(flags.strength);
+  if (!Number.isFinite(strength) || strength < 0.01 || strength > 1) {
+    console.error("Error: --strength must be a number between 0.01 and 1.0.");
+    process.exit(1);
+  }
   const key = flags.key || undefined;
 
   console.log(`\n======================================================`);
@@ -122,6 +145,7 @@ async function main() {
   console.log(`======================================================`);
   console.log(`Master Audio:   ${masterPath}`);
   console.log(`Recipients:     ${recipientNames.length} recipients`);
+  console.log(`ID Range:       #${startId} .. #${startId + recipientNames.length - 1}`);
   console.log(`Band / Stren:   ${band} / ${strength}`);
   console.log(`Output Folder:  ${outDir}\n`);
 
@@ -129,15 +153,18 @@ async function main() {
   const wav = await readWavFile(masterPath);
   const format = { sampleRate: wav.sampleRate, channels: wav.channels };
   const masterBase = path.basename(masterPath, path.extname(masterPath));
+  const sourceBitDepth = [16, 24, 32].includes(wav.bitsPerSample) ? wav.bitsPerSample : 16;
 
   const manifest = {
     masterFile: path.basename(masterPath),
     masterSampleRate: wav.sampleRate,
     masterChannels: wav.channels,
+    masterBitDepth: sourceBitDepth,
     masterDurationSec: wav.durationSec,
     generatedAt: new Date().toISOString(),
     band,
     strength,
+    startId,
     tardos: null,
     recipients: []
   };
@@ -157,13 +184,18 @@ async function main() {
 
   console.log(`Generating individually tagged audio copies:\n`);
 
+  const usedFilenames = new Set();
+
   for (let i = 0; i < recipientNames.length; i++) {
     const name = recipientNames[i];
-    const payloadId = flags["start-id"]
-      ? Number(flags["start-id"]) + i
-      : (crypto.randomInt(100000, 900000) * 1000 + (i + 1)) >>> 0;
-    const safeName = sanitizeFilename(name);
-    const outFilename = `${masterBase}_[${safeName}].wav`;
+    const payloadId = startId + i;
+    const safeName = sanitizeFilename(name) || "recipient";
+    let outFilename = `${masterBase}_[${safeName}].wav`;
+    let duplicate = 2;
+    while (usedFilenames.has(outFilename)) {
+      outFilename = `${masterBase}_[${safeName}_${duplicate++}].wav`;
+    }
+    usedFilenames.add(outFilename);
     const outFilePath = path.join(outDir, outFilename);
 
     process.stdout.write(`  [${i + 1}/${recipientNames.length}] Tagging for "${name}" (ID #${payloadId})... `);
@@ -178,7 +210,7 @@ async function main() {
     await writeWavFile(outFilePath, watermarked, {
       sampleRate: wav.sampleRate,
       channels: wav.channels,
-      bitDepth: 16
+      bitDepth: sourceBitDepth
     });
 
     const fileBuf = fs.readFileSync(outFilePath);
@@ -204,7 +236,7 @@ async function main() {
   console.log(`======================================================`);
   console.log(`Manifest created: ${manifestPath}`);
   console.log(`\nIf a copy leaks online, identify the source with:`);
-  console.log(`  node aureal-watermark.cjs detect leaked_audio.wav --json\n`);
+  console.log(`  node scripts/audit_leak.js leaked_audio.wav --manifest "${manifestPath}"\n`);
 }
 
 main().catch((err) => {

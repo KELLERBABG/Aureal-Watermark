@@ -72,21 +72,47 @@ function clampInt(v, lo, hi, name) {
 
 export function resolveBand(band, sampleRate) {
   const preset = band === "high" || band === "mid" ? bandPreset(band) : null;
-  const b = { ...DEFAULT_BAND, ...(preset || band || {}) };
+  const custom = preset || parseBandSpec(band);
+  const b = { ...DEFAULT_BAND, ...(custom || {}) };
   let { lowHz, highHz } = b;
   lowHz = clampInt(lowHz, 1000, sampleRate / 2 - 100, "band.lowHz");
   highHz = clampInt(highHz, lowHz + 100, sampleRate / 2 - 100, "band.highHz");
   return { lowHz, highHz, centerHz: (lowHz + highHz) / 2 };
 }
 
+/**
+ * Parses a custom band selector: an object `{ lowHz, highHz }` or a
+ * `"17000:19500"` / `"17000-19500"` string. Returns null for preset names and
+ * anything that does not describe a concrete frequency range.
+ */
+function parseBandSpec(band) {
+  if (band && typeof band === "object") {
+    if ("lowHz" in band || "highHz" in band) {
+      const lowHz = Number(band.lowHz);
+      const highHz = Number(band.highHz);
+      if (!Number.isFinite(lowHz)) throw new TypeError("band.lowHz must be a finite number");
+      if (!Number.isFinite(highHz)) throw new TypeError("band.highHz must be a finite number");
+      return { lowHz, highHz };
+    }
+    return null;
+  }
+  if (typeof band === "string") {
+    const m = band.trim().match(/^(\d+(?:\.\d+)?)\s*[:\-]\s*(\d+(?:\.\d+)?)$/);
+    if (m) return { lowHz: Number(m[1]), highHz: Number(m[2]) };
+  }
+  return null;
+}
+
 export function bandList(spec, sampleRate) {
-  if (spec === "high") {
-    return [resolveBand("high", sampleRate)];
+  if (spec === "high" || spec === "mid") {
+    return [resolveBand(spec, sampleRate)];
   }
-  if (spec === "mid") {
-    return [resolveBand("mid", sampleRate)];
+  const custom = parseBandSpec(spec);
+  if (custom) {
+    return [resolveBand(custom, sampleRate)];
   }
-  // Default to dual-band for maximum lossy compression resilience (MP3/AAC/streaming)
+  // "dual", "auto", undefined and anything unrecognized: both bands, which is
+  // the most lossy-compression resilient configuration (MP3/AAC/streaming).
   return [resolveBand("high", sampleRate), resolveBand("mid", sampleRate)];
 }
 

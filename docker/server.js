@@ -14,6 +14,10 @@ import { DEFAULT_BAND } from "../src/signal.js";
 
 const DEFAULT_KEY = "aural-watermark-default-key";
 const MAX_BODY_BYTES = (Number(process.env.MAX_BODY_SIZE_MB) || 100) * 1024 * 1024;
+// Output containers the REST API can emit. "wav" is passed through, the rest
+// are transcoded by FFmpeg; anything else would reach FFmpeg without codec
+// flags and fail late with an opaque 500, so it is rejected up front.
+const SUPPORTED_OUTPUT_FORMATS = new Set(["wav", "mp3", "flac", "aac", "m4a", "ogg"]);
 
 let cachedFfmpeg = null;
 export function hasFfmpeg() {
@@ -98,6 +102,30 @@ function parseBandParam(band) {
     return { lowHz: parts[0], highHz: parts[1] };
   }
   return "dual";
+}
+
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function parseJsonBody(rawBody) {
+  try {
+    return JSON.parse(rawBody.toString("utf8"));
+  } catch {
+    throw new HttpError(400, "Request body is not valid JSON.");
+  }
+}
+
+function validatePayloadId(value) {
+  if (!Number.isInteger(value) || value < 0 || value > 0xFFFFFFFF) return false;
+  return true;
+}
+
+function validateBodySize(err) {
+  return err instanceof Error && /Payload exceeds maximum size/.test(err.message);
 }
 
 function sendJson(res, statusCode, data) {
@@ -189,7 +217,7 @@ export function createAurealServer(options = {}) {
 
         if (contentType.includes("application/json")) {
           isJsonMode = true;
-          const json = JSON.parse(rawBody.toString("utf8"));
+          const json = parseJsonBody(rawBody);
           if (!json.audioBase64) {
             return sendJson(res, 400, { error: "Missing required 'audioBase64' in JSON payload." });
           }
@@ -201,8 +229,15 @@ export function createAurealServer(options = {}) {
           if (json.format !== undefined) outputFormat = json.format;
         }
 
-        if (payloadId === null || !Number.isInteger(payloadId) || payloadId < 0 || payloadId > 0xFFFFFFFF) {
+        if (payloadId === null || !validatePayloadId(payloadId)) {
           return sendJson(res, 400, { error: "Query parameter, header, or JSON field 'id' must be an unsigned 32-bit integer (0..4294967295)." });
+        }
+
+        const outputFormatName = String(outputFormat).toLowerCase().replace(/^\./, "");
+        if (!SUPPORTED_OUTPUT_FORMATS.has(outputFormatName)) {
+          return sendJson(res, 400, {
+            error: `Unsupported output format '${outputFormat}'. Supported formats: ${[...SUPPORTED_OUTPUT_FORMATS].join(", ")}.`
+          });
         }
 
         // Parse input to PCM
@@ -227,19 +262,25 @@ export function createAurealServer(options = {}) {
           band
         });
 
+        // Preserve the source word depth where the writer supports it; 8-bit
+        // PCM and other exotic widths are promoted to 16-bit.
+        const sourceBitDepth = Number.isInteger(wav.bitsPerSample) && [16, 24, 32].includes(wav.bitsPerSample)
+          ? wav.bitsPerSample
+          : 16;
         const markedWavBuffer = writeWav(markedSamples, {
           sampleRate: wav.sampleRate,
           channels: wav.channels,
-          bitDepth: wav.bitDepth || 16
+          bitDepth: sourceBitDepth
         });
 
-        const { buffer: finalBuffer, contentType: outContentType } = transcodeFromWavBuffer(markedWavBuffer, outputFormat);
+        const { buffer: finalBuffer, contentType: outContentType } = transcodeFromWavBuffer(markedWavBuffer, outputFormatName);
 
         if (isJsonMode) {
           return sendJson(res, 200, {
             success: true,
             payloadId,
-            format: outputFormat,
+            format: outputFormatName,
+            bitDepth: sourceBitDepth,
             durationSec: wav.durationSec,
             sampleRate: wav.sampleRate,
             channels: wav.channels,
@@ -271,7 +312,7 @@ export function createAurealServer(options = {}) {
         let withReport = query.report === "true" || req.headers["x-aureal-report"] === "true";
 
         if (contentType.includes("application/json")) {
-          const json = JSON.parse(rawBody.toString("utf8"));
+          const json = parseJsonBody(rawBody);
           if (!json.audioBase64) {
             return sendJson(res, 400, { error: "Missing required 'audioBase64' in JSON payload." });
           }
@@ -280,6 +321,10 @@ export function createAurealServer(options = {}) {
           if (json.key !== undefined) key = json.key;
           if (json.band !== undefined) bandParam = json.band;
           if (json.report !== undefined) withReport = Boolean(json.report);
+        }
+
+        if (expectedId !== null && !validatePayloadId(expectedId)) {
+          return sendJson(res, 400, { error: "Query parameter, header, or JSON field 'id' must be an unsigned 32-bit integer (0..4294967295)." });
         }
 
         let wav;
@@ -333,7 +378,8 @@ export function createAurealServer(options = {}) {
       return sendJson(res, 404, { error: `Endpoint not found: ${req.method} ${pathname}` });
 
     } catch (err) {
-      return sendJson(res, 500, { error: err.message || "Internal server error" });
+      const status = err instanceof HttpError ? err.status : (validateBodySize(err) ? 413 : 500);
+      return sendJson(res, status, { error: err.message || "Internal server error" });
     }
   });
 

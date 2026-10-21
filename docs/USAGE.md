@@ -50,7 +50,7 @@ Supports direct input and output in **WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF** 
 | `--id` | **Required** | Unsigned 32-bit tracking ID (`0` to `4294967295`). |
 | `--key` | `aural-watermark-default-key` | Secret salt used for PRNG sequence generation. Must match at detection time. |
 | `--strength` | `0.5` | Embedding amplitude scale (`0.01` to `1.0`). Nominal target is $\ge 32\text{--}36\text{ dB}$ below host audio; audibility depends on source material, playback system, and listener. |
-| `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (8–13 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
+| `--band` | `dual` | `high` (17.0–19.5 kHz, ultrasonic), `mid` (4.5–13.5 kHz), `dual` (both bands), or custom `lowHz:highHz`. |
 
 ### `detect <in.wav> [--id <uint32>] [--key s] [--band auto|dual|high|mid] [--json] [--report proof.json] [--report-txt cert.txt]`
 
@@ -183,7 +183,7 @@ The resulting `proof.json` includes:
 | :--- | :--- | :--- |
 | **Archival Masters / Lossless Distribution** | `high` | Places most watermark energy in the 17.0–19.5 kHz band; audibility depends on source, hardware, and listener. |
 | **Podcasts, Streaming, Social Media (MP3/AAC)** | `dual` (embed) + `auto` (detect) | Redundant encoding across mid and high bands survives encoder low-passes. |
-| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (8–13 kHz) masked under speech sibilants and music transients. |
+| **Aggressive Codecs / Transcoded Video** | `mid` | Maximum codec margin (4.5–13.5 kHz) masked under speech sibilants and music transients. |
 
 ---
 

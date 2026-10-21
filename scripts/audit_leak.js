@@ -16,7 +16,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readWavFile } from "../src/wav.js";
 import { detectWatermark } from "../src/detect.js";
 import { accuseCoalition } from "../src/tardos.js";
@@ -49,7 +49,7 @@ function decodeAudioToWav(inputPath) {
   // Check ffmpeg for compressed audio (MP3, AAC, M4A, etc.)
   const tempWav = path.join(os.tmpdir(), `aureal_audit_${Date.now()}_${Math.random().toString(36).slice(2)}.wav`);
   try {
-    execSync(`ffmpeg -v error -y -i "${inputPath}" -acodec pcm_s16le -ar 44100 "${tempWav}"`, { stdio: "pipe" });
+    execFileSync("ffmpeg", ["-v", "error", "-y", "-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", tempWav], { stdio: "pipe" });
     return { wavPath: tempWav, isTemp: true };
   } catch (err) {
     throw new Error(`Failed to decode non-WAV audio (${ext}). Ensure ffmpeg is installed, or convert to WAV first.`);
@@ -110,14 +110,21 @@ async function main() {
   }
 
   const idMap = new Map();
-  if (Array.isArray(manifest.recipients)) {
-    for (const r of manifest.recipients) {
-      idMap.set(r.id, r);
-    }
+  const recipients = Array.isArray(manifest.recipients) ? manifest.recipients : [];
+  if (recipients.length === 0) {
+    console.error("Error: Manifest contains no recipients array.");
+    process.exit(1);
+  }
+  for (const r of recipients) {
+    idMap.set(Number(r.id), r);
   }
 
   const key = flags.key || manifest.key || undefined;
   const band = flags.band || manifest.band || "auto";
+  if (!/^(dual|high|mid|auto|\d+\s*[:\-]\s*\d+)$/.test(String(band))) {
+    console.error(`Error: --band must be "dual", "high", "mid", "auto", or "lowHz:highHz" (got "${band}").`);
+    process.exit(1);
+  }
 
   // Decode audio
   const { wavPath, isTemp } = decodeAudioToWav(audioFile);
@@ -143,7 +150,7 @@ async function main() {
   // Run Tardos anti-collusion accusation if manifest has Tardos metadata
   let tardosReport = null;
   if (manifest.tardos && res.details && res.details.softSymbols) {
-    const recipientsWithCodewords = manifest.recipients.filter((r) => r.tardosCodeword);
+    const recipientsWithCodewords = recipients.filter((r) => r.tardosCodeword);
     if (recipientsWithCodewords.length > 0) {
       tardosReport = accuseCoalition(
         res.details.softSymbols,
@@ -189,8 +196,8 @@ async function main() {
   const ebn0Str = res.ebN0Db != null ? `${res.ebN0Db > 0 ? "+" : ""}${res.ebN0Db} dB` : "-";
   const sqnrStr = res.sqnrDb != null ? `${res.sqnrDb > 0 ? "+" : ""}${res.sqnrDb} dB` : "-";
 
-  console.log(`Status:           WATERMARK VERIFIED`);
-  console.log(`Recovered ID:     #${recoveredId}`);
+  console.log(`Status:           ${res.detected ? "WATERMARK VERIFIED" : "WATERMARK NOT DETECTED (Tardos correlation only)"}`);
+  console.log(`Recovered ID:     ${recoveredId != null ? `#${recoveredId}` : "-"}`);
   console.log(`Confidence:       ${(res.confidence * 100).toFixed(1)}%`);
   console.log(`Signal Margin:    Eb/N0: ${ebn0Str} (SQNR: ${sqnrStr})`);
   console.log(`Bit Error Rate:   ${(res.ber * 100).toFixed(1)}% (${res.crcOk ? "CRC-16 Valid" : "CRC Error"})`);
@@ -218,7 +225,7 @@ async function main() {
   } else if (tardosReport && tardosReport.accused.length > 0) {
     console.log(`COLLUSION ANALYSIS (Tardos Anti-Collusion Accuser):`);
     console.log(`  Accused Coalition: ${tardosReport.accused.map(a => `"${a.name}" (score ${a.score.toFixed(2)})`).join(", ")}`);
-    console.log(`  Threshold:         ${tardosReport.threshold.toFixed(2)} (Population mean: ${tardosReport.meanScore.toFixed(2)})`);
+    console.log(`  Threshold:         ${tardosReport.threshold.toFixed(2)} (Population median: ${tardosReport.medianScore.toFixed(2)})`);
     console.log(`======================================================`);
     console.log(`VERDICT: Multi-recipient collusion detected! Leaked via joint copies from: ${tardosReport.accused.map(a => a.name).join(" & ")}.\n`);
   } else {

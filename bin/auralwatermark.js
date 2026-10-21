@@ -2,7 +2,7 @@
 // auralwatermark — Desktop App & CLI Suite for Aureal Watermark.
 
 import { argv, exit } from "node:process";
-import { spawn, exec, execSync } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, unlinkSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
@@ -14,7 +14,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 import { getLicenseStatus, activatePolarKey, clearLocalLicense, loadLocalLicense } from "../src/license.js";
-import { generateForensicReport, formatForensicReportText } from "../src/report.js";
+import { generateForensicReport, formatForensicReportText, ENGINE_VERSION } from "../src/report.js";
 
 const HELP = `Aureal Watermark v0.2.7 — Audio watermarking for anti-theft and AI detection
 
@@ -26,12 +26,12 @@ Command Line Interface:
       Generate synthetic speech-like audio for demos/tests.
 
   auralwatermark embed <in.audio> <out.audio> --id <uint32> [--key secret]
-      [--strength 0..1] [--band high|mid|dual|lowHz:highHz]
+      [--strength 0..1] [--band high|mid|dual|lowHz:highHz|lowHz-highHz]
       Embed watermark carrying the payload id (default band: dual).
       Supports WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF (with ffmpeg).
 
   auralwatermark detect <in.audio> [--id <uint32>] [--key secret]
-      [--band auto|high|mid|dual|lowHz:highHz] [--json]
+      [--band auto|high|mid|dual|lowHz:highHz|lowHz-highHz] [--json]
       [--report proof.json] [--report-txt proof.txt]
       Verify an expected id or run blind detection + CRC decode.
       Supports WAV, MP3, FLAC, AAC, M4A, OGG, and AIFF (with ffmpeg).
@@ -41,7 +41,9 @@ Command Line Interface:
       auralwatermark license <POLAR_KEY>          Activate commercial license (offline ready)
       auralwatermark license --remove             Deactivate / remove local license
 
-Exit codes: 0 success/detected · 1 not detected · 2 error`;
+Exit codes: 0 success/detected · 1 not detected · 2 error
+
+Global: auralwatermark help | auralwatermark version | auralwatermark --version`;
 
 function parseArgs(rest) {
   const pos = [];
@@ -71,11 +73,14 @@ function bandOf(flags, dflt) {
   const b = flags.band;
   if (!b) return dflt;
   if (b === "high" || b === "mid" || b === "dual" || b === "auto") return b;
-  const parts = String(b).split(":").map(Number);
-  if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
-    return { lowHz: parts[0], highHz: parts[1] };
+  const m = String(b).match(/^(\d+(?:\.\d+)?)[:\-](\d+(?:\.\d+)?)$/);
+  if (m) {
+    const lowHz = Number(m[1]);
+    const highHz = Number(m[2]);
+    if (lowHz > 0 && highHz > lowHz) return { lowHz, highHz };
+    throw new Error(`--band range must satisfy 0 < lowHz < highHz, got '${b}'`);
   }
-  throw new Error(`--band must be high|mid|dual|auto or lowHz:highHz, got '${b}'`);
+  throw new Error(`--band must be high|mid|dual|auto or lowHz:highHz|lowHz-highHz (or lowHz-highHz), got '${b}'`);
 }
 
 function die(msg, code = 2) {
@@ -167,9 +172,17 @@ function getPricingHtml() {
   return "";
 }
 
+function runFfmpeg(args) {
+  // Argument-vector call: never interpolate user paths into a shell string, so
+  // Windows paths containing '&' or quotes are handled correctly.
+  return execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args], {
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+}
+
 function hasFfmpeg() {
   try {
-    execSync("ffmpeg -version", { stdio: "ignore" });
+    execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
     return true;
   } catch {
     return false;
@@ -189,9 +202,7 @@ async function loadAudioInput(filePath) {
     }
     const tempWav = join(tmpdir(), `aureal-in-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
     try {
-      execSync(`ffmpeg -hide_banner -loglevel error -y -i "${filePath}" -c:a pcm_s16le "${tempWav}"`, {
-        stdio: ["ignore", "pipe", "pipe"]
-      });
+      runFfmpeg(["-i", filePath, "-c:a", "pcm_s16le", tempWav]);
       const wav = await readWavFile(tempWav);
       return {
         wav,
@@ -206,6 +217,17 @@ async function loadAudioInput(filePath) {
   }
 }
 
+const CODEC_ARGS = {
+  mp3: ["-c:a", "libmp3lame", "-b:a", "320k"],
+  flac: ["-c:a", "flac"],
+  aac: ["-c:a", "aac", "-b:a", "256k"],
+  m4a: ["-c:a", "aac", "-b:a", "256k"],
+  ogg: ["-c:a", "libvorbis", "-q:a", "8"],
+  opus: ["-c:a", "libopus", "-b:a", "192k"],
+  aiff: ["-c:a", "pcm_s24be"],
+  aif: ["-c:a", "pcm_s24be"]
+};
+
 async function saveAudioOutput(outputPath, pcmSamples, fmt, bitDepth) {
   const ext = outputPath.toLowerCase().split(".").pop();
   if (ext === "wav") {
@@ -213,6 +235,12 @@ async function saveAudioOutput(outputPath, pcmSamples, fmt, bitDepth) {
     return;
   }
 
+  const codecArgs = CODEC_ARGS[ext];
+  if (!codecArgs) {
+    throw new Error(
+      `Unsupported output format '.${ext}'. Write a .wav file, or use one of: ${Object.keys(CODEC_ARGS).join(", ")} (with ffmpeg).`
+    );
+  }
   if (!hasFfmpeg()) {
     throw new Error(
       `Cannot export to '.${ext}': Only uncompressed '.wav' is supported natively. ` +
@@ -223,23 +251,7 @@ async function saveAudioOutput(outputPath, pcmSamples, fmt, bitDepth) {
   const tempWav = join(tmpdir(), `aureal-out-${Date.now()}-${Math.random().toString(36).slice(2)}.wav`);
   try {
     await writeWavFile(tempWav, pcmSamples, { sampleRate: fmt.sampleRate, channels: fmt.channels, bitDepth });
-    let codecArgs = "";
-    if (ext === "mp3") {
-      codecArgs = "-c:a libmp3lame -b:a 320k";
-    } else if (ext === "flac") {
-      codecArgs = "-c:a flac";
-    } else if (ext === "aac" || ext === "m4a") {
-      codecArgs = "-c:a aac -b:a 256k";
-    } else if (ext === "ogg") {
-      codecArgs = "-c:a libvorbis -q:a 8";
-    } else if (ext === "opus") {
-      codecArgs = "-c:a libopus -b:a 192k";
-    } else if (ext === "aiff" || ext === "aif") {
-      codecArgs = "-c:a pcm_s24be";
-    }
-    execSync(`ffmpeg -hide_banner -loglevel error -y -i "${tempWav}" ${codecArgs} "${outputPath}"`, {
-      stdio: ["ignore", "pipe", "pipe"]
-    });
+    runFfmpeg(["-i", tempWav, ...codecArgs, outputPath]);
   } finally {
     try { unlinkSync(tempWav); } catch {}
   }
@@ -364,13 +376,12 @@ function launchDesktopApp() {
   }
 
   // Universal browser fallback
-  const opener =
-    process.platform === "darwin"
-      ? "open"
-      : process.platform === "win32"
-      ? "start"
-      : "xdg-open";
-  exec(`${opener} "${fileUrl}"`);
+  if (process.platform === "win32") {
+    spawn("cmd", ["/c", "start", "", `"${fileUrl}"`], { detached: true, stdio: "ignore" }).unref();
+  } else {
+    const opener = process.platform === "darwin" ? "open" : "xdg-open";
+    spawn(opener, [fileUrl], { detached: true, stdio: "ignore" }).unref();
+  }
 }
 
 async function main() {
@@ -387,12 +398,28 @@ async function main() {
     return;
   }
 
+  if (cmd === "version" || cmd === "--version" || cmd === "-v") {
+    console.log(`Aureal Watermark v${ENGINE_VERSION}`);
+    return;
+  }
+
   const { pos, flags } = parseArgs(rest);
   const key = flags.key;
+
+  if (flags.help) {
+    console.log(HELP);
+    return;
+  }
+
+  for (const name of ["key", "id", "strength", "band", "report", "report-txt", "seconds", "rate", "channels", "bits"]) {
+    if (flags[name] === true) die(`--${name} requires a value`);
+  }
+  if (key !== undefined && typeof key !== "string") die("--key requires a value");
 
   if (cmd === "gen") {
     const out = pos[0];
     if (!out) die("gen requires an output path: auralwatermark gen out.wav");
+    if (!out.toLowerCase().endsWith(".wav")) die("gen writes uncompressed WAV only: output path must end in .wav");
     const seconds = num(flags, "seconds", 10);
     const sampleRate = num(flags, "rate", 44100);
     const channels = num(flags, "channels", 1);
@@ -431,7 +458,7 @@ async function main() {
         band,
       });
       const meta = marked.watermarkMeta;
-      const bits = wav.bitsPerSample === 24 ? 24 : 16;
+      const bits = [16, 24, 32].includes(wav.bitsPerSample) ? wav.bitsPerSample : 16;
       await saveAudioOutput(out, marked, { sampleRate: wav.sampleRate, channels: wav.channels }, bits);
       const ms = Date.now() - t0;
 

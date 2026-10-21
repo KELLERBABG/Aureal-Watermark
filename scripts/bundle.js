@@ -79,14 +79,15 @@ const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const process = require("node:process");
 const os = require("node:os");
-const { spawn, exec, execSync } = require("node:child_process");
+const { spawn, exec, execSync, execFileSync } = require("node:child_process");
 const { createServer } = require("node:http");
-const { join, dirname } = require("node:path");
+const path = require("node:path");
+const { join, dirname } = path;
 const { createHash, createHmac } = require("node:crypto");
 
 const { argv, exit, stdin, stdout } = process;
 const { readFile, writeFile } = fsp;
-const { existsSync, readFileSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync } = fs;
+const { existsSync, readFileSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync, unlinkSync, rmSync } = fs;
 const { tmpdir } = os;
 
 const DEFAULT_KEY = "aural-watermark-default-key";
