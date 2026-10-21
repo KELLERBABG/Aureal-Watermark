@@ -396,6 +396,7 @@ A parallel branch (`87dca2b`, "test: restore full suite and fix CLI, server, aut
 
 **Found during the merge (fixed)**
 - `process.exit()` immediately after a large async stdout write occasionally deadlocked the process on Windows when output was piped (reproduced from a normal shell: `audit_leak --json` printed the full report, then hung until killed). `audit_leak`, `batch_distribute` and the CLI's `die()` now set `process.exitCode` and unwind normally. 15/15 stress runs complete in ~1.5 s afterwards.
+- The REST service reset keep-alive connections when the event loop was blocked by synchronous DSP: under two concurrent test suites, three tests failed with `fetch failed` / `ECONNRESET` because Node's default 5 s `keepAliveTimeout` fired on an idle pooled socket just as the next request arrived. The server now sets `keepAliveTimeout` 120 s, `headersTimeout` 125 s and `requestTimeout` 600 s; both concurrent suites pass 121/2 (previously 118/3 and 120/1). This would also hit a real client that reuses a connection between bursts of work.
 
 **Merged-suite result:** 123 tests (121 pass, 2 ffmpeg-gated skips) on Windows Node 24/20/18 and Linux Node 22 without ffmpeg; **133/133 on Linux with ffmpeg 7.1.5**, where the codec and transcode tests execute instead of skipping.
 

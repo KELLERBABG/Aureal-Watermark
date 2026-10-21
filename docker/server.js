@@ -419,6 +419,14 @@ export function createAurealServer(options = {}) {
     }
   });
 
+  // The DSP runs synchronously on this thread, so a request can block the event loop for
+  // seconds. Node's default 5 s keep-alive timeout then races a client that reuses the
+  // connection and the socket is reset (ECONNRESET) before the queued request is served.
+  // Give idle connections room for a blocked loop, and allow long uploads/processing.
+  server.keepAliveTimeout = 120_000;
+  server.headersTimeout = 125_000;
+  server.requestTimeout = 600_000;
+
   return server;
 }
 
