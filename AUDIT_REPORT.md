@@ -317,7 +317,7 @@ Consequence: the `carrierBand` field written into the forensic report (and repor
 
 ## 9. Resolution log
 
-Everything was re-tested after the changes. `npm test` runs the new suite (69 tests, 0 failures, ~95 s, no dependencies, no ffmpeg needed).
+Everything was re-tested after the changes. `npm test` runs the merged suite (123 tests: 121 pass + 2 ffmpeg-gated skips, ~140 s, no dependencies). The suite was 69 tests when the platform matrix below was measured; the extra coverage came from merging the parallel `test/full-system-verification` branch (see §10).
 
 | # | Finding | Status | What changed |
 | :--- | :--- | :--- | :--- |
@@ -330,7 +330,7 @@ Everything was re-tested after the changes. `npm test` runs the new suite (69 te
 | F7 | Desktop MP3 export broken | **Fixed** | `adaptHtmlForOffline()` also rewrites `src="/assets/…"` to the local `assets/` directory; the launcher and the bundle both write `assets/aureal-engine.js` + `assets/lame.min.js` next to the page. |
 | F8 | Preseeded licence ignored | **Fixed** | `getClientLicense()` accepts the injected record on its status/display fields instead of requiring a stripped `key`. |
 | F9 | Leak audit cannot read its own manifest | **Fixed** | `batch_distribute.js` records `key`/`keyDefault` (and documents that the manifest is private); `audit_leak.js` therefore traces a leaked copy without `--key`. |
-| F10 | No tests, vacuous CI | **Fixed** | `test/` with 69 `node --test` cases covering payload/CRC, WAV I/O, watermark round-trip + bands, report seal, CLI, REST, browser engine and distribution scripts. `node --test` now reports 69 pass. |
+| F10 | No tests, vacuous CI | **Fixed** | `test/` with 123 `node --test` cases (a superset merged with the verification branch) covering payload/CRC, WAV I/O, watermark round-trip + bands, report seal, CLI, REST, browser engine and distribution scripts. `node --test` reports 121 pass + 2 ffmpeg-gated skips. |
 | F11 | Release build cannot complete | **Fixed** | `stamp-icon.cjs` is valid UTF-8, degrades to a warning when `rcedit` is absent, and `rcedit` is a declared devDependency installed by the release workflow. |
 | F12 | Bands collapse at low sample rates | **Fixed** | `resolveBand`/`bandList` never return degenerate or duplicate bands; presets that do not fit are dropped (dual) or replaced by a wide fallback band (single); impossible custom bands throw. 8 kHz now yields `2145–3900` and round-trips. |
 | F13 | REST drops 24-bit to 16-bit | **Fixed** | Uses `wav.bitsPerSample` (16/24/32) instead of the nonexistent `wav.bitDepth`. |
@@ -371,6 +371,33 @@ Everything was re-tested after the changes. `npm test` runs the new suite (69 te
 Remaining unexecuted areas after this pass: the macOS SEA build, the Docker **image** build, and the GitHub-hosted runners themselves. Everything else in the table above was run.
 
 **Still open (needs the owner):** F19 pricing/currency model, F26 legal-page routing, and the F15 wire-format decision. **Not executed:** the macOS SEA build and Docker image build (see the platform matrix above); the GitHub-hosted runners themselves.
+
+---
+
+## 10. Reconciliation with `test/full-system-verification`
+
+A parallel branch (`87dca2b`, "test: restore full suite and fix CLI, server, automation, and packaging defects") had been pushed to `origin` from the same base commit `4aa2033`. It was merged into `main` and the extra branch deleted. Summary of what came across and what did not:
+
+**Adopted from the branch**
+- The restored test suite: `band`, `codec`, `license`, `server`, `types_contract`, `ui`, `browser`, `bundle`, `automation` and `adversarial_suite` (the four overlapping files — `cli`, `report`, `watermark`, `wav` — were superseded by the versions covering the new report seal and band handling).
+- CLI: `version` / `--version` / `-v`; engine version read from `ENGINE_VERSION`; `lowHz-highHz` band syntax; `--bits 32` in `gen`; 32-bit-float depth preserved through `embed`; clearer band-range error.
+- `src/signal.js`: `parseBandSpec` — the API now also accepts `"lowHz:highHz"` / `"lowHz-highHz"` strings (on top of the object form and the Nyquist/fallback rules).
+- `scripts/batch_distribute.js`: `--start-id` / `--strength` / `--band` validation, 32-bit overflow guard, `masterBitDepth`, filename de-duplication, ID-range log.
+- `scripts/build-all.ps1`: version read from `package.json`, exit-code assertions, SEA node-binary sanity check.
+- `scripts/publish-release.js`: version-driven release body/assets (rewritten with the corrected claims and a non-zero exit on failure).
+- CI: ffmpeg installed in the test workflow so the codec tests execute instead of skipping.
+
+**Not adopted (deliberate)**
+- `execSync` in `docker/server.js` — the format allow-list closes the reported vector, but `main` keeps `execFileSync` argument vectors for depth.
+- Sequential IDs by default in `batch_distribute` — random IDs are retained; sequential IDs are guessable and make an averaged collusion decode to one recipient by majority vote.
+- A `tardos` codebook in the manifest — the codewords are never embedded, so recording them is misleading (F3).
+- `signature.verified` / schema 1.0.0 in the report tests — superseded by the canonical 1.1.0 seal and `verifyForensicReport`.
+- "Leak traced directly to …" verdict wording — kept the hedged wording, because a match is not proof of who leaked.
+
+**Found during the merge (fixed)**
+- `process.exit()` immediately after a large async stdout write occasionally deadlocked the process on Windows when output was piped (reproduced from a normal shell: `audit_leak --json` printed the full report, then hung until killed). `audit_leak`, `batch_distribute` and the CLI's `die()` now set `process.exitCode` and unwind normally. 15/15 stress runs complete in ~1.5 s afterwards.
+
+**Merged-suite result:** 123 tests (121 pass, 2 ffmpeg-gated skips) on Windows Node 24/20/18 and Linux Node 22 without ffmpeg; **133/133 on Linux with ffmpeg 7.1.5**, where the codec and transcode tests execute instead of skipping.
 
 ---
 

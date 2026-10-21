@@ -63,14 +63,14 @@ async function main() {
   const args = process.argv.slice(2);
   if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
     printHelp();
-    process.exit(0);
+    process.exitCode = 0; return;
   }
 
   const audioFile = args[0].startsWith("--") ? null : args[0];
   if (!audioFile) {
     console.error("Error: Leaked audio file required as first argument.");
     printHelp();
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   const flags = {};
@@ -90,17 +90,17 @@ async function main() {
   if (!flags.manifest) {
     console.error("Error: --manifest <recipients.json> is required.");
     printHelp();
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   if (!fs.existsSync(audioFile)) {
     console.error(`Error: Audio file not found: ${audioFile}`);
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   if (!fs.existsSync(flags.manifest)) {
     console.error(`Error: Manifest file not found: ${flags.manifest}`);
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   // Load manifest
@@ -109,7 +109,7 @@ async function main() {
     manifest = JSON.parse(fs.readFileSync(flags.manifest, "utf8"));
   } catch (e) {
     console.error(`Failed to parse manifest JSON: ${e.message}`);
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   const idMap = new Map();
@@ -157,7 +157,7 @@ async function main() {
         ? `Audio leaked from recipient "${matchedRecipient.name}" (ID #${matchedRecipient.id})`
         : (res.detected ? "Watermark detected but ID not found in this manifest" : "No watermark detected")
     }, null, 2));
-    process.exit(res.detected ? 0 : 1);
+    process.exitCode = res.detected ? 0 : 1; return;
   }
 
   console.log(`\n======================================================`);
@@ -174,7 +174,7 @@ async function main() {
     console.log(`audio shorter than one frame, or a MIX/AVERAGE of several recipients'`);
     console.log(`copies. Collusion resistance is NOT implemented — averaging copies can`);
     console.log(`erase the ID entirely.\n`);
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   const ebn0Str = res.ebN0Db != null ? `${res.ebN0Db > 0 ? "+" : ""}${res.ebN0Db} dB` : "-";
@@ -214,10 +214,10 @@ async function main() {
     console.log(`======================================================\n`);
   }
 
-  process.exit(0);
+  process.exitCode = 0; return;
 }
 
 main().catch((err) => {
   console.error("Forensic audit error:", err);
-  process.exit(1);
+  process.exitCode = 1; return;
 });

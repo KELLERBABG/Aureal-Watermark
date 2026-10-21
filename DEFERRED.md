@@ -5,9 +5,11 @@ Everything the audit found that is *not* fixed is listed here, with the reason i
 deferred and what "done" looks like. Nothing here blocks running the software; some of it
 blocks **selling** it.
 
-Status of the code: `npm test` = 69/69 on Windows (Node 18/20/24) and Linux (Node 22);
-browser Studio verified in headless Edge for both `file://` (desktop) and HTTP (web) with
-the real engine + MP3 encoder. See `AUDIT_REPORT.md` §9 for the resolution log.
+Status of the code: `npm test` = 123 tests (121 pass, 2 ffmpeg-gated skips) on Windows
+Node 18/20/24 and Linux Node 22 (measured at 69 tests before the verification branch was
+merged; the suite has grown since). Browser Studio verified in headless Edge for both
+`file://` (desktop) and HTTP (web) with the real engine + MP3 encoder. See
+`AUDIT_REPORT.md` §9 for the resolution log.
 
 ---
 
@@ -114,7 +116,7 @@ protects the codebase and history, not the DSP.
 ## Reproducing the verification
 
 ```bash
-npm test                                  # 69 tests, no deps, no ffmpeg needed
+npm test                                  # 123 tests, no deps, no ffmpeg needed (2 codec tests skip)
 npm run sync:site:check                   # page aliases + generated browser engine drift gate
 node audit/15-browser-e2e.mjs             # real headless Chrome/Edge: desktop file:// + web HTTP
 node audit/13-rest-rce-poc.mjs            # injection regression (must be inert)

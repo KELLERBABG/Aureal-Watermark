@@ -296,7 +296,7 @@ export interface LocalLicenseRecord {
   [field: string]: unknown;
 }
 
-export interface PolarLicenseStatus {
+export interface LicenseStatus {
   /** True when a cached, non-expired commercial license record exists. */
   isLicensed: boolean;
   tier: LicenseTier;
@@ -466,13 +466,14 @@ export function packCodeword(id: number): Int8Array;
 /**
  * Decodes a 48-symbol BPSK codeword back to its 32-bit ID and checks the CRC.
  *
+ * The returned `id` is the payload carried by the 32 data symbols (`>>> 0`);
+ * `crcOk` reports whether the 16 CRC symbols match those payload bytes.
+ *
  * @param symbols Exactly 48 symbols; a symbol is read as bit 1 when `> 0`.
  * @throws RangeError When the codeword length is not 48.
  */
 export function unpackCodeword(symbols: ArrayLike<number>): {
-  /** Payload ID carried by the 32 data symbols (`>>> 0`). */
   id: number;
-  /** Whether the 16 CRC symbols match the payload bytes. */
   crcOk: boolean;
 };
 
@@ -534,7 +535,7 @@ export function clearLocalLicense(): boolean;
 /**
  * Checks if the current machine has an active cached commercial license.
  */
-export function getLicenseStatus(): PolarLicenseStatus;
+export function getLicenseStatus(): LicenseStatus;
 
 /**
  * Obfuscates sensitive characters of a license key string for display.

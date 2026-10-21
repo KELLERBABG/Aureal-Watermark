@@ -160,3 +160,63 @@ test("the CLI reads the version from one place", async () => {
   const { stdout } = await runCli(["--help"]);
   assert.ok(stdout.includes(pkg.version), `help mentions ${pkg.version}`);
 });
+
+test("version / --version print the engine version and exit 0", async () => {
+  const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  for (const flag of ["version", "--version", "-v"]) {
+    const res = await runCli([flag]);
+    assert.equal(res.code, 0, `${flag} exit code`);
+    assert.match(res.stdout, new RegExp(`v${pkg.version.replace(/\./g, "\\.")}`), `${flag} output`);
+  }
+});
+
+test("a custom band accepts both lowHz:highHz and lowHz-highHz", async () => {
+  const { dir, cleanup } = tempDir();
+  try {
+    await runCli(["gen", "in.wav", "--seconds", "5"], { cwd: dir });
+    for (const spec of ["12000:14000", "12000-14000"]) {
+      const embed = await runCli(["embed", "in.wav", `out-${spec.replace(":", "_")}.wav`, "--id", "7", "--band", spec], { cwd: dir });
+      assert.equal(embed.code, 0, `${spec}: ${embed.stderr}`);
+      assert.match(embed.stdout, /12000-14000 Hz/, `${spec} is used verbatim`);
+      const detect = await runCli(["detect", `out-${spec.replace(":", "_")}.wav`, "--id", "7", "--band", spec], { cwd: dir });
+      assert.equal(detect.code, 0, `${spec} detect: ${detect.stderr}`);
+    }
+    const invalid = await runCli(["embed", "in.wav", "bad.wav", "--id", "7", "--band", "14000:12000"], { cwd: dir });
+    assert.equal(invalid.code, 2);
+    assert.match(invalid.stderr, /0 < lowHz < highHz/);
+  } finally {
+    cleanup();
+  }
+});
+
+test("embed preserves 24-bit PCM and 32-bit float source depth", async () => {
+  const { dir, cleanup } = tempDir();
+  try {
+    for (const bits of [24, 32]) {
+      await runCli(["gen", `in-${bits}.wav`, "--seconds", "4", "--bits", String(bits)], { cwd: dir });
+      const embed = await runCli(["embed", `in-${bits}.wav`, `out-${bits}.wav`, "--id", "424242", "--key", "depth"], { cwd: dir });
+      assert.equal(embed.code, 0, embed.stderr);
+      const detect = await runCli(["detect", `out-${bits}.wav`, "--id", "424242", "--key", "depth"], { cwd: dir });
+      assert.equal(detect.code, 0, detect.stderr);
+      assert.match(detect.stdout, new RegExp(`${bits}-bit`), `${bits}-bit depth preserved`);
+    }
+  } finally {
+    cleanup();
+  }
+});
+
+test("paths containing spaces, ampersands and unicode are handled", async () => {
+  const { dir, cleanup } = tempDir();
+  try {
+    const weird = join(dir, "master & ünïcode (test).wav");
+    const out = join(dir, "out & ünïcode.wav");
+    await runCli(["gen", weird, "--seconds", "4"], { cwd: dir });
+    const embed = await runCli(["embed", weird, out, "--id", "424242", "--key", "paths"], { cwd: dir });
+    assert.equal(embed.code, 0, embed.stderr);
+    const detect = await runCli(["detect", out, "--id", "424242", "--key", "paths"], { cwd: dir });
+    assert.equal(detect.code, 0, detect.stderr);
+    assert.match(detect.stdout, /detected: YES/);
+  } finally {
+    cleanup();
+  }
+});

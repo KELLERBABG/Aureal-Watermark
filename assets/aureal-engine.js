@@ -119,25 +119,45 @@ function fallbackBand(sampleRate) {
 }
 
 /**
+ * Parse a custom band selector. Accepts an object `{ lowHz, highHz }` or a
+ * `"17000:19500"` / `"17000-19500"` string. Returns null for preset names and
+ * for anything that does not describe a concrete frequency range.
+ */
+function parseBandSpec(spec) {
+  if (spec && typeof spec === "object") {
+    if (!("lowHz" in spec) && !("highHz" in spec)) return null;
+    const lowHz = Number(spec.lowHz);
+    const highHz = Number(spec.highHz);
+    if (!Number.isFinite(lowHz)) throw new TypeError("band.lowHz must be a finite number");
+    if (!Number.isFinite(highHz)) throw new TypeError("band.highHz must be a finite number");
+    return { lowHz, highHz };
+  }
+  if (typeof spec === "string") {
+    const m = spec.trim().match(/^(\d+(?:\.\d+)?)\s*[:\-]\s*(\d+(?:\.\d+)?)$/);
+    if (m) return { lowHz: Number(m[1]), highHz: Number(m[2]) };
+  }
+  return null;
+}
+
+/**
  * Resolve a band specification to the list of bands to embed/detect.
  *
  *  - "high"    → the high preset (or a wide fallback band if it cannot fit)
  *  - "mid"     → the mid preset  (or a wide fallback band if it cannot fit)
  *  - "dual"    → both presets that fit; if neither fits, one fallback band
- *  - {lowHz, highHz} → exactly that band; throws if it cannot fit under Nyquist
+ *  - {lowHz, highHz} or "lowHz:highHz" / "lowHz-highHz" → exactly that band;
+ *    throws if it cannot fit under Nyquist
  *
  * A band is never returned degenerate (lowHz === highHz), and the same list is
  * never returned twice, so "dual" cannot silently double-embed one carrier.
  */
 function bandList(spec, sampleRate) {
-  if (spec && typeof spec === "object") {
-    if (!Number.isFinite(Number(spec.lowHz)) || !Number.isFinite(Number(spec.highHz))) {
-      throw new TypeError("band object requires numeric {lowHz, highHz}");
-    }
-    const band = resolveBand(spec, sampleRate);
+  const custom = parseBandSpec(spec);
+  if (custom) {
+    const band = resolveBand(custom, sampleRate);
     if (!usableBand(band, sampleRate)) {
       throw new RangeError(
-        `band ${spec.lowHz}-${spec.highHz} Hz does not fit below Nyquist for ${sampleRate} Hz ` +
+        `band ${custom.lowHz}-${custom.highHz} Hz does not fit below Nyquist for ${sampleRate} Hz ` +
         `(usable range up to ${Math.floor(sampleRate / 2) - 100} Hz, minimum width ${MIN_BAND_WIDTH} Hz)`
       );
     }

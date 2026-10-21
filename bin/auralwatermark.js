@@ -14,7 +14,7 @@ import { embedWatermark } from "../src/embed.js";
 import { detectWatermark } from "../src/detect.js";
 import { DEFAULT_BAND } from "../src/signal.js";
 import { getLicenseStatus, activatePolarKey, clearLocalLicense, loadLocalLicense } from "../src/license.js";
-import { generateForensicReport, formatForensicReportText, verifyForensicReport } from "../src/report.js";
+import { generateForensicReport, formatForensicReportText, verifyForensicReport, ENGINE_VERSION } from "../src/report.js";
 
 const HELP = `Aureal Watermark v0.2.7 — Audio watermarking for anti-theft and AI detection
 
@@ -22,7 +22,7 @@ Desktop App:
   auralwatermark [gui]              Launch standalone Desktop Studio application (Default)
 
 Command Line Interface:
-  auralwatermark gen out.wav --seconds 30 [--rate 44100] [--channels 1] [--bits 16]
+  auralwatermark gen out.wav --seconds 30 [--rate 44100] [--channels 1] [--bits 16|24|32]
       Generate synthetic speech-like audio for demos/tests.
 
   auralwatermark embed <in.audio> <out.audio> --id <uint32> [--key secret]
@@ -44,6 +44,9 @@ Command Line Interface:
   auralwatermark verify-report <proof.json> [--key secret]
       Recompute the HMAC seal of a report produced by --report and confirm
       that the report body (hashes, verdict, payload ID, metrics) is unmodified.
+
+  auralwatermark version | --version | -v
+      Print the engine version.
 
 Exit codes: 0 success/detected/report valid · 1 not detected/report invalid · 2 error`;
 
@@ -75,17 +78,32 @@ function bandOf(flags, dflt) {
   const b = flags.band;
   if (!b) return dflt;
   if (b === "high" || b === "mid" || b === "dual" || b === "auto") return b;
-  const parts = String(b).split(":").map(Number);
-  if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
-    return { lowHz: parts[0], highHz: parts[1] };
+  // Accept "lowHz:highHz" and "lowHz-highHz".
+  const m = String(b).trim().match(/^(\d+(?:\.\d+)?)\s*[:\-]\s*(\d+(?:\.\d+)?)$/);
+  if (m) {
+    const lowHz = Number(m[1]);
+    const highHz = Number(m[2]);
+    if (lowHz > 0 && highHz > lowHz) return { lowHz, highHz };
+    throw new Error(`--band range must satisfy 0 < lowHz < highHz, got '${b}'`);
   }
-  throw new Error(`--band must be high|mid|dual|auto or lowHz:highHz, got '${b}'`);
+  throw new Error(`--band must be high|mid|dual|auto or lowHz:highHz|lowHz-highHz, got '${b}'`);
+}
+
+/**
+ * Thrown by die(): unwinds to the top-level handler, which prints the message and sets
+ * the exit code. Deliberately not `process.exit()` — forcing an exit while an async
+ * stdout write is pending can hang the process on Windows when output is piped.
+ */
+class CliExit extends Error {
+  constructor(message, code) {
+    super(message);
+    this.name = "CliExit";
+    this.exitCode = code;
+  }
 }
 
 function die(msg, code = 2) {
-  console.error(`error: ${msg}`);
-  process.exitCode = code;
-  process.exit(code);
+  throw new CliExit(msg, code);
 }
 
 // --- Offline (file://) link rewriting ---------------------------------------
@@ -192,6 +210,7 @@ async function loadAudioInput(filePath) {
     const wav = await readWavFile(filePath);
     return { wav, cleanup: () => {} };
   } catch (err) {
+    if (err && err.code === "ENOENT") throw new Error(`File not found: ${filePath}`);
     if (!hasFfmpeg()) {
       throw new Error(
         `Unable to read '${filePath}': Not a valid WAV file (${err.message}). ` +
@@ -400,6 +419,11 @@ async function main() {
     return;
   }
 
+  if (cmd === "version" || cmd === "--version" || cmd === "-v") {
+    console.log(`Aureal Watermark v${ENGINE_VERSION}`);
+    return;
+  }
+
   const { pos, flags } = parseArgs(rest);
   const key = flags.key;
 
@@ -410,7 +434,7 @@ async function main() {
     const sampleRate = num(flags, "rate", 44100);
     const channels = num(flags, "channels", 1);
     const bits = num(flags, "bits", 16);
-    if (![16, 24].includes(bits)) die("--bits must be 16 or 24");
+    if (![16, 24, 32].includes(bits)) die("--bits must be 16, 24 or 32 (32 writes 32-bit IEEE float)");
     const t0 = Date.now();
     const pcm = synthesizeSpeechLike({ seconds, sampleRate, channels });
     await writeWavFile(out, pcm, { sampleRate, channels, bitDepth: bits });
@@ -444,7 +468,7 @@ async function main() {
         band,
       });
       const meta = marked.watermarkMeta;
-      const bits = wav.bitsPerSample === 24 ? 24 : 16;
+      const bits = [16, 24, 32].includes(wav.bitsPerSample) ? wav.bitsPerSample : 16;
       await saveAudioOutput(out, marked, { sampleRate: wav.sampleRate, channels: wav.channels }, bits);
       const ms = Date.now() - t0;
 
@@ -614,6 +638,11 @@ async function main() {
 }
 
 main().catch((err) => {
+  if (err instanceof CliExit) {
+    console.error(`error: ${err.message}`);
+    process.exitCode = err.exitCode;
+    return;
+  }
   console.error("error:", err.message);
   process.exitCode = 2;
 });

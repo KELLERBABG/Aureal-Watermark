@@ -54,14 +54,14 @@ async function main() {
   const args = process.argv.slice(2);
   if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
     printHelp();
-    process.exit(0);
+    process.exitCode = 0; return;
   }
 
   const masterPath = args[0].startsWith("--") ? null : args[0];
   if (!masterPath) {
     console.error("Error: master audio file required as first argument.");
     printHelp();
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   const flags = {};
@@ -88,7 +88,7 @@ async function main() {
         recipientNames = parsed.map((item) => (typeof item === "string" ? item : item.name || item.recipient));
       } catch (e) {
         console.error("Failed to parse JSON recipients file:", e.message);
-        process.exit(1);
+        process.exitCode = 1; return;
       }
     } else {
       recipientNames = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
@@ -98,12 +98,12 @@ async function main() {
   } else {
     console.error("Error: Please provide recipients via --recipients or --file.");
     printHelp();
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   if (recipientNames.length === 0) {
     console.error("Error: No recipient names found.");
-    process.exit(1);
+    process.exitCode = 1; return;
   }
 
   const outDir = path.resolve(flags["out-dir"] || "./dist_promos");
@@ -111,9 +111,31 @@ async function main() {
     fs.mkdirSync(outDir, { recursive: true });
   }
 
-  const startId = Number.isInteger(Number(flags["start-id"])) ? Number(flags["start-id"]) : 100001;
-  const band = flags.band || "dual";
-  const strength = flags.strength ? Number(flags.strength) : 0.5;
+  // Validate operator input up front: a bad flag should fail with a clear message,
+  // not produce NaN payloads deep inside the embedder.
+  let startId = null;
+  if (flags["start-id"] !== undefined) {
+    const parsed = Number(flags["start-id"]);
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed > 0xffffffff) {
+      console.error("Error: --start-id must be an integer between 0 and 4294967295.");
+      process.exitCode = 1; return;
+    }
+    startId = parsed;
+  }
+  if (startId !== null && startId + recipientNames.length - 1 > 0xffffffff) {
+    console.error(`Error: --start-id ${startId} with ${recipientNames.length} recipients exceeds the 32-bit ID space.`);
+    process.exitCode = 1; return;
+  }
+  const band = flags.band === undefined ? "dual" : String(flags.band);
+  if (!/^(dual|high|mid|auto|\d+\s*[:\-]\s*\d+)$/.test(band)) {
+    console.error(`Error: --band must be "dual", "high", "mid", "auto", or "lowHz:highHz" (got "${band}").`);
+    process.exitCode = 1; return;
+  }
+  const strength = flags.strength === undefined ? 0.5 : Number(flags.strength);
+  if (!Number.isFinite(strength) || strength < 0.01 || strength > 1) {
+    console.error("Error: --strength must be a number between 0.01 and 1.0.");
+    process.exitCode = 1; return;
+  }
   const key = flags.key || undefined;
 
   console.log(`\n======================================================`);
@@ -121,6 +143,7 @@ async function main() {
   console.log(`======================================================`);
   console.log(`Master Audio:   ${masterPath}`);
   console.log(`Recipients:     ${recipientNames.length} recipients`);
+  if (startId !== null) console.log(`ID Range:       #${startId} .. #${startId + recipientNames.length - 1}`);
   console.log(`Band / Stren:   ${band} / ${strength}`);
   console.log(`Output Folder:  ${outDir}\n`);
 
@@ -128,12 +151,14 @@ async function main() {
   const wav = await readWavFile(masterPath);
   const format = { sampleRate: wav.sampleRate, channels: wav.channels };
   const masterBase = path.basename(masterPath, path.extname(masterPath));
+  const sourceBitDepth = [16, 24, 32].includes(wav.bitsPerSample) ? wav.bitsPerSample : 16;
 
   const manifest = {
     schema: "aureal-recipients/1",
     masterFile: path.basename(masterPath),
     masterSampleRate: wav.sampleRate,
     masterChannels: wav.channels,
+    masterBitDepth: sourceBitDepth,
     masterDurationSec: wav.durationSec,
     generatedAt: new Date().toISOString(),
     band,
@@ -143,18 +168,27 @@ async function main() {
     // it can embed a matching ID, so treat it like the promos themselves.
     key: key ?? null,
     keyDefault: key ? false : true,
+    startId,
     recipients: []
   };
 
   console.log(`Generating individually tagged audio copies:\n`);
 
+  const usedFilenames = new Set();
   for (let i = 0; i < recipientNames.length; i++) {
     const name = recipientNames[i];
-    const payloadId = flags["start-id"]
-      ? Number(flags["start-id"]) + i
+    // Random IDs unless the operator pinned a range: sequential IDs are guessable and
+    // make an averaged collusion decode to a single recipient by majority vote.
+    const payloadId = startId !== null
+      ? startId + i
       : (crypto.randomInt(100000, 900000) * 1000 + (i + 1)) >>> 0;
-    const safeName = sanitizeFilename(name);
-    const outFilename = `${masterBase}_[${safeName}].wav`;
+    const safeName = sanitizeFilename(name) || "recipient";
+    let outFilename = `${masterBase}_[${safeName}].wav`;
+    let duplicate = 2;
+    while (usedFilenames.has(outFilename)) {
+      outFilename = `${masterBase}_[${safeName}_${duplicate++}].wav`;
+    }
+    usedFilenames.add(outFilename);
     const outFilePath = path.join(outDir, outFilename);
 
     process.stdout.write(`  [${i + 1}/${recipientNames.length}] Tagging for "${name}" (ID #${payloadId})... `);
@@ -169,7 +203,7 @@ async function main() {
     await writeWavFile(outFilePath, watermarked, {
       sampleRate: wav.sampleRate,
       channels: wav.channels,
-      bitDepth: 16
+      bitDepth: sourceBitDepth
     });
 
     const fileBuf = fs.readFileSync(outFilePath);
@@ -203,5 +237,5 @@ async function main() {
 
 main().catch((err) => {
   console.error("Batch distribution error:", err);
-  process.exit(1);
+  process.exitCode = 1; return;
 });

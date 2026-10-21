@@ -236,7 +236,7 @@ console.log(result.recoveredPayloadId); // 883921
 ## Testing & Reproducibility
 
 ```bash
-npm test                      # node --test: 69 tests, no dependencies, no ffmpeg required
+npm test                      # node --test: 133 tests with ffmpeg, 123 without (codec tests skip)
 npm run sync:site:check       # fails if any page alias or the generated browser engine has drifted from src/
 npm run build:engine          # regenerate assets/aureal-engine.js after changing src/
 ```

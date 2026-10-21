@@ -25,6 +25,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Setup ffmpeg
+        # test/codec.test.js and the CLI MP3 round-trip skip themselves when ffmpeg
+        # is absent; installing it makes those checks run in CI.
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
+
       - name: Check Generated Site Aliases For Drift
         run: npm run sync:site:check
 

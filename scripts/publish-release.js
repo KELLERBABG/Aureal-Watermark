@@ -1,33 +1,36 @@
-// scripts/publish-release.js
+// scripts/publish-release.js — manual release publisher (the CI workflow uses
+// softprops/action-gh-release instead). Version and asset names are derived from
+// package.json so this script cannot drift from the build.
 import fs from "node:fs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
+const tag = `v${version}`;
+const zipName = `aureal-watermark-v${version}-universal.zip`;
+const exe = "dist/aureal-watermark.exe";
+const cjs = "dist/aureal-watermark.cjs";
 
 const token = process.env.GITHUB_TOKEN || process.env.TOKEN || "";
 const repo = "KELLERBABG/Aureal-Watermark";
 
-const body = `# Aureal Watermark v0.2.7 — Audio Watermarking and Leak Investigation Tools
+const body = `# Aureal Watermark ${tag} — Audio Watermarking and Leak Investigation Tools
 
 Aureal embeds keyed audio IDs for leak investigation and recovery testing. Detection depends on content, carrier settings, and transformations. A match is not proof of authorship or provenance.
 
-**Focus of this release:** a ground-up visual refresh of the Desktop Studio. The offline Studio served from this build, the copy embedded in the standalone executables, and the Universal ZIP now match the current website design.
+**Focus of this release:** the CLI, the Web Studio and the embedded Desktop Studio now run the same engine (the browser copy is generated from \`src/\`), the forensic report seal covers the whole report and can be verified, and the repository ships an automated test suite.
 
 ---
 
-### Key Highlights in v0.2.7
+### Key Highlights in ${tag}
 
-* **Multi-Format Audio Export (WAV & MP3):** Export watermarked masters in **WAV 16-bit PCM** (Lossless CD Master), **WAV 24-bit PCM** (High-Res Studio Master), or **MP3** (320 kbps Insane, 192 kbps Standard, 128 kbps Compact Web). Integrated 100% offline pure-JS LAME encoder (\`lame.min.js\`, 156 KB) with zero CDN dependencies.
-* **Watermark configuration:** Select carrier bands and strength for the watermark; audibility varies by source material, playback system, and listener. Test with your own content and delivery chain.
-* **Fixture-tested transformations (local suite only):** The local fixture suite exercises selected codec and signal transformations; passing fixtures do not establish broad or universal recovery guarantees, and results vary by content, encoder, and settings.
-  * **Mid/Side decorrelation:** Local phase-cancellation and vocal-remover-style fixtures passed with the orthogonal Mid/Side mixing matrix.
-  * **Unaligned crops:** A 1.8-second local crop fixture passed with full codeword recovery via circular modulo frame folding; shorter or longer crops are not characterized.
-  * **Speed/pitch drift:** Local resampling fixtures at $\pm0.2\\%$ and $\pm1.0\\%$ passed; arbitrary analog wow/flutter is not tested.
-  * **Chained transcoding:** The chained fixture \`WAV -> MP3 128k -> AAC 96k -> MP4 -> MP3 64k -> Opus 96k -> WAV\` passed in local testing; platform-specific re-encoding pipelines differ.
-* **Standalone Desktop Studio App:**
-  * **Refreshed Studio design:** the offline Studio interface has been rebuilt to match the current website — new layout, type scale, and palette across the embed, detect and report views.
-  * Double-click \`aureal-watermark.exe\` or run \`auralwatermark gui\` to launch the offline Desktop Studio.
-  * Official multi-resolution Aureal radar icon and PE metadata embedded into the Windows executable.
-  * Built-in pre-embed collision detector warns if a master was already tagged to prevent acoustic cross-talk.
-  * Cryptographic auto-ID generator and studio namespace key controls.
-
+* **One DSP engine everywhere.** \`assets/aureal-engine.js\` is generated from \`src/\` by \`scripts/build-engine.js\`, so the Web Studio, the Verifier, the landing-page demo and the CLI cannot diverge. CI fails if a stale copy is committed.
+* **Verifiable audit reports.** The HMAC seal now signs the whole report body (verdict, payload ID, metrics, file hashes), and \`auralwatermark verify-report proof.json --key <secret>\` re-checks it. Legacy seals are rejected explicitly.
+* **Multi-Format Audio Export (WAV & MP3).** WAV 16-bit, WAV 24-bit, or MP3 (320/192/128 kbps) with the offline pure-JS LAME encoder — no CDN, no network.
+* **Carrier bands.** High 17–19.5 kHz, mid 4.5–13.5 kHz, both (default), or a custom \`lowHz:highHz\` range. At low sample rates the engine fits a single usable band instead of collapsing to a tone.
+* **Runtime hardening.** The REST microservice validates output formats against an allow-list and never passes caller data to a shell.
+* **Removed claim.** Collusion-resistant fingerprinting is **not** implemented: averaging independently tagged copies defeats recovery. This is now stated in the README, docs and pricing matrix instead of advertised as a feature.
+* **Test suite.** \`npm test\` runs the \`node --test\` suite (payload/CRC, WAV I/O, watermark round-trip and bands, report seal, CLI, REST, browser engine, distribution scripts). No dependencies, no ffmpeg required.
 
 ---
 
@@ -35,122 +38,101 @@ Aureal embeds keyed audio IDs for leak investigation and recovery testing. Detec
 
 | File | Platform | Description |
 | :--- | :--- | :--- |
-| **\`aureal-watermark.exe\`** | Windows (x64) | **Standalone Executable** — double-click to launch Desktop Studio or run via command prompt. |
-| **\`aureal-watermark.cjs\`** | Universal (All OS) | **Single-file standalone script** — run directly with \`node aureal-watermark.cjs [command]\` (Node.js ≥ 18). |
-| **\`aureal-watermark-v0.2.7-universal.zip\`** | Universal (All OS) | Complete bundle containing CLI, offline Desktop Studio, documentation, and assets. |
+| **\`aureal-watermark.exe\`** | Windows (x64) | Standalone executable — double-click to launch the Desktop Studio, or run it as a CLI. |
+| **\`aureal-watermark.cjs\`** | Universal (all OS) | Single-file standalone script — \`node aureal-watermark.cjs [command]\` (Node.js >= 18). |
+| **\`${zipName}\`** | Universal (all OS) | CLI, offline Desktop Studio, documentation and assets. |
 
 ---
 
 ### Quick Start
 
 \`\`\`bash
-# Launch Standalone Desktop Studio GUI (Default)
+# Launch the offline Desktop Studio (default)
 ./aureal-watermark.exe
 
 # Or run headless CLI operations
 ./aureal-watermark.exe embed master.wav protected.wav --id 883921
 ./aureal-watermark.exe detect protected.wav --id 883921
+./aureal-watermark.exe verify-report proof.json --key <secret>
 \`\`\`
 
 * **Web Studio:** https://aureal.kellersystems.dev/studio
-* **Commercial Licensing & Pricing:** https://aureal.kellersystems.dev/pricing
 * **Documentation:** https://aureal.kellersystems.dev/docs
 `;
 
-async function main() {
-  console.log("Checking for release v0.2.7 on GitHub...");
-
-  if (!fs.existsSync("dist/aureal-watermark.exe") || fs.statSync("dist/aureal-watermark.exe").size < 1000) {
-    throw new Error("dist/aureal-watermark.exe not found! Run scripts/build-all.ps1 first.");
-  }
-  console.log(`Found built binary dist/aureal-watermark.exe (${fs.statSync("dist/aureal-watermark.exe").size} bytes)`);
-
-  const get24 = await fetch(`https://api.github.com/repos/${repo}/releases/tags/v0.2.7`, {
-    headers: { Authorization: "Bearer " + token, "User-Agent": "NodeJS" }
+async function api(path, init = {}) {
+  return fetch(`https://api.github.com/repos/${repo}${path}`, {
+    ...init,
+    headers: {
+      Authorization: "Bearer " + token,
+      "User-Agent": "NodeJS",
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(init.headers || {}),
+    },
   });
-
-  let rel;
-  if (get24.ok) {
-    rel = await get24.json();
-    console.log("Release v0.2.7 exists (ID:", rel.id, "), updating release info...");
-    await fetch(`https://api.github.com/repos/${repo}/releases/${rel.id}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-        "User-Agent": "NodeJS"
-      },
-      body: JSON.stringify({
-        name: "Aureal Watermark v0.2.7",
-        body: body,
-        draft: false,
-        prerelease: false
-      })
-    });
-  } else {
-    console.log("Creating new GitHub Release v0.2.7...");
-    const createRes = await fetch(`https://api.github.com/repos/${repo}/releases`, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-        "User-Agent": "NodeJS"
-      },
-      body: JSON.stringify({
-        tag_name: "v0.2.7",
-        target_commitish: "main",
-        name: "Aureal Watermark v0.2.7",
-        body: body,
-        draft: false,
-        prerelease: false
-      })
-    });
-    if (!createRes.ok) {
-      const err = await createRes.text();
-      throw new Error(`Failed to create release: ${createRes.status} ${err}`);
-    }
-    rel = await createRes.json();
-    console.log("Created release ID:", rel.id);
-  }
-
-  if (rel.assets && rel.assets.length > 0) {
-    for (const a of rel.assets) {
-      console.log("Deleting previous asset:", a.name);
-      await fetch(a.url, {
-        method: "DELETE",
-        headers: { Authorization: "Bearer " + token, "User-Agent": "NodeJS" }
-      });
-    }
-  }
-
-  async function uploadAsset(filePath, assetName, contentType) {
-    console.log(`Uploading ${assetName}...`);
-    const data = fs.readFileSync(filePath);
-    const uploadUrl = `https://uploads.github.com/repos/${repo}/releases/${rel.id}/assets?name=${assetName}`;
-    const upRes = await fetch(uploadUrl, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": contentType,
-        "User-Agent": "NodeJS"
-      },
-      body: data
-    });
-    if (!upRes.ok) {
-      const err = await upRes.text();
-      console.error(`Failed to upload ${assetName}: ${upRes.status} ${err}`);
-    } else {
-      console.log(`Uploaded ${assetName} successfully!`);
-    }
-  }
-
-  await uploadAsset("dist/aureal-watermark.cjs", "aureal-watermark.cjs", "application/javascript");
-  await uploadAsset("dist/aureal-watermark-v0.2.7-universal.zip", "aureal-watermark-v0.2.7-universal.zip", "application/zip");
-  if (fs.existsSync("dist/aureal-watermark.exe") && fs.statSync("dist/aureal-watermark.exe").size > 1000) {
-    await uploadAsset("dist/aureal-watermark.exe", "aureal-watermark.exe", "application/octet-stream");
-  }
-
-  console.log("SUCCESS: Release v0.2.7 fully published with all assets!");
 }
 
-main().catch(console.error);
+async function main() {
+  if (!token) throw new Error("GITHUB_TOKEN (or TOKEN) is required.");
+  if (!fs.existsSync(cjs)) throw new Error(`${cjs} is missing — run scripts/bundle.js first.`);
+  console.log(`Publishing ${tag} ...`);
+
+  const found = await api(`/releases/tags/${tag}`);
+  let release;
+  if (found.ok) {
+    release = await found.json();
+    console.log(`Updating existing release (id ${release.id}) ...`);
+    const patched = await api(`/releases/${release.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ name: `Aureal Watermark ${tag}`, body, draft: false, prerelease: false }),
+    });
+    if (!patched.ok) throw new Error(`PATCH failed: ${patched.status} ${await patched.text()}`);
+    release = await patched.json();
+  } else {
+    console.log("Creating a new release ...");
+    const created = await api("/releases", {
+      method: "POST",
+      body: JSON.stringify({
+        tag_name: tag,
+        target_commitish: "main",
+        name: `Aureal Watermark ${tag}`,
+        body,
+        draft: false,
+        prerelease: false,
+      }),
+    });
+    if (!created.ok) throw new Error(`POST failed: ${created.status} ${await created.text()}`);
+    release = await created.json();
+  }
+
+  for (const asset of release.assets || []) {
+    console.log(`Deleting previous asset ${asset.name} ...`);
+    await api(`/releases/assets/${asset.id}`, { method: "DELETE" });
+  }
+
+  const uploads = [
+    [cjs, "aureal-watermark.cjs", "application/javascript"],
+    [`dist/${zipName}`, zipName, "application/zip"],
+    [exe, "aureal-watermark.exe", "application/octet-stream"],
+  ];
+  for (const [file, name, type] of uploads) {
+    if (!fs.existsSync(file)) {
+      console.warn(`skipping ${name} (${file} not built)`);
+      continue;
+    }
+    console.log(`Uploading ${name} ...`);
+    const res = await fetch(`https://uploads.github.com/repos/${repo}/releases/${release.id}/assets?name=${encodeURIComponent(name)}`, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": type, "User-Agent": "NodeJS" },
+      body: fs.readFileSync(file),
+    });
+    if (!res.ok) throw new Error(`upload of ${name} failed: ${res.status} ${await res.text()}`);
+  }
+
+  console.log(`SUCCESS: ${tag} published.`);
+}
+
+main().catch((err) => {
+  console.error("publish-release failed:", err.message || err);
+  process.exitCode = 1;
+});
